@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Gezzo?</title>
+	<!-- <link rel="stylesheet" type="text/css" href="/stylesheets/reset.css"> -->
+	<link rel="stylesheet" type="text/css" href="/stylesheets/normalize.css">
+	<!-- <link rel="stylesheet" type="text/css" href="/stylesheets/bootstrap.css"> -->
+	<link rel="stylesheet" type="text/css" href="/stylesheets/style.css">
+</head>
+<body>
+	<!-- handlebar templates -->
+	<script type="text/x-handlebars">
+		<div id="main">
+			{{outlet}}
+		</div>
+	</script>
+
+	<script type="text/x-handlebars" data-template-name="login">
+		<form class="form-inline" {{action login on="submit"}}>
+			{{input value=username type="text" placeholder="Hi! Who are you?"}}
+			{{input class="btn" type="submit" value="Let's Play!"}}
+		</form>
+	</script>
+
+	<script type="text/x-handlebars" data-template-name="games">
+		<div class="container">
+			<h2>My Games</h2>
+			<div class="games">
+				<ul class="games-list">
+					<li>
+						<!-- User Sees that the opponent guessed -->
+						{{#link-to "myturn.answer" classNames="game-list-item"}}
+							Opponent guessed
+						{{/link-to}}
+					</li>
+					<li>
+						<!-- User needs to answer the opponents question -->
+						{{#link-to "myturn.answer" classNames="game-list-item"}}
+							Answer Opponent question
+						{{/link-to}}
+					</li>
+					<li>
+						<!-- User does not have a character assigned -->
+						{{#link-to "myturn.pick" classNames="game-list-item"}}
+							No character set
+						{{/link-to}}
+					</li>
+				</ul>
+				<div>
+					<!-- New game -->
+					{{#link-to "myturn.pick" classNames="game-list-item"}}
+						New Game
+					{{/link-to}}
+				</div>
+			</div>
+		</div>
+	</script>
+
+	<script type="text/x-handlebars" data-template-name="theirturn">
+		<h2>Their Turn</h2>
+	</script>
+
+	<script type="text/x-handlebars" data-template-name="myturn">
+		<h2>My Turn</h2>
+		<p>Against User A</p>
+		{{outlet}}
+	</script>
+
+	<script type="text/x-handlebars" data-template-name="myturn/pick">
+		<div class="container">
+			<ul class="image-list">
+				<li class="image-item">
+					{{#link-to "games"}}
+						<img src="/images/alba.jpg"/>
+					{{/link-to}}
+				</li>
+				<li class="image-item">
+					{{#link-to "games"}}
+						<img src="/images/alba.jpg"/>
+					{{/link-to}}
+				</li>
+				<li class="image-item">
+					{{#link-to "games"}}
+						<img src="/images/alba.jpg"/>
+					{{/link-to}}
+				</li>
+				<li class="image-item">
+					{{#link-to "games"}}
+						<img src="/images/alba.jpg"/>
+					{{/link-to}}
+				</li>
+				<li class="image-item">
+					{{#link-to "games"}}
+						<img src="/images/alba.jpg"/>
+					{{/link-to}}
+				</li>
+				<li class="image-item">
+					{{#link-to "games"}}
+						<img src="/images/alba.jpg"/>
+					{{/link-to}}
+				</li>
+				<li class="image-item">
+					{{#link-to "games"}}
+						<img src="/images/alba.jpg"/>
+					{{/link-to}}
+				</li>
+				<li class="image-item">
+					{{#link-to "games"}}
+						<img src="/images/alba.jpg"/>
+					{{/link-to}}
+				</li>
+				<li class="image-item">
+					{{#link-to "games"}}
+						<img src="/images/alba.jpg"/>
+					{{/link-to}}
+				</li>
+				<li class="image-item">
+					{{#link-to "games"}}
+						<img src="/images/alba.jpg"/>
+					{{/link-to}}
+				</li>
+				<li class="image-item">
+					{{#link-to "games"}}
+						<img src="/images/alba.jpg"/>
+					{{/link-to}}
+				</li>
+				<li class="image-item">
+					{{#link-to "games"}}
+						<img src="/images/alba.jpg"/>
+					{{/link-to}}
+				</li>
+				<li class="image-item">
+					{{#link-to "games"}}
+						<img src="/images/alba.jpg"/>
+					{{/link-to}}
+				</li>
+				<li class="image-item">
+					{{#link-to "games"}}
+						<img src="/images/alba.jpg"/>
+					{{/link-to}}
+				</li>
+				<li class="image-item">
+					{{#link-to "games"}}
+						<img src="/images/alba.jpg"/>
+					{{/link-to}}
+				</li>
+				<li class="image-item">
+					{{#link-to "games"}}
+						<img src="/images/alba.jpg"/>
+					{{/link-to}}
+				</li>
+			</ul>
+			<span>Hi!</span>
+		</div>
+	</script>
+
+	<script type="text/x-handlebars" data-template-name="myturn/answer">
+		<h3>Answer</h3>
+	</script>
+
+	<script type="text/x-handlebars" data-template-name="ask">
+		<h4>Ask</h4>
+		{{outlet}}
+	</script>
+
+	<script type="text/x-handlebars" data-template-name="ask/question">
+		<h4>Ask / Question</h4>
+	</script>
+
+	<script type="text/x-handlebars" data-template-name="ask/guess">
+		<h4>Ask / guess</h4>
+	</script>
+
+	<!-- import application -->
+	<script data-main="/javascripts/gezzoo", src="/javascripts/require.js"></script>
+</body>
+</html>

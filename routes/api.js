@@ -15,6 +15,6 @@ var getGame = function( req, res ) {
 };
 
 exports.install = function( app ) {
-	app.get( '/games', login.authenticate, getGames );
-	app.get( '/games/:id', login.authenticate, getGame );
+	app.get( '/api/games', login.authenticate, getGames );
+	app.get( '/api/games/:id', login.authenticate, getGame );
 };

@@ -1,8 +1,95 @@
-body {
-  padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+#messagecontainer {
+	position: relative;
+	height: 100%;
+}
+#messagewindow {
+	/*position: absolute;*/
+}
+#inputcontainer {
+	position: absolute;
+	bottom: 0;
+	top: 50px;
+	height: 100%;
+}
+
+html, body, div, h1, h2, h3, h4, h5, li, ul, p {
+	margin: 0;
+	padding: 0;
+}
+
+ul {
+	list-style: none;
 }
 
 a {
-  color: #00B7FF;
+	text-decoration: none;
+}
+
+/* apply a natural box layout model to all elements */
+*, *:before, *:after {
+	-moz-box-sizing: border-box; 
+	-webkit-box-sizing: border-box; 
+	box-sizing: border-box;
+}
+
+h2 {
+	color: #F39C12;
+}
+
+a {
+	color: #F39C12;
+}
+
+#main {
+	background: #F1C40F;
+	width: 100%;
+}
+
+.container {
+	padding: 8px;
+}
+
+.games, .questions {
+	margin: 0 auto;
+}
+
+.game-list-item, .question-list-item {
+	display: block;
+	background: white;
+	height: 48px;
+	border: 1px white solid;
+	margin-bottom: 1px;
+}
+
+.image-item {
+	float: left;
+	width: 50%;
+	overflow: hidden;
+	padding: 4px;
+}
+
+.image-item img {
+	float: left;
+	width: 100%;
+}
+
+.action-button {
+	color: white;
+	background: #F39C12;
+	padding: 4px;
+}
+
+/* Small devices */
+@media (min-width: 768px) {
+	
+}
+
+/* Medium devices */
+@media (min-width: 992px) {
+
+}
+
+/* Large devices */
+@media (min-width: 1200px) {
+	
 }

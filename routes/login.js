@@ -1,31 +1,23 @@
-var users = require('./data/users');
-
 var login = function( req, res ) {
-	var b = req.body;
-	var user = users.findUser( b.username, b.password );
-	if ( user === null ) {
-		res.json({error:'No user found'});
+	var username = req.body.username;
+	if ( username === null ) {
+		res.json(401, {error:'Need to provide a username'});
 	} else {
-		req.session.user = user;
-		res.json(200, {user:'logged in'});
+		var token = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+		res.json({ token: token });
 	}
 };
 
 var logout = function( req, res ) {
-	req.session.user = null;
-	res.json(200, {user:'logged out'});
+	
 };
 
 exports.authenticate = function( req, res, next ) {
-	if( req.session.user ) {
+	var token = req.body.token || req.param('token') || req.headers.token;
+	if( token ) {
 		next();
 	} else {
-		res.json(401, {error:'User not found'});
-
-		// TODO: For testing only. 
-		// req.session.user = { username: 'slim' };
-		// next();
-		// TODO: For testing only. 
+		res.json(401, { error:'Invalid token provided' });
 	}
 };
 
