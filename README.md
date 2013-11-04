@@ -36,6 +36,12 @@ This is a two player game, where each player takes turn trying to guess the oppo
 * Design the 'opponent guessed right' page
 * Design the 'opponent guessed wrong' page
 * Design the 'game over' page
+
+## User Stories
+* The user can start a new game
+* The user can see a list of on-going games
+
+## Reminders
 * What happens if a user attempts to cheat by changing the URL to skip a stage. We need to have a game engine on the server that checks whether or not we're transitioning to the right states from the client (i.e. don't allow a client to guess before they've answered their opponent. Don't let them guess twice, etc..)
 * Make sure the back button also sets the UI to its "new state" given that the user just performed an action.
 

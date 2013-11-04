@@ -1,5 +1,3 @@
-var connection = require('../database');
-
 var games = [
 	{ id:1, player1:"vijay", player2:"slim", turn:"vijay" },
 	{ id:2, player1:"slim", player2:"navika", turn:"slim" }
@@ -57,4 +55,3 @@ exports.findGame = function( username, gameId ) {
 
 	return null;
 }
-

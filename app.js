@@ -2,6 +2,7 @@ var express = require('express');
 var http = require('http');
 var path = require('path');
 var gezzoo = require('./routes');
+var migrate = require('./routes/migratedb');
 var app = express();
 
 app.set('port', process.env.PORT || 3000);
@@ -20,12 +21,7 @@ if ('development' == app.get('env')) {
 	app.use(express.errorHandler());
 }
 
-gezzoo.init(app);
-
-http.createServer(app).listen(app.get('port'));
-
-// app.post( '/update/:username/:id', function( req, res ) {
-// 	// game1.messages = req.body.
-// 	JSON.stringify( req.body.messages );
-// 	res.redirect( '/user/' + req.params.username );
-// });
+migrate.execute(function() {
+	gezzoo.init(app);
+	http.createServer(app).listen(app.get('port'));
+});

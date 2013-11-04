@@ -1,17 +1,3 @@
-#messagecontainer {
-	position: relative;
-	height: 100%;
-}
-#messagewindow {
-	/*position: absolute;*/
-}
-#inputcontainer {
-	position: absolute;
-	bottom: 0;
-	top: 50px;
-	height: 100%;
-}
-
 html, body, div, h1, h2, h3, h4, h5, li, ul, p {
 	margin: 0;
 	padding: 0;
@@ -56,9 +42,12 @@ a {
 .game-list-item, .question-list-item {
 	display: block;
 	background: white;
-	height: 48px;
-	border: 1px white solid;
+	height: 54px;
 	margin-bottom: 1px;
+}
+
+.image-list {
+	overflow: hidden;
 }
 
 .image-item {
@@ -76,7 +65,25 @@ a {
 .action-button {
 	color: white;
 	background: #F39C12;
-	padding: 4px;
+	padding: 16px;
+}
+
+.ask-navigation {
+	width: 100%;
+	overflow: hidden;
+	margin: 8px 0;
+}
+
+.ask-navigation li {
+	float: left;
+	width: 50%;
+	overflow: hidden;
+}
+
+.ask-navigation li a {
+	float: left;
+	width: 100%;
+	text-align: center;
 }
 
 /* Small devices */
