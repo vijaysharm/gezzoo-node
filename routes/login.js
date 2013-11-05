@@ -19,6 +19,7 @@ var findToken = function( token, callback ) {
 
 			usersdb.findOne( query, function( err, user ) {
 				if ( err ) throw err;
+				db.close();
 				callback( user );
 			});
 		});
@@ -42,11 +43,10 @@ var login = function( req, res ) {
 	var token = util.extractToken( req );
 	if ( token ) {
 		findToken( token, function(user) {
-			req.session.user = user;
+			req.user = user;
 			if ( user ) {
 				res.json(createSerializedUser( user ));
 			} else {
-				req.session.user = null;
 				res.send(404, 'Token not found: ' + token);
 			}
 		});
@@ -72,8 +72,9 @@ var login = function( req, res ) {
 					// Here, im using the _id of the record as the session 
 					// token, this should probably be changed to being different 
 					// so that you can have multiple logged in sessions
-					req.session.user = user;
+					req.user = user;
 					res.json(createSerializedUser( user ));
+					db.close();
 				});
 			});
 		})
@@ -81,13 +82,13 @@ var login = function( req, res ) {
 };
 
 var logout = function( req, res ) {
-	req.session.user = null;
+	// Nothing to do here.
 };
 
 exports.authenticate = function( req, res, next ) {
 	var token = util.extractToken( req );
 	findToken( token, function(user) {
-		req.session.user = user;
+		req.user = user;
 		if ( user ) {
 			next();
 		} else {

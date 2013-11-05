@@ -1,6 +1,17 @@
 var connection = require('../database');
 var util = require('../util');
 var engine = require('./engine');
+var _ = require('underscore');
+
+var log = function( data ) {
+	console.log(JSON.stringify( data ));
+};
+
+var extractOpponent = function(user, game) {
+	return _.find(game.players, function(player) {
+		return ! user._id.equals(player);
+	});
+};
 
 /**
  * @param id can be a string ID, or object ID
@@ -21,6 +32,7 @@ var findOne = function( query, collection, callback ) {
 		var collectiondb = db[collection]();
 		collectiondb.findOne(query, function(err, obj) {
 			if ( err ) throw err;
+			db.close();
 			callback(obj);
 		});
 	});
@@ -70,7 +82,7 @@ var createNewGame = function( user, res ) {
 
 		// var gamesdb = db.games();
 		// var query = {players:{$all:[util.toObjectId( user.id )]}};
-		// console.log(JSON.stringify( query ));
+		// log( query );
 		// gamesdb.find(query).toArray(function( err, matches ) {
 		// 	if ( err ) throw err;
 
@@ -98,6 +110,7 @@ var createNewGame = function( user, res ) {
 var createNewGameWithUser = function( user, opponent, db, res ) {
 	var boardsdb = db.boards();
 	var gamesdb = db.games();
+	var characters = db.characters();
 	var boards_row_count = 1;
 	var query = {}
 	boardsdb.find(query).limit(boards_row_count).toArray(function(err, boards) {
@@ -111,18 +124,27 @@ var createNewGameWithUser = function( user, opponent, db, res ) {
 		var board = boards[0];
 		var game = {
 			players: [user._id, opponent._id],
-			board: board._id
+			board: board._id,
+			selected_characters: [],
+			turn: user._id
 		};
 
 		gamesdb.insert(game, function(err, results) {
 			var insertedgame = results[0];
-			
-			var returnedgame = {
-				players: insertedgame.players,
-				board: board,
-				_id: insertedgame._id
-			};
-			res.json(returnedgame);
+			var query = {_id:{ $in: board.characters }};
+			var options = {name:1, img:1};
+			characters.find(query, options).toArray(function(err, fullcharacters) {
+				db.close();
+
+				board.characters = fullcharacters;
+				// We only need to return back certain fields
+				res.json({
+					players: insertedgame.players,
+					turn: insertedgame.turn,
+					_id: insertedgame._id,
+					board: board
+				});
+			});
 		});
 	});
 };
@@ -151,11 +173,74 @@ exports.setCharacter = function( user, game, character, res ) {
 		return;
 	}
 
+	// TODO: If its the opponent that's setting the
+	//       character, you don't want to change the turn
+	//       since they have to also ask a question
+	var nextturn = extractOpponent(user, game);
+
 	connection.getInstance(function(db) {
 		var gamesdb = db.games();
-		res.json({
-			success:'you have it!'
-		})
+		var query = {
+			_id: game._id
+		};
+		var update = {
+			$push: {
+				selected_characters:{ 
+					player:user._id,
+					character:character._id 
+				}
+			},
+			$set: {
+				turn: nextturn
+			}
+		};
+		var options = { upsert:false, 'new':true };
+		var sort = [['_id','1']];
+		gamesdb.findAndModify(query, sort, update, options, function(err, insertedgame) {
+			db.close();			
+			res.json(200);
+		});
 	});	
 };
 
+// games = {
+// 	_id: ...
+// 	playeractions: [
+// 		{ player: ...,actions:[{...},{...}]},
+// 		{ player: ...,actions:[{...},{...}]},
+// 	]
+// }
+exports.postAction = function( user, game, action, value, res ) {
+	var validate = engine.verPostAction( user, game, action, value );
+	if ( validate ) {
+		res.json(401, { error: validate });
+		return;
+	}
+
+	var nextturn = extractOpponent(user, game);
+	connection.getInstance(function(db) {
+		// var gamesdb = db.games();
+		// var query = {
+		// 	gameid: game._id
+		// };
+		// var update = {
+		// 	$push: {
+		// 		actions:{ 
+		// 			action:action,
+		// 			value:value
+		// 		}
+		// 	},
+		// 	$set: {
+		// 		turn: nextturn
+		// 	}
+		// };
+		// var options = { upsert:true, 'new':true };
+		// var sort = [['_id','1']];
+		// actionsdb.findAndModify(query, sort, update, options, function(err, insertedaction) {
+		// 	if ( err ) throw err;
+
+			db.close();
+			res.json(401,'not implemented');
+		// });
+	});
+};

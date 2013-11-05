@@ -2,34 +2,7 @@ var login = require('./login');
 var impl = require('./data/impl');
 var util = require('./util')
 
-var getGames = function( req, res ) {
-	// var username = req.session.user.username;
-	// var userGames = impl.findGames( username );
-	// res.json( JSON.stringify(userGames) );
-	res.json( 404 );
-};
-
-var getGame = function( req, res ) {
-	// var username = req.session.user.username;
-	// var gameId = parseInt( req.params.id );
-	// var userGames = impl.findGame( username, gameId );
-	// res.json( JSON.stringify(userGames) );
-	res.json( 404 );
-};
-
-var createGame = function( req, res ) {
-	var user = req.session.user;
-	var opponent = req.opponent;
-	impl.startNewGame( user, opponent, res );
-};
-
-var setCharacter = function( req, res ) {
-	var user = req.session.user;
-	var game = req.game;
-	var character = req.character;
-	impl.setCharacter( user, game, character, res );
-};
-
+/*** Middleware CHECKS ***/
 var checkOpponent = function( req, res, next ) {
 	var opponent = util.extract( req, 'opponent');
 	impl.getUser(opponent, function(person) {
@@ -58,11 +31,12 @@ var checkCharacter = function( req, res, next ) {
 	var game = req.game;
 	var boardid = game.board;
 	var characterid = util.extract(req, 'character');
+	console.log('received character id: ' + characterid);
 	impl.getBoardByCharacter(boardid, characterid, function(board) {
 		if ( board ) {
 			impl.getCharacter( characterid, function( character ) {
 				if ( character ) {
-					req.charcter = character;
+					req.character = character;
 				}
 				next();
 			});
@@ -78,6 +52,43 @@ var authenticate = function( req, res, next ) {
 	login.authenticate( req, res, next );
 };
 
+/*** API Handlers ***/
+var getGames = function( req, res ) {
+	// var username = req.user.username;
+	// var userGames = impl.findGames( username );
+	// res.json( JSON.stringify(userGames) );
+	res.json( 404 );
+};
+
+var getGame = function( req, res ) {
+	// var username = req.user.username;
+	// var gameId = parseInt( req.params.id );
+	// var userGames = impl.findGame( username, gameId );
+	// res.json( JSON.stringify(userGames) );
+	res.json( 404 );
+};
+
+var createGame = function( req, res ) {
+	var user = req.user;
+	var opponent = req.opponent;
+	impl.startNewGame( user, opponent, res );
+};
+
+var setCharacter = function( req, res ) {
+	var user = req.user;
+	var game = req.game;
+	var character = req.character;
+	impl.setCharacter( user, game, character, res );
+};
+
+var postAction = function( req, res ) {
+	var user = req.user;
+	var game = req.game;
+	var actiontype = util.extract( req, 'action' );
+	var actionvalue = util.extract( req, 'value' );
+	impl.postAction( user, game, actiontype, actionvalue, res );
+}
+
 exports.install = function( app ) {
 	// app.get( '/api/games', authenticate, getGames );
 	// app.get( '/api/games/:id', authenticate, getGame );
@@ -90,4 +101,8 @@ exports.install = function( app ) {
 			 checkGame,
 			 checkCharacter,
 			 setCharacter);
+	app.post('/api/games/:id/action',
+			 authenticate,
+			 checkGame,
+			 postAction);	
 };

@@ -103,6 +103,12 @@ var initializeCharacters = function( db, callback ) {
 	});
 };
 
+var initializeActions = function( db, callback ) {
+	var actionsdb = db.actions();
+	actionsdb.drop();
+	callback();
+};
+
 exports.execute = function( callback ) {
 	connection.getInstance(function( db ) {
 		insertUsers( db, function() {
@@ -111,6 +117,7 @@ exports.execute = function( callback ) {
 					initializeBoards( db, function() {
 						initializeGames( db, function() {
 							console.log('Database Initilization Complete');
+							db.close();
 							callback();
 						});
 					});

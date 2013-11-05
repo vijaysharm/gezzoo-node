@@ -1,7 +1,14 @@
 var http = require('http');
 var querystring = require('querystring');
 var _ = require('underscore');
-var tokenid = '52728ca9954deb0b31000004';
+var tokenid_player_1 = '52728ca9954deb0b31000004';
+var tokenid_player_2;
+
+function extractOpponent(current, players) {
+	return _.find( players, function(player) {
+		return player !== current;
+	});
+};
 
 var post = function( data, url, callback ) {
 	var options = {
@@ -44,12 +51,18 @@ var setCharacterPost = function( gameid, characterid, token, callback ) {
 	post(data, path, callback);
 };
 
-newGamePost(tokenid, function( data ) {
+newGamePost(tokenid_player_1, function( data ) {
 	data = JSON.parse( data );
-	var characters = data.board.characters;
+	tokenid_player_2 = extractOpponent(tokenid_player_1, data.players);
+	
 	var gameid = data._id;
-	console.log(data.board._id);
-	setCharacterPost(gameid, characters[0], tokenid, function(data) {
+	var characters = data.board.characters;
+	var characterid = characters[0]._id;
+	console.log( 'Setting: ' + characters[0].name + ': id->' + characterid);
+	setCharacterPost(gameid, characterid, tokenid_player_1, function(data) {
 		console.log(data);
+		setCharacterPost(gameid, characters[1]._id, tokenid_player_1, function(data) {
+			console.log(data);
+		});
 	});
 });

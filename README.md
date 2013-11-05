@@ -55,3 +55,15 @@ This is a two player game, where each player takes turn trying to guess the oppo
     /myturn/ask/question
     /myturn/ask/guess
 /theirturn
+
+# GAME SCHEMA
+{
+  "players":[
+    "52728ca9954deb0b31000004",
+    "52728fbf63a64c904c657ed5"
+  ],
+  "board":"52796403b6ef6a6cc3000019",
+  "selected_characters":[],
+  "turn":"52728ca9954deb0b31000004",
+  "_id":"52796405b6ef6a6cc300001b"
+}
