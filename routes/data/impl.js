@@ -3,11 +3,25 @@ var util = require('../util');
 var engine = require('./engine');
 var _ = require('underscore');
 
-var log = function( data ) {
-	console.log(JSON.stringify( data ));
+function assign(list,value) {
+	var a = [];
+	_.each(list, function(l) {
+		a.push({
+			_id: l,
+			up: value
+		})
+	});
+	return a;
 };
 
-var extractOpponent = function(user, game) {
+function log( data ) {
+	if ( typeof( data ) === 'string' )
+		console.log(data)
+	else
+		console.log(JSON.stringify( data ));
+};
+
+function extractOpponent(user, game) {
 	return _.find(game.players, function(player) {
 		return ! user._id.equals(player);
 	});
@@ -16,7 +30,7 @@ var extractOpponent = function(user, game) {
 /**
  * @param id can be a string ID, or object ID
  */
-var findOneById = function( id, collection, callback ) {
+function findOneById( id, collection, callback ) {
 	if ( id ) {
 		var obj = typeof(id) === 'string' ? 
 						  util.toObjectId(id) : id;
@@ -27,7 +41,7 @@ var findOneById = function( id, collection, callback ) {
 	}
 };
 
-var findOne = function( query, collection, callback ) {
+function findOne( query, collection, callback ) {
 	connection.getInstance(function(db) {
 		var collectiondb = db[collection]();
 		collectiondb.findOne(query, function(err, obj) {
@@ -122,11 +136,21 @@ var createNewGameWithUser = function( user, opponent, db, res ) {
 		//       decide if they want a smaller board for a shorter game
 		//       or a larger board for a longer game)
 		var board = boards[0];
+		var player_characters = assign(board.characters, true);
+		
 		var game = {
 			players: [user._id, opponent._id],
 			board: board._id,
 			selected_characters: [],
-			turn: user._id
+			turn: user._id,
+			actions: [
+				{ player: user._id, list:[] },
+				{ player: opponent._id, list:[] },
+			],
+			player_board : [
+				{ player: user._id, board: player_characters },
+				{ player: opponent._id, board: player_characters },
+			]
 		};
 
 		gamesdb.insert(game, function(err, results) {
@@ -142,7 +166,8 @@ var createNewGameWithUser = function( user, opponent, db, res ) {
 					players: insertedgame.players,
 					turn: insertedgame.turn,
 					_id: insertedgame._id,
-					board: board
+					board: board,
+					player_board: player_characters
 				});
 			});
 		});
@@ -177,7 +202,6 @@ exports.setCharacter = function( user, game, character, res ) {
 	//       character, you don't want to change the turn
 	//       since they have to also ask a question
 	var nextturn = extractOpponent(user, game);
-
 	connection.getInstance(function(db) {
 		var gamesdb = db.games();
 		var query = {
@@ -203,44 +227,55 @@ exports.setCharacter = function( user, game, character, res ) {
 	});	
 };
 
-// games = {
-// 	_id: ...
-// 	playeractions: [
-// 		{ player: ...,actions:[{...},{...}]},
-// 		{ player: ...,actions:[{...},{...}]},
-// 	]
-// }
+/**
+ * TODO: If the action is a guess, we should set the game to ended
+ *       and we should return that the user guessed right in the 
+ *       response
+ *
+ * TODO: Should probably support setting the player's board so that
+ *       a user can also set their board while posting an action.
+ */
 exports.postAction = function( user, game, action, value, res ) {
-	var validate = engine.verPostAction( user, game, action, value );
+	var validate = engine.verifyAskQuestion( user, game, action, value );
 	if ( validate ) {
 		res.json(401, { error: validate });
 		return;
 	}
 
 	var nextturn = extractOpponent(user, game);
+	var playerid = action === 'reply' ? extractOpponent(user, game) : user._id;
 	connection.getInstance(function(db) {
-		// var gamesdb = db.games();
-		// var query = {
-		// 	gameid: game._id
-		// };
-		// var update = {
-		// 	$push: {
-		// 		actions:{ 
-		// 			action:action,
-		// 			value:value
-		// 		}
-		// 	},
-		// 	$set: {
-		// 		turn: nextturn
-		// 	}
-		// };
-		// var options = { upsert:true, 'new':true };
-		// var sort = [['_id','1']];
-		// actionsdb.findAndModify(query, sort, update, options, function(err, insertedaction) {
-		// 	if ( err ) throw err;
+		var gamesdb = db.games();
+		var query = {
+			_id: game._id,
+			'actions.player': playerid
+		};
+		var actionitem = {
+			action:action,
+			value:value,
+			by: user._id
+		};
+		var update = {
+			$push: { 'actions.$.list': actionitem },
+			$set: { turn: nextturn }
+		};
+		var options = { upsert:false, 'new':true };
+		var sort = [['_id','1']];
+		gamesdb.findAndModify(query, sort, update, options, function(err, insertedaction) {
+			if ( err ) throw err;
 
 			db.close();
-			res.json(401,'not implemented');
-		// });
+			res.json(actionitem);
+		});
 	});
+};
+
+exports.updateBoard = function( user, game, board, player_board, res ) {
+	var validate = engine.verifyUpdateBoard( user, game, board, player_board );
+	if ( validate ) {
+		res.json(401, { error: validate });
+		return;
+	}
+
+	res.json(401,{error:'update board not implemented'});
 };

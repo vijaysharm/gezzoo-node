@@ -1,5 +1,5 @@
 var http = require('http');
-var querystring = require('querystring');
+var querystring = require('qs');
 var _ = require('underscore');
 var tokenid_player_1 = '52728ca9954deb0b31000004';
 var tokenid_player_2;
@@ -10,7 +10,7 @@ function extractOpponent(current, players) {
 	});
 };
 
-var post = function( data, url, callback ) {
+function post( data, url, callback ) {
 	var options = {
 	  host: 'localhost',
 	  port: 3000,
@@ -25,7 +25,7 @@ var post = function( data, url, callback ) {
 	var req = http.request(options, function(res) {
 		res.setEncoding('utf8');
 		res.on('data', function(chunk) {
-			callback(chunk);
+			callback(JSON.parse(chunk));
 		});
 	});
 
@@ -33,7 +33,7 @@ var post = function( data, url, callback ) {
 	req.end();
 };
 
-var newGamePost = function( token, callback ) {
+function newGamePost( token, callback ) {
 	var data = querystring.stringify({
 		token:token
 	});
@@ -41,28 +41,57 @@ var newGamePost = function( token, callback ) {
 	post(data,'/api/games',callback);
 };
 
-var setCharacterPost = function( gameid, characterid, token, callback ) {
+function setCharacterPost( gameid, characterid, token, callback ) {
 	var data = querystring.stringify({
-		token:token,
+		token: token,
 		character: characterid
 	});
 
-	var path = '/api/games/' + gameid + '/character'
+	var path = '/api/games/' + gameid + '/character';
 	post(data, path, callback);
 };
 
+function postAction( gameid, action, value, token, callback ) {
+	var data = querystring.stringify({
+		action: action,
+		value: value,
+		token: token
+	});
+
+	var path = '/api/games/' + gameid + '/action';
+	post(data, path, callback);
+};
+
+function updateBoard( gameid, player_board, token, callback ) {
+	var data = querystring.stringify({
+		player_board: player_board,
+		token: token
+	});
+
+	var path = '/api/games/' + gameid + '/board';
+	post(data, path, callback);	
+};
+
 newGamePost(tokenid_player_1, function( data ) {
-	data = JSON.parse( data );
 	tokenid_player_2 = extractOpponent(tokenid_player_1, data.players);
-	
+
 	var gameid = data._id;
 	var characters = data.board.characters;
 	var characterid = characters[0]._id;
-	console.log( 'Setting: ' + characters[0].name + ': id->' + characterid);
+	var player_1_board = data.player_board;
+	console.log( 'Setting: ' + characters[0].name + ': id->' + characterid + ' for player 1');
 	setCharacterPost(gameid, characterid, tokenid_player_1, function(data) {
 		console.log(data);
-		setCharacterPost(gameid, characters[1]._id, tokenid_player_1, function(data) {
+		console.log( 'Setting: ' + characters[1].name + ': id->' + characterid + ' for player 2');
+		setCharacterPost(gameid, characters[1]._id, tokenid_player_2, function(data) {
 			console.log(data);
+
+			postAction(gameid, 'question', 'Hiya!', tokenid_player_1, function(data) {
+				console.log(data);
+				updateBoard(gameid, player_1_board, tokenid_player_2, function(data) {
+					console.log(data);
+				});
+			});
 		});
 	});
 });

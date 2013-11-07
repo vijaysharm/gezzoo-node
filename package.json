@@ -9,7 +9,8 @@
     "express": "3.3.5",
     "jade": "*",
     "mongodb" : "1.1.11",
-    "underscore": "*"
+    "underscore": "*",
+	"qs": "*"
   },
   "devDependencies": {
 	  "nodemon": "*"

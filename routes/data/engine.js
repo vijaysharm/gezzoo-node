@@ -47,6 +47,12 @@ exports.verifySetCharacter = function( user, game, character ) {
 };
 
 exports.verifyAskQuestion = function( user, game, action, value ) {
+	if ( action === 'question' || action === 'reply' || action === 'guess' ) {
+
+	} else {
+		return 'Invalid action [' + action + ']';
+	}
+
 	if ( user ) {
 
 	} else {
@@ -63,4 +69,38 @@ exports.verifyAskQuestion = function( user, game, action, value ) {
 	}
 
 	return null;
+};
+
+exports.verifyUpdateBoard = function( user, game, board, player_board ) {
+	if ( user ) {
+
+	} else {
+		return 'Invalid user object';
+	}
+
+	if ( board ) {
+
+	} else {
+		return 'Invalid board';
+	}
+
+	if ( player_board ) {
+		if ( player_board.length !== board.characters.length ) {
+			console.log( player_board.length + ", " + board.characters.length )
+			return 'Invalid player board length';
+		}
+	} else {
+		return 'Invalid player board';
+	}
+
+	if ( game ) {
+		var turn = user._id.equals(game.turn);
+		if ( turn === false ) {
+			return 'Not your turn';
+		}
+	} else {
+		return 'Invalid game object';
+	}
+
+	return null;	
 };
