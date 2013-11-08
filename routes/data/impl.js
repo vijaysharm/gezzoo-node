@@ -1,6 +1,5 @@
 var connection = require('../database');
 var util = require('../util');
-var engine = require('./engine');
 var _ = require('underscore');
 
 function assign(list,value) {
@@ -178,7 +177,10 @@ var createNewGameWithUser = function( user, opponent, db, res ) {
  * @param user the user object from the users db
  * @param opponent the user object form the users db
  */
-exports.startNewGame = function( user, opponent, res ) {
+exports.startNewGame = function( req, res ) {
+	var user = req.user;
+	var opponent = req.opponent;
+
 	if ( opponent ) {
 		createNewGameWithUser( user, person, db, res );
 	} else {
@@ -191,12 +193,10 @@ exports.startNewGame = function( user, opponent, res ) {
  * @param game is the game object from the db
  * @param character is the character object from the db
  */
-exports.setCharacter = function( user, game, character, res ) {
-	var validate = engine.verifySetCharacter(user, game, character);
-	if ( validate ) {
-		res.json(401, { error: validate });
-		return;
-	}
+exports.setCharacter = function( req, res ) {
+	var user = req.user;
+	var game = req.game;
+	var character = req.character;
 
 	// TODO: If its the opponent that's setting the
 	//       character, you don't want to change the turn
@@ -235,12 +235,11 @@ exports.setCharacter = function( user, game, character, res ) {
  * TODO: Should probably support setting the player's board so that
  *       a user can also set their board while posting an action.
  */
-exports.postAction = function( user, game, action, value, res ) {
-	var validate = engine.verifyAskQuestion( user, game, action, value );
-	if ( validate ) {
-		res.json(401, { error: validate });
-		return;
-	}
+exports.postAction = function( req, res ) {
+	var user = req.user;
+	var game = req.game;
+	var action = req.action;
+	var value = req.value;
 
 	var nextturn = extractOpponent(user, game);
 	var playerid = action === 'reply' ? extractOpponent(user, game) : user._id;
@@ -255,6 +254,8 @@ exports.postAction = function( user, game, action, value, res ) {
 			value:value,
 			by: user._id
 		};
+		// TODO: Augment this to set the player board if it was
+		//       passed in
 		var update = {
 			$push: { 'actions.$.list': actionitem },
 			$set: { turn: nextturn }
@@ -270,12 +271,52 @@ exports.postAction = function( user, game, action, value, res ) {
 	});
 };
 
-exports.updateBoard = function( user, game, board, player_board, res ) {
-	var validate = engine.verifyUpdateBoard( user, game, board, player_board );
-	if ( validate ) {
-		res.json(401, { error: validate });
-		return;
-	}
+exports.updateBoard = function( req, res ) {
+	var user = req.user;
+	var game = req.game;
+	var board = req.board;
+	var player_board = req.player_board;
 
-	res.json(401,{error:'update board not implemented'});
+	var nextturn = extractOpponent(user, game);
+	connection.getInstance(function(db) {
+		var gamesdb = db.games();
+		var playerid = user._id;
+
+		var query = {
+			_id: game._id,
+			'player_board.player': playerid
+		};
+		var update = {
+			$set: { 'player_board.$.board': player_board },
+			$set: { turn: nextturn }
+		};
+		var options = { upsert:false, 'new':true };
+		var sort = [['_id','1']];
+
+		gamesdb.findAndModify(query, sort, update, options, function(err, game) {
+			if ( err ) throw err;
+
+			var result = _.find(game.player_board, function(pb) {
+				return playerid.equals(pb.player);
+			});
+
+			db.close();
+
+			// TODO: I should probably also return the game id
+			res.json(result);
+		});		
+	});
+};
+
+exports.guess = function( req, res ) {
+	var user = req.user;
+	var game = req.game;
+	var character = req.character;
+
+	connection.getInstance(function(db) {
+		var gamesdb = db.games();
+		var playerid = user._id;
+		var opponent = extractOpponent(user, game);
+		res.json(401,{error:'guess not implemented'});
+	});
 };

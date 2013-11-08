@@ -1,16 +1,17 @@
 var login = require('./login');
 var impl = require('./data/impl');
+var engine = require('./data/engine');
 var util = require('./util')
 var _ = require('underscore');
 
 /*** Middleware CHECKS ***/
-function checkAction( req, res, next ) {
+function fetchAction( req, res, next ) {
 	req.action = util.extract( req, 'action' );
 	req.value = util.extract( req, 'value' );
 	next();
 };
 
-function checkOpponent( req, res, next ) {
+function fetchOpponent( req, res, next ) {
 	var opponent = util.extract( req, 'opponent');
 	impl.getUser(opponent, function(person) {
 		if ( person ) {
@@ -20,7 +21,7 @@ function checkOpponent( req, res, next ) {
 	});
 };
 
-function checkGame( req, res, next ) {
+function fetchGame( req, res, next ) {
 	var gameid = util.extract(req, 'id');
 	impl.getGame(gameid, function(game) {
 		if ( game ) {
@@ -38,7 +39,7 @@ function checkGame( req, res, next ) {
  * I'm building the what a character in the player 
  * board looks like. This could be improved
  */
-function checkBoard( req, res, next ) {
+function fetchBoard( req, res, next ) {
 	var game = req.game;
 	var player_board = util.extract(req, 'player_board');
 	impl.getBoard(game.board, function(board) {
@@ -68,7 +69,7 @@ function checkBoard( req, res, next ) {
  * Assumes getGame has already been called and is
  * set in the req.game field.
  */
-function checkCharacter( req, res, next ) {
+function fetchCharacter( req, res, next ) {
 	var game = req.game;
 	var boardid = game.board;
 	var characterid = util.extract(req, 'character');
@@ -92,71 +93,36 @@ function authenticate( req, res, next ) {
 	login.authenticate( req, res, next );
 };
 
-/*** API Handlers ***/
-function getGames( req, res ) {
-	// var username = req.user.username;
-	// var userGames = impl.findGames( username );
-	// res.json( JSON.stringify(userGames) );
-	res.json( 404 );
-};
-
-function getGame( req, res ) {
-	// var username = req.user.username;
-	// var gameId = parseInt( req.params.id );
-	// var userGames = impl.findGame( username, gameId );
-	// res.json( JSON.stringify(userGames) );
-	res.json( 404 );
-};
-
-function createGame( req, res ) {
-	var user = req.user;
-	var opponent = req.opponent;
-	impl.startNewGame( user, opponent, res );
-};
-
-function setCharacter( req, res ) {
-	var user = req.user;
-	var game = req.game;
-	var character = req.character;
-	impl.setCharacter( user, game, character, res );
-};
-
-function postAction( req, res ) {
-	var user = req.user;
-	var game = req.game;
-	var actiontype = req.action;
-	var actionvalue = req.value;
-	impl.postAction( user, game, actiontype, actionvalue, res );
-}
-
-function updateBoard( req, res ) {
-	var user = req.user;
-	var game = req.game;
-	var board = req.board;
-	var player_board = req.player_board;
-	impl.updateBoard( user, game, board, player_board, res );
-};
-
 exports.install = function( app ) {
 	// app.get( '/api/games', authenticate, getGames );
 	// app.get( '/api/games/:id', authenticate, getGame );
 	app.post('/api/games',
 			 authenticate,
-			 checkOpponent,
-			 createGame);
+			 fetchOpponent,
+			 impl.startNewGame);
 	app.post('/api/games/:id/character',
 			 authenticate,
-			 checkGame,
-			 checkCharacter,
-			 setCharacter);
+			 fetchGame,
+			 fetchCharacter,
+			 engine.verifySetCharacter,
+			 impl.setCharacter);
 	app.post('/api/games/:id/action',
 			 authenticate,
-			 checkGame,
-			 checkAction,
-			 postAction);
+			 fetchGame,
+			 fetchAction,
+			 fetchBoard,
+			 engine.verifyAskQuestion,
+			 impl.postAction);
 	app.post('/api/games/:id/board',
 			 authenticate,
-			 checkGame,
-			 checkBoard,
-			 updateBoard);	
+			 fetchGame,
+			 fetchBoard,
+			 engine.verifyUpdateBoard,
+			 impl.updateBoard);	
+	app.post('/api/games/:id/guess',
+			 authenticate,
+			 fetchGame,
+			 fetchCharacter,
+			 engine.verifyGuess,
+			 impl.guess);		
 };

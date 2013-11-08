@@ -12,95 +12,145 @@ var _ = require('underscore');
  * @param user is the user object from the users db
  * @param character is the character object from the db
  */
-exports.verifySetCharacter = function( user, game, character ) {
-	if ( user ) {
+exports.verifySetCharacter = function( req, res, next ) {
+	var user = req.user;
+	var game = req.game;
+	var character = req.character;
+	var result = null;
 
-	} else {
-		return 'Invalid user object';
+	if ( ! user ) {
+		result = 'Invalid user object';
 	}
 
-	if ( character ) {
-
-	} else {
-		return 'Invalid character object';
+	if ( ! character ) {
+		result = 'Invalid character object';
 	}
 
 	if ( game ) {
 		// Check if the game object has any set characters
 		// and check if that player has a character set.
 		var c = _.find(game.selected_characters, function(p) {
-			return user._id.equals(p.player);
+			result = user._id.equals(p.player);
 		});
 		if ( c ) {
-			return 'Character already set';
+			result = 'Character already set';
 		}
 
 		var turn = user._id.equals(game.turn);
 		if ( turn === false ) {
-			return 'Not your turn';
+			result = 'Not your turn';
 		}
 	} else {
-		return 'Invalid game object';	
+		result = 'Invalid game object';	
 	}
 
-	return null;
+	if ( result ) {
+		res.json(401, result);
+	} else {
+		next();	
+	}
 };
 
-exports.verifyAskQuestion = function( user, game, action, value ) {
+exports.verifyAskQuestion = function( req, res, next ) {
+	var user = req.user;
+	var game = req.game;
+	var action = req.action;
+	var value = req.value;
+	var result = null;
+
 	if ( action === 'question' || action === 'reply' || action === 'guess' ) {
 
 	} else {
-		return 'Invalid action [' + action + ']';
+		result = 'Invalid action [' + action + ']';
 	}
 
-	if ( user ) {
-
-	} else {
-		return 'Invalid user object';
+	if ( ! user ) {
+		result = 'Invalid user object';
 	}
 
 	if ( game ) {
 		var turn = user._id.equals(game.turn);
 		if ( turn === false ) {
-			return 'Not your turn';
+			result = 'Not your turn';
 		}
 	} else {
-		return 'Invalid game object';
+		result = 'Invalid game object';
 	}
 
-	return null;
+	if ( result ) {
+		res.json(401, result);
+	} else {
+		next();	
+	}
 };
 
-exports.verifyUpdateBoard = function( user, game, board, player_board ) {
-	if ( user ) {
+exports.verifyUpdateBoard = function( req, res, next ) {
+	var user = req.user;
+	var game = req.game;
+	var board = req.board;
+	var player_board = req.player_board;
+	var result = null;
 
-	} else {
-		return 'Invalid user object';
+	if ( ! user ) {
+		result = 'Invalid user object';
 	}
 
-	if ( board ) {
-
-	} else {
-		return 'Invalid board';
+	if ( ! board ) {
+		result = 'Invalid board';
 	}
 
 	if ( player_board ) {
 		if ( player_board.length !== board.characters.length ) {
-			console.log( player_board.length + ", " + board.characters.length )
-			return 'Invalid player board length';
+			result = 'Invalid player board length';
 		}
 	} else {
-		return 'Invalid player board';
+		result = 'Invalid player board';
 	}
 
 	if ( game ) {
 		var turn = user._id.equals(game.turn);
 		if ( turn === false ) {
-			return 'Not your turn';
+			result = 'Not your turn';
 		}
 	} else {
-		return 'Invalid game object';
+		result = 'Invalid game object';
 	}
 
-	return null;	
+	if ( result ) {
+		res.json(401, result);
+	} else {
+		next();	
+	}
+};
+
+exports.verifyGuess = function( req, res, next ){
+	var user = req.user;
+	var game = req.game;
+	var character = req.character;
+	var result = null;
+
+	if ( ! user ) {
+		result = 'Invalid user object';
+	}
+
+	if ( ! character ) {
+		result = 'Invalid character object';
+	}
+
+	if ( game ) {
+		var turn = user._id.equals(game.turn);
+		if ( turn === false ) {
+			result = 'Not your turn';
+		}
+	} else {
+		result = 'Invalid game object';
+	}
+
+	if ( result ) {
+		res.json(401, result);
+	} else {
+		next();	
+	}
+
+	return next();
 };

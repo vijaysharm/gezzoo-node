@@ -89,7 +89,7 @@ newGamePost(tokenid_player_1, function( data ) {
 			postAction(gameid, 'question', 'Hiya!', tokenid_player_1, function(data) {
 				console.log(data);
 				updateBoard(gameid, player_1_board, tokenid_player_2, function(data) {
-					console.log(data);
+					console.log(JSON.stringify(data));
 				});
 			});
 		});
