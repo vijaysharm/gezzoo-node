@@ -72,6 +72,16 @@ function updateBoard( gameid, player_board, token, callback ) {
 	post(data, path, callback);	
 };
 
+function guess( gameid, characterid, token, callback ) {
+	var data = querystring.stringify({
+		character: characterid,
+		token: token
+	});
+
+	var path = '/api/games/' + gameid + '/guess';
+	post(data, path, callback);	
+};
+
 newGamePost(tokenid_player_1, function( data ) {
 	tokenid_player_2 = extractOpponent(tokenid_player_1, data.players);
 
@@ -89,7 +99,10 @@ newGamePost(tokenid_player_1, function( data ) {
 			postAction(gameid, 'question', 'Hiya!', tokenid_player_1, function(data) {
 				console.log(data);
 				updateBoard(gameid, player_1_board, tokenid_player_2, function(data) {
-					console.log(JSON.stringify(data));
+					// console.log(JSON.stringify(data));
+					guess(gameid, characters[0]._id, tokenid_player_1, function(data) {
+						console.log(data);
+					});
 				});
 			});
 		});

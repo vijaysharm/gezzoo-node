@@ -42,27 +42,31 @@ function fetchGame( req, res, next ) {
 function fetchBoard( req, res, next ) {
 	var game = req.game;
 	var player_board = util.extract(req, 'player_board');
-	impl.getBoard(game.board, function(board) {
-		var fullboard = [];
-		_.each(player_board, function(character) {
-			var id = util.toObjectId(character._id);
-			var exists = _.find(board.characters, function(c) {
-				return id.equals(c);
+	if ( player_board ) {
+		impl.getBoard(game.board, function(board) {
+			var fullboard = [];
+			_.each(player_board, function(character) {
+				var id = util.toObjectId(character._id);
+				var exists = _.find(board.characters, function(c) {
+					return id.equals(c);
+				});
+
+				if ( exists ) {
+					fullboard.push({
+						_id: id,
+						up: character.up
+					})
+				}
 			});
 
-			if ( exists ) {
-				fullboard.push({
-					_id: id,
-					up: character.up
-				})
-			}
+			req.player_board = fullboard;
+			req.board = board;
+
+			next();
 		});
-
-		req.player_board = fullboard;
-		req.board = board;
-
+	} else {
 		next();
-	});
+	}
 };
 
 /**
@@ -94,8 +98,13 @@ function authenticate( req, res, next ) {
 };
 
 exports.install = function( app ) {
-	// app.get( '/api/games', authenticate, getGames );
-	// app.get( '/api/games/:id', authenticate, getGame );
+	app.get('/api/games',
+			authenticate,
+			impl.getGames);
+	app.get('/api/games/:id',
+			authenticate,
+			fetchGame,
+			impl.getGameById);
 	app.post('/api/games',
 			 authenticate,
 			 fetchOpponent,
@@ -111,6 +120,7 @@ exports.install = function( app ) {
 			 fetchGame,
 			 fetchAction,
 			 fetchBoard,
+			 fetchCharacter,
 			 engine.verifyAskQuestion,
 			 impl.postAction);
 	app.post('/api/games/:id/board',

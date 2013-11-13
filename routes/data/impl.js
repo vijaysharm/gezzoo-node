@@ -2,6 +2,12 @@ var connection = require('../database');
 var util = require('../util');
 var _ = require('underscore');
 
+function findGamePropertyByUser( list, playerid ) {
+	return _.find(list, function(item) {
+		return playerid.equals(item.player);
+	});
+};
+
 function assign(list,value) {
 	var a = [];
 	_.each(list, function(l) {
@@ -84,6 +90,39 @@ exports.getBoardByCharacter = function( boardid, characterid, callback ) {
 	findOne( query, 'boards', callback );
 };
 
+exports.getGames = function( req, res ) {
+	var user = req.user;
+
+	connection.getInstance(function( db ) {
+		var gamesdb = db.games();
+		var query = {
+			players: {$in:[user._id]},
+			ended: false
+		};
+
+		var options = {
+			players: 1,
+			turn: 1,
+			_id: 1
+		};
+
+		gamesdb.find(query, options).toArray(function(err, games) {
+			db.close();
+			res.json({error: 'getGames not implemented'});
+		});
+	});
+};
+
+exports.getGameById = function( req, res ) {
+	var game = req.game;
+	var user = req.user;
+
+	connection.getInstance(function( db ) {
+		db.close();
+		res.json({error: 'getGameById not implemented'});
+	});
+};
+
 var createNewGame = function( user, res ) {
 	// 1. search for a user to play against
 	// 2. select the board from which they will play
@@ -142,6 +181,7 @@ var createNewGameWithUser = function( user, opponent, db, res ) {
 			board: board._id,
 			selected_characters: [],
 			turn: user._id,
+			ended: false,
 			actions: [
 				{ player: user._id, list:[] },
 				{ player: opponent._id, list:[] },
@@ -227,50 +267,6 @@ exports.setCharacter = function( req, res ) {
 	});	
 };
 
-/**
- * TODO: If the action is a guess, we should set the game to ended
- *       and we should return that the user guessed right in the 
- *       response
- *
- * TODO: Should probably support setting the player's board so that
- *       a user can also set their board while posting an action.
- */
-exports.postAction = function( req, res ) {
-	var user = req.user;
-	var game = req.game;
-	var action = req.action;
-	var value = req.value;
-
-	var nextturn = extractOpponent(user, game);
-	var playerid = action === 'reply' ? extractOpponent(user, game) : user._id;
-	connection.getInstance(function(db) {
-		var gamesdb = db.games();
-		var query = {
-			_id: game._id,
-			'actions.player': playerid
-		};
-		var actionitem = {
-			action:action,
-			value:value,
-			by: user._id
-		};
-		// TODO: Augment this to set the player board if it was
-		//       passed in
-		var update = {
-			$push: { 'actions.$.list': actionitem },
-			$set: { turn: nextturn }
-		};
-		var options = { upsert:false, 'new':true };
-		var sort = [['_id','1']];
-		gamesdb.findAndModify(query, sort, update, options, function(err, insertedaction) {
-			if ( err ) throw err;
-
-			db.close();
-			res.json(actionitem);
-		});
-	});
-};
-
 exports.updateBoard = function( req, res ) {
 	var user = req.user;
 	var game = req.game;
@@ -296,10 +292,7 @@ exports.updateBoard = function( req, res ) {
 		gamesdb.findAndModify(query, sort, update, options, function(err, game) {
 			if ( err ) throw err;
 
-			var result = _.find(game.player_board, function(pb) {
-				return playerid.equals(pb.player);
-			});
-
+			var result = findGamePropertyByUser(game.player_board, playerid);
 			db.close();
 
 			// TODO: I should probably also return the game id
@@ -308,15 +301,112 @@ exports.updateBoard = function( req, res ) {
 	});
 };
 
+function pushAction( query, update, callback ) {
+	connection.getInstance(function(db) {
+		var gamesdb = db.games();
+
+		var options = { upsert:false, 'new':true };
+		var sort = [['_id','1']];
+		gamesdb.findAndModify(query, sort, update, options, function(err, game) {
+			if ( err ) throw err;
+
+			db.close();
+			callback(game);
+		});
+	});	
+}
+
+/**
+ * TODO: If the action is a guess, we should set the game to ended
+ *       and we should return that the user guessed right in the 
+ *       response
+ *
+ * combinations:
+ *		{ action: question, value: hi.. }
+ * 		{ action: reply, value: hi.. }
+ * 		{ action: guess, value: ?, character: objectid }
+ */
+exports.postAction = function( req, res ) {
+	var user = req.user;
+	var game = req.game;
+	var action = req.action;
+	var value = req.value;
+	var player_board = req.player_board;
+	var character = req.character;
+
+	var opponent = extractOpponent(user, game);
+	var nextturn = extractOpponent(user, game);
+	var playerid = action === 'reply' ? opponent : user._id;
+	var result = findGamePropertyByUser(game.selected_characters, opponent);
+	var userguess = false;
+
+	if ( action === 'guess' && result && character ) {
+		userguess = result.character.equals(character._id);
+		/** the character should be */
+		value = userguess;
+	}
+
+	var query = {
+		_id: game._id,
+		'actions.player': playerid
+	};
+
+	var actionitem = {
+		action:action,
+		value:value,
+		by: by
+	};
+	
+	var update = {
+		$push: { 'actions.$.list': actionitem },
+		$set: { turn: nextturn }
+	};
+
+	if ( player_board ) {
+		_.extend( query, {'player_board.player': playerid} );
+		_.extend( update, {$set: { 'player_board.$.board': player_board }} );
+	}
+
+	if ( action === 'guess' ) {
+		_.extend( update, {$set:{ ended: userguess }});
+	}
+
+	pushAction( query, update, function(result) {
+		// TODO: I need to return the board if it was passed in
+		_.extend(actionitem, {gameid: game._id});
+		res.json(actionitem);
+	});
+};
+
 exports.guess = function( req, res ) {
 	var user = req.user;
 	var game = req.game;
 	var character = req.character;
 
-	connection.getInstance(function(db) {
-		var gamesdb = db.games();
-		var playerid = user._id;
-		var opponent = extractOpponent(user, game);
-		res.json(401,{error:'guess not implemented'});
+	var opponent = extractOpponent(user, game);
+	var result = findGamePropertyByUser(game.selected_characters, opponent);
+	var userguess = result.character.equals(character._id);
+
+	var query = {
+		_id: game._id,
+		'actions.player': user._id
+	};
+	var actionitem = {
+		action: 'guess',
+		value: userguess,
+		by: user._id
+	};
+	var update = {
+		$push: { 'actions.$.list': actionitem },
+		$set: { turn: nextturn },
+		$set: { ended: userguess },
+	};
+
+	pushAction( user._id, game, 'guess', userguess, user._id, nextturn, function(result, db) {
+		db.close();
+		res.json({
+			gameid: game._id,
+			result: userguess
+		});
 	});
 };

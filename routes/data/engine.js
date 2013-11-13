@@ -57,6 +57,9 @@ exports.verifyAskQuestion = function( req, res, next ) {
 	var action = req.action;
 	var value = req.value;
 	var result = null;
+	var board = req.board;
+	var player_board = req.player_board;
+	var character = req.character;
 
 	if ( action === 'question' || action === 'reply' || action === 'guess' ) {
 
@@ -66,6 +69,18 @@ exports.verifyAskQuestion = function( req, res, next ) {
 
 	if ( ! user ) {
 		result = 'Invalid user object';
+	}
+
+	if ( player_board && action === 'guess' ) {
+		result = "Can't update board and guess your character";
+	}
+
+	if ( player_board || board ) {
+		if ( player_board.length !== board.characters.length ) {
+			result = 'Invalid player board length';
+		}
+	} else {
+		result = 'Invalid player board';
 	}
 
 	if ( game ) {
@@ -151,6 +166,4 @@ exports.verifyGuess = function( req, res, next ){
 	} else {
 		next();	
 	}
-
-	return next();
 };
