@@ -21,3 +21,7 @@ exports.random = function( max ) {
 exports.toObjectId = function( id ) {
 	return new BSON.ObjectID(id);
 };
+
+exports.isObjectId = function( id ) {
+  return !(id != null && 'number' != typeof id && (id.length != 12 && id.length != 24))
+};

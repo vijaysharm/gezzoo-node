@@ -9,11 +9,14 @@
     "express": "3.3.5",
     "jade": "*",
     "mongodb" : "1.1.11",
-    "underscore": "*",
-	"qs": "*",
+    "underscore": "*"
   },
   "devDependencies": {
-	  "nodemon": "*"
+	  "nodemon": "*",
+	  "qs": "*",
+	  "mocha": "*",
+	  "supertest": "*",
+	  "should": "*"
   },
   "engines": {
     "node": "0.10.x",

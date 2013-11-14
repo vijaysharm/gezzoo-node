@@ -1,7 +1,8 @@
 var login = require('./login');
 var impl = require('./data/impl');
 var engine = require('./data/engine');
-var util = require('./util')
+var util = require('./util');
+var connection = require('./database');
 var _ = require('underscore');
 
 /*** Middleware CHECKS ***/
@@ -93,29 +94,41 @@ function fetchCharacter( req, res, next ) {
 	});
 };
 
+function getDb( req, res, next ) {
+	connection.getInstance(function(db) {
+		req.db = db;
+		next();
+	});
+};
+
 function authenticate( req, res, next ) {
 	login.authenticate( req, res, next );
 };
 
 exports.install = function( app ) {
 	app.get('/api/games',
+			getDb,
 			authenticate,
 			impl.getGames);
 	app.get('/api/games/:id',
+			getDb,
 			authenticate,
 			fetchGame,
 			impl.getGameById);
 	app.post('/api/games',
+			 getDb,
 			 authenticate,
 			 fetchOpponent,
 			 impl.startNewGame);
 	app.post('/api/games/:id/character',
+			 getDb,
 			 authenticate,
 			 fetchGame,
 			 fetchCharacter,
 			 engine.verifySetCharacter,
 			 impl.setCharacter);
 	app.post('/api/games/:id/action',
+			 getDb,
 			 authenticate,
 			 fetchGame,
 			 fetchAction,
@@ -124,12 +137,14 @@ exports.install = function( app ) {
 			 engine.verifyAskQuestion,
 			 impl.postAction);
 	app.post('/api/games/:id/board',
+			 getDb,
 			 authenticate,
 			 fetchGame,
 			 fetchBoard,
 			 engine.verifyUpdateBoard,
 			 impl.updateBoard);	
 	app.post('/api/games/:id/guess',
+			 getDb,
 			 authenticate,
 			 fetchGame,
 			 fetchCharacter,

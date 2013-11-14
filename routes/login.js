@@ -2,7 +2,7 @@ var util = require( './util');
 var connection = require('./database');
 var BSON = require('mongodb').BSONPure;
 
-var createSerializedUser = function( user ) {
+function createSerializedUser( user ) {
 	return {
 		name: user.username,
 		token: user._id,
@@ -10,11 +10,11 @@ var createSerializedUser = function( user ) {
 	};
 };
 
-var findToken = function( token, callback ) {
-	if ( token ) {
-		connection.getInstance(function( db ) {
+function findToken( db, token, callback ) {
+	if (util.isObjectId( token )) {
+		if ( token ) {
 			var usersdb = db.users();
-			var o_id = new BSON.ObjectID(token);
+			var o_id = util.toObjectId(token);
 			var query = { _id: o_id };
 
 			usersdb.findOne( query, function( err, user ) {
@@ -22,10 +22,21 @@ var findToken = function( token, callback ) {
 				db.close();
 				callback( user );
 			});
-		});
+		} else {
+			db.close();
+			callback( null );
+		}
 	} else {
+		db.close();
 		callback( null );
 	}
+};
+
+function getDb( req, res, next ) {
+	connection.getInstance(function(db) {
+		req.db = db;
+		next();
+	});
 };
 
 /**
@@ -41,8 +52,10 @@ var findToken = function( token, callback ) {
  */
 var login = function( req, res ) {
 	var token = util.extractToken( req );
+	var db = req.db;
+
 	if ( token ) {
-		findToken( token, function(user) {
+		findToken( db, token, function(user) {
 			req.user = user;
 			if ( user ) {
 				res.json(createSerializedUser( user ));
@@ -51,33 +64,31 @@ var login = function( req, res ) {
 			}
 		});
 	} else {
-		connection.getInstance(function( db ) {
-			var countersdb = db.counters();
-			var usersdb = db.users();
+		var countersdb = db.counters();
+		var usersdb = db.users();
 
-			var query = { _id:'userid' };
-			var update = {$inc:{ seq: 1 }};
-			var sort = [['userid','1']];
-            var options = {'new':true};
+		var query = { _id:'userid' };
+		var update = {$inc:{ seq: 1 }};
+		var sort = [['userid','1']];
+        var options = {'new':true};
 
-			countersdb.findAndModify(query, sort, update, options, function( err, usercount ) {
-				if ( err ) throw err;
-				var newuser = {
-					username: 'gezzoo_' + usercount.seq
-				};
+		countersdb.findAndModify(query, sort, update, options, function( err, usercount ) {
+			if ( err ) throw err;
+			var newuser = {
+				username: 'gezzoo_' + usercount.seq
+			};
 
-				usersdb.insert( newuser, function( err, inserteduser ) {
-					var user = inserteduser[0];
+			usersdb.insert( newuser, function( err, inserteduser ) {
+				var user = inserteduser[0];
 
-					// Here, im using the _id of the record as the session 
-					// token, this should probably be changed to being different 
-					// so that you can have multiple logged in sessions
-					req.user = user;
-					res.json(createSerializedUser( user ));
-					db.close();
-				});
+				// Here, im using the _id of the record as the session 
+				// token, this should probably be changed to being different 
+				// so that you can have multiple logged in sessions
+				req.user = user;
+				res.json(createSerializedUser( user ));
+				db.close();
 			});
-		})
+		});
 	}
 };
 
@@ -87,6 +98,7 @@ var logout = function( req, res ) {
 
 exports.authenticate = function( req, res, next ) {
 	var token = util.extractToken( req );
+	var db = req.db;
 	findToken( token, function(user) {
 		req.user = user;
 		if ( user ) {
@@ -98,5 +110,5 @@ exports.authenticate = function( req, res, next ) {
 };
 
 exports.install = function( app ) {
-	app.post('/api/login', login );
+	app.post('/api/login', getDb, login );
 };

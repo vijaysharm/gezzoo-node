@@ -92,67 +92,65 @@ exports.getBoardByCharacter = function( boardid, characterid, callback ) {
 
 exports.getGames = function( req, res ) {
 	var user = req.user;
+	var db = req.db;
 
-	connection.getInstance(function( db ) {
-		var gamesdb = db.games();
-		var query = {
-			players: {$in:[user._id]},
-			ended: false
-		};
+	var gamesdb = db.games();
+	var query = {
+		players: {$in:[user._id]},
+		ended: false
+	};
 
-		var options = {
-			players: 1,
-			turn: 1,
-			_id: 1
-		};
+	var options = {
+		players: 1,
+		turn: 1,
+		_id: 1
+	};
 
-		gamesdb.find(query, options).toArray(function(err, games) {
-			db.close();
-			res.json({error: 'getGames not implemented'});
-		});
+	gamesdb.find(query, options).toArray(function(err, games) {
+		db.close();
+		res.json({error: 'getGames not implemented'});
 	});
 };
 
 exports.getGameById = function( req, res ) {
 	var game = req.game;
 	var user = req.user;
+	var db = req.db;
 
-	connection.getInstance(function( db ) {
-		db.close();
-		res.json({error: 'getGameById not implemented'});
-	});
+	db.close();
+	res.json({error: 'getGameById not implemented'});
 };
 
 var createNewGame = function( user, res ) {
 	// 1. search for a user to play against
 	// 2. select the board from which they will play
 	// 3. start the game, and return enough info to the client
-	connection.getInstance(function( db ) {
-		// TODO: get a list of all the ongoing games, and use them as
-		//       as a filter for users to search for. i.e. do not include
-		//       users that this user already has ongoing games with.
 
-		// var gamesdb = db.games();
-		// var query = {players:{$all:[util.toObjectId( user.id )]}};
-		// log( query );
-		// gamesdb.find(query).toArray(function( err, matches ) {
-		// 	if ( err ) throw err;
+	// TODO: get a list of all the ongoing games, and use them as
+	//       as a filter for users to search for. i.e. do not include
+	//       users that this user already has ongoing games with.
 
-			// TODO: Improve this query so that the selected users
-			//       Are newer and the more active users. This way
-			//       this user has a better chance to have people
-			//       to play with
-			var usersdb = db.users();
-			var user_row_limit = 20;
-			var query = {_id:{$nin:[ util.toObjectId( user.id ) ]}};
-			usersdb.find(query).limit(user_row_limit).toArray(function( err, opponents ) {
-				// Choose a random opponent from the list of returned 
-				// users. This could be Improved.
-				var index = util.random(opponents.length-1);
-				createNewGameWithUser( user, opponents[index], db, res );
-			});
-		// })
-	});
+	var db = req.db;
+	// var gamesdb = db.games();
+	// var query = {players:{$all:[util.toObjectId( user.id )]}};
+	// log( query );
+	// gamesdb.find(query).toArray(function( err, matches ) {
+	// 	if ( err ) throw err;
+
+		// TODO: Improve this query so that the selected users
+		//       Are newer and the more active users. This way
+		//       this user has a better chance to have people
+		//       to play with
+		var usersdb = db.users();
+		var user_row_limit = 20;
+		var query = {_id:{$nin:[ util.toObjectId( user.id ) ]}};
+		usersdb.find(query).limit(user_row_limit).toArray(function( err, opponents ) {
+			// Choose a random opponent from the list of returned 
+			// users. This could be Improved.
+			var index = util.random(opponents.length-1);
+			createNewGameWithUser( user, opponents[index], db, res );
+		});
+	// })
 };
 
 /**
@@ -237,34 +235,33 @@ exports.setCharacter = function( req, res ) {
 	var user = req.user;
 	var game = req.game;
 	var character = req.character;
+	var db = req.db;
 
 	// TODO: If its the opponent that's setting the
 	//       character, you don't want to change the turn
 	//       since they have to also ask a question
 	var nextturn = extractOpponent(user, game);
-	connection.getInstance(function(db) {
-		var gamesdb = db.games();
-		var query = {
-			_id: game._id
-		};
-		var update = {
-			$push: {
-				selected_characters:{ 
-					player:user._id,
-					character:character._id 
-				}
-			},
-			$set: {
-				turn: nextturn
+	var gamesdb = db.games();
+	var query = {
+		_id: game._id
+	};
+	var update = {
+		$push: {
+			selected_characters:{ 
+				player:user._id,
+				character:character._id 
 			}
-		};
-		var options = { upsert:false, 'new':true };
-		var sort = [['_id','1']];
-		gamesdb.findAndModify(query, sort, update, options, function(err, insertedgame) {
-			db.close();			
-			res.json(200);
-		});
-	});	
+		},
+		$set: {
+			turn: nextturn
+		}
+	};
+	var options = { upsert:false, 'new':true };
+	var sort = [['_id','1']];
+	gamesdb.findAndModify(query, sort, update, options, function(err, insertedgame) {
+		db.close();			
+		res.json(200);
+	});
 };
 
 exports.updateBoard = function( req, res ) {
@@ -272,48 +269,45 @@ exports.updateBoard = function( req, res ) {
 	var game = req.game;
 	var board = req.board;
 	var player_board = req.player_board;
-
+	var db = req.db;
 	var nextturn = extractOpponent(user, game);
-	connection.getInstance(function(db) {
-		var gamesdb = db.games();
-		var playerid = user._id;
 
-		var query = {
-			_id: game._id,
-			'player_board.player': playerid
-		};
-		var update = {
-			$set: { 'player_board.$.board': player_board },
-			$set: { turn: nextturn }
-		};
-		var options = { upsert:false, 'new':true };
-		var sort = [['_id','1']];
+	var gamesdb = db.games();
+	var playerid = user._id;
 
-		gamesdb.findAndModify(query, sort, update, options, function(err, game) {
-			if ( err ) throw err;
+	var query = {
+		_id: game._id,
+		'player_board.player': playerid
+	};
+	var update = {
+		$set: { 'player_board.$.board': player_board },
+		$set: { turn: nextturn }
+	};
+	var options = { upsert:false, 'new':true };
+	var sort = [['_id','1']];
 
-			var result = findGamePropertyByUser(game.player_board, playerid);
-			db.close();
+	gamesdb.findAndModify(query, sort, update, options, function(err, game) {
+		if ( err ) throw err;
 
-			// TODO: I should probably also return the game id
-			res.json(result);
-		});		
-	});
+		var result = findGamePropertyByUser(game.player_board, playerid);
+		db.close();
+
+		// TODO: I should probably also return the game id
+		res.json(result);
+	});	
 };
 
-function pushAction( query, update, callback ) {
-	connection.getInstance(function(db) {
-		var gamesdb = db.games();
+function pushAction( db, query, update, callback ) {
+	var gamesdb = db.games();
 
-		var options = { upsert:false, 'new':true };
-		var sort = [['_id','1']];
-		gamesdb.findAndModify(query, sort, update, options, function(err, game) {
-			if ( err ) throw err;
+	var options = { upsert:false, 'new':true };
+	var sort = [['_id','1']];
+	gamesdb.findAndModify(query, sort, update, options, function(err, game) {
+		if ( err ) throw err;
 
-			db.close();
-			callback(game);
-		});
-	});	
+		db.close();
+		callback(game);
+	});
 }
 
 /**
@@ -333,6 +327,7 @@ exports.postAction = function( req, res ) {
 	var value = req.value;
 	var player_board = req.player_board;
 	var character = req.character;
+	var db = req.db;
 
 	var opponent = extractOpponent(user, game);
 	var nextturn = extractOpponent(user, game);
@@ -371,7 +366,7 @@ exports.postAction = function( req, res ) {
 		_.extend( update, {$set:{ ended: userguess }});
 	}
 
-	pushAction( query, update, function(result) {
+	pushAction( db, query, update, function(result) {
 		// TODO: I need to return the board if it was passed in
 		_.extend(actionitem, {gameid: game._id});
 		res.json(actionitem);
@@ -382,6 +377,7 @@ exports.guess = function( req, res ) {
 	var user = req.user;
 	var game = req.game;
 	var character = req.character;
+	var db = req.db;
 
 	var opponent = extractOpponent(user, game);
 	var result = findGamePropertyByUser(game.selected_characters, opponent);
@@ -402,7 +398,7 @@ exports.guess = function( req, res ) {
 		$set: { ended: userguess },
 	};
 
-	pushAction( user._id, game, 'guess', userguess, user._id, nextturn, function(result, db) {
+	pushAction( db, user._id, game, 'guess', userguess, user._id, nextturn, function(result, db) {
 		db.close();
 		res.json({
 			gameid: game._id,
