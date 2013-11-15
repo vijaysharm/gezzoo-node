@@ -8,13 +8,11 @@ function findGamePropertyByUser( list, playerid ) {
 	});
 };
 
-function assign(list,value) {
+function transform(list,value) {
 	var a = [];
 	_.each(list, function(l) {
-		a.push({
-			_id: l,
-			up: value
-		})
+		var r = _.extend({ _id: l }, value);
+		a.push(r);
 	});
 	return a;
 };
@@ -35,52 +33,49 @@ function extractOpponent(user, game) {
 /**
  * @param id can be a string ID, or object ID
  */
-function findOneById( id, collection, callback ) {
+function findOneById( db, id, collection, callback ) {
 	if ( id ) {
 		var obj = typeof(id) === 'string' ? 
 						  util.toObjectId(id) : id;
 		var query = {_id:obj};
-		findOne( query, collection, callback );
+		findOne( db, query, collection, callback );
 	} else {
 		callback( null );
 	}
 };
 
-function findOne( query, collection, callback ) {
-	connection.getInstance(function(db) {
-		var collectiondb = db[collection]();
-		collectiondb.findOne(query, function(err, obj) {
-			if ( err ) throw err;
-			db.close();
-			callback(obj);
-		});
+function findOne( db, query, collection, callback ) {
+	var collectiondb = db[collection]();
+	collectiondb.findOne(query, function(err, obj) {
+		if ( err ) throw err;
+		callback(obj);
 	});
 };
 
 /**
  * @param user is the user ID as a string
  */
-exports.getUser = function( userid, callback ) {
-	findOneById(userid, 'users', callback);
+exports.getUser = function( db, userid, callback ) {
+	findOneById(db, userid, 'users', callback);
 };
 
-exports.getGame = function( gameid, callback ) {
-	findOneById(gameid, 'games', callback);
+exports.getGame = function( db, gameid, callback ) {
+	findOneById(db, gameid, 'games', callback);
 };
 
-exports.getCharacter = function( characterid, callback ) {
-	findOneById(characterid, 'characters', callback);
+exports.getCharacter = function( db, characterid, callback ) {
+	findOneById(db, characterid, 'characters', callback);
 };
 
 exports.getBoard = function( boardid, callback ) {
-	findOneById(boardid, 'boards', callback );
+	findOneById(db, boardid, 'boards', callback );
 };
 
 /**
  * @param boardid is an object id of the board
  * @param character is a string id of the character
  */
-exports.getBoardByCharacter = function( boardid, characterid, callback ) {
+exports.getBoardByCharacter = function( db, boardid, characterid, callback ) {
 	characterid = util.toObjectId(characterid);
 	var query = {
 		_id: boardid,
@@ -121,7 +116,7 @@ exports.getGameById = function( req, res ) {
 	res.json({error: 'getGameById not implemented'});
 };
 
-var createNewGame = function( user, res ) {
+var createNewGame = function( db, user, res ) {
 	// 1. search for a user to play against
 	// 2. select the board from which they will play
 	// 3. start the game, and return enough info to the client
@@ -130,7 +125,6 @@ var createNewGame = function( user, res ) {
 	//       as a filter for users to search for. i.e. do not include
 	//       users that this user already has ongoing games with.
 
-	var db = req.db;
 	// var gamesdb = db.games();
 	// var query = {players:{$all:[util.toObjectId( user.id )]}};
 	// log( query );
@@ -172,7 +166,7 @@ var createNewGameWithUser = function( user, opponent, db, res ) {
 		//       decide if they want a smaller board for a shorter game
 		//       or a larger board for a longer game)
 		var board = boards[0];
-		var player_characters = assign(board.characters, true);
+		var player_characters = transform(board.characters, {up: true});
 		
 		var game = {
 			players: [user._id, opponent._id],
@@ -196,8 +190,8 @@ var createNewGameWithUser = function( user, opponent, db, res ) {
 			var options = {name:1, img:1};
 			characters.find(query, options).toArray(function(err, fullcharacters) {
 				db.close();
-
 				board.characters = fullcharacters;
+				
 				// We only need to return back certain fields
 				res.json({
 					players: insertedgame.players,
@@ -218,11 +212,12 @@ var createNewGameWithUser = function( user, opponent, db, res ) {
 exports.startNewGame = function( req, res ) {
 	var user = req.user;
 	var opponent = req.opponent;
+	var db = req.db;
 
 	if ( opponent ) {
 		createNewGameWithUser( user, person, db, res );
 	} else {
-		createNewGame( user, res );
+		createNewGame( db, user, res );
 	}
 };
 

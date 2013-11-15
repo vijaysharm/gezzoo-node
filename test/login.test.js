@@ -1,43 +1,23 @@
 var assert = require('assert');
 var request = require('supertest');
 var should = require('should'); 
-var connection = require('../routes/database')
+var util = require('./util.test');
+var DbBuilder = require('../routes/dbutil').DbBuilder;
 
 describe('Login', function() {
-	var url = 'http://localhost:3000';
-
-	function createLogin(data, callback) {
-		if ( arguments.length === 1 ) {
-			callback = data;
-			data = {};
-		}
-
-		request(url)
-			.post('/api/login')
-			.send(data)
-			.end(function(err, res) {
-				if(err) throw err;
-				callback(res);
-			});
+	var url = {
+		domain: 'http://localhost:3000',
+		subdomain: '/api/login'
 	};
 
 	before(function(done) {
-		connection.getInstance(function(db) {
-			db.users().drop();
-			db.games().drop();
-			db.boards().drop();
-			db.characters().drop();
-			db.counters().drop();
-			db.counters().insert({ _id:'userid', seq: 1 }, function(err, result) {
-				if ( err ) throw err;
-				db.close();
-				done();
-			});
+		new DbBuilder().build(function() {
+			done();
 		});
 	});
 
 	it('should create new token when none is given', function(done) {
-		createLogin(function(res) {
+		util.post(url, function(res) {
 			res.body.should.have.property('name');
 			res.body.should.have.property('token');
 			res.body.should.have.property('id');
@@ -46,7 +26,7 @@ describe('Login', function() {
 	});
 
 	it('should return the same user if an existing token is given', function(done) {
-		createLogin(function(res) {
+		util.post(url, function(res) {
 			var token = res.body.token;
 			var name = res.body.name;
 			var id = res.body.id;
@@ -54,8 +34,8 @@ describe('Login', function() {
 				token: token,
 			};
 
-			request(url)
-				.post('/api/login')
+			request(url.domain)
+				.post(url.subdomain)
 				.send(data)
 				.end(function(err, res) {
 					if(err) throw err;
@@ -75,7 +55,7 @@ describe('Login', function() {
 			token: 'blah'
 		};
 
-		createLogin(data, function(res) {
+		util.post(url, data, function(res) {
 			res.status.should.equal(404);
 			done();
 		});

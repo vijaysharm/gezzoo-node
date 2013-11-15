@@ -14,21 +14,16 @@ function findToken( db, token, callback ) {
 	if (util.isObjectId( token )) {
 		if ( token ) {
 			var usersdb = db.users();
-			var o_id = util.toObjectId(token);
-			var query = { _id: o_id };
-
-			usersdb.findOne( query, function( err, user ) {
+			var query = { _id: util.toObjectId(token) };
+			usersdb.find(query).toArray(function(err, users) {
 				if ( err ) throw err;
-				db.close();
-				callback( user );
+				callback( null, users[0] );
 			});
 		} else {
-			db.close();
-			callback( null );
+			callback( 'No token provided' );
 		}
 	} else {
-		db.close();
-		callback( null );
+		callback( 'Token is not valid type' );
 	}
 };
 
@@ -55,7 +50,8 @@ var login = function( req, res ) {
 	var db = req.db;
 
 	if ( token ) {
-		findToken( db, token, function(user) {
+		findToken( db, token, function(err, user) {
+			db.close();
 			req.user = user;
 			if ( user ) {
 				res.json(createSerializedUser( user ));
@@ -84,9 +80,9 @@ var login = function( req, res ) {
 				// Here, im using the _id of the record as the session 
 				// token, this should probably be changed to being different 
 				// so that you can have multiple logged in sessions
+				db.close();
 				req.user = user;
 				res.json(createSerializedUser( user ));
-				db.close();
 			});
 		});
 	}
@@ -99,12 +95,12 @@ var logout = function( req, res ) {
 exports.authenticate = function( req, res, next ) {
 	var token = util.extractToken( req );
 	var db = req.db;
-	findToken( token, function(user) {
+	findToken( db, token, function(err, user) {
 		req.user = user;
 		if ( user ) {
 			next();
 		} else {
-			res.json(401, { error:'Invalid token provided' });
+			res.json(401, { error:'User not found with token: ' + token });
 		}
 	});
 };

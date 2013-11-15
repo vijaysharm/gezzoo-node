@@ -14,7 +14,8 @@ function fetchAction( req, res, next ) {
 
 function fetchOpponent( req, res, next ) {
 	var opponent = util.extract( req, 'opponent');
-	impl.getUser(opponent, function(person) {
+	var db = req.db;
+	impl.getUser(db, opponent, function(person) {
 		if ( person ) {
 			req.opponent = person;
 		}
@@ -24,6 +25,7 @@ function fetchOpponent( req, res, next ) {
 
 function fetchGame( req, res, next ) {
 	var gameid = util.extract(req, 'id');
+	var db = req.db;
 	impl.getGame(gameid, function(game) {
 		if ( game ) {
 			req.game = game;
@@ -42,6 +44,7 @@ function fetchGame( req, res, next ) {
  */
 function fetchBoard( req, res, next ) {
 	var game = req.game;
+	var db = req.db;
 	var player_board = util.extract(req, 'player_board');
 	if ( player_board ) {
 		impl.getBoard(game.board, function(board) {
@@ -77,10 +80,11 @@ function fetchBoard( req, res, next ) {
 function fetchCharacter( req, res, next ) {
 	var game = req.game;
 	var boardid = game.board;
+	var db = req.db;
 	var characterid = util.extract(req, 'character');
-	impl.getBoardByCharacter(boardid, characterid, function(board) {
+	impl.getBoardByCharacter(db, boardid, characterid, function(board) {
 		if ( board ) {
-			impl.getCharacter( characterid, function( character ) {
+			impl.getCharacter( db, characterid, function( character ) {
 				if ( character ) {
 					req.character = character;
 				}
