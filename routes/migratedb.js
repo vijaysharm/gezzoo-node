@@ -1,6 +1,7 @@
 var connection = require('./database');
 var BSON = require('mongodb').BSONPure;
 var util = require('./util');
+var DbBuilder = require('./dbutil').DbBuilder;
 
 var _ = require('underscore');
 
@@ -41,88 +42,13 @@ var getCharcters = function() {
 	];
 };
 
-var initializeCounter = function( db, callback ) {
-	var countersdb = db.counters();
-	var users = getUsers();
-	countersdb.drop();
-
-	countersdb.insert({ _id:'userid', seq: users.length }, function(err, result) {
-		if ( err ) throw err;
-		callback();
-	});
-};
-
-var insertUsers = function( db, callback ) {
-	var usersdb = db.users();
-	usersdb.drop();
-
-	var users = getUsers();
-	usersdb.insert( users, function( err, result ) {
-		if ( err ) throw err;
-		callback();
-	});
-};
-
-var initializeGames = function( db, callback ) {
-	var gamesdb = db.games();
-	gamesdb.drop();
-	callback();
-};
-
-var createBoard = function( name, characters ) {
-	return {
-		name: name,
-		characters: characters
-	};
-};
-
-var initializeBoards = function( db, callback ) {
-	var boardsdb = db.boards();
-	var charactersdb = db.characters();
-	boardsdb.drop();
-
-	var query = {category:{$all:[ 'bollywood' ]}};
-	charactersdb.find(query).limit(24).toArray(function(err, characters) {
-		if ( err ) throw err;
-		var charids = _.pluck(characters,'_id');
-		var board = createBoard('Bollywood', charids);
-		boardsdb.insert(board, function(err, insertedboard) {
-			if ( err ) throw err;
-			callback();
-		})
-	});
-};
-
-var initializeCharacters = function( db, callback ) {
-	var charactersdb = db.characters();
-	charactersdb.drop();
-	var characters = getCharcters();
-	charactersdb.insert(characters, function(err, result) {
-		if ( err ) throw err;
-		callback();
-	});
-};
-
-var initializeActions = function( db, callback ) {
-	var actionsdb = db.actions();
-	actionsdb.drop();
-	callback();
-};
-
 exports.execute = function( callback ) {
-	connection.getInstance(function( db ) {
-		insertUsers( db, function() {
-			initializeCounter( db, function() {
-				initializeCharacters( db, function() {
-					initializeBoards( db, function() {
-						initializeGames( db, function() {
-							console.log('Database Initilization Complete');
-							db.close();
-							callback();
-						});
-					});
-				});
+	new DbBuilder()
+			.addUsers(getUsers())
+			.addCharacters(getCharcters())
+			.setCategory('test')
+			.build(function() {
+				console.log('Database Initilization Complete');
+				callback();
 			});
-		});
-	});
 };

@@ -24,13 +24,17 @@ function fetchOpponent( req, res, next ) {
 };
 
 function fetchGame( req, res, next ) {
-	var gameid = util.extract(req, 'id');
+	var gameid = util.toObjectId(util.extract(req, 'id'));
+	var user = req.user;
 	var db = req.db;
-	impl.getGame(gameid, function(game) {
+	impl.getGame(db, gameid, user, function(game) {
 		if ( game ) {
 			req.game = game;
+			next();
+		} else {
+			db.close();
+			res.json(401, 'No game with ID ' + gameid);
 		}
-		next();
 	});
 };
 
@@ -47,7 +51,7 @@ function fetchBoard( req, res, next ) {
 	var db = req.db;
 	var player_board = util.extract(req, 'player_board');
 	if ( player_board ) {
-		impl.getBoard(game.board, function(board) {
+		impl.getBoard(db, game.board, function(board) {
 			var fullboard = [];
 			_.each(player_board, function(character) {
 				var id = util.toObjectId(character._id);
@@ -84,7 +88,7 @@ function fetchCharacter( req, res, next ) {
 	var characterid = util.extract(req, 'character');
 	impl.getBoardByCharacter(db, boardid, characterid, function(board) {
 		if ( board ) {
-			impl.getCharacter( db, characterid, function( character ) {
+			impl.getCharacter(db, characterid, function( character ) {
 				if ( character ) {
 					req.character = character;
 				}
@@ -93,7 +97,7 @@ function fetchCharacter( req, res, next ) {
 		} else {
 			// TODO: Should probably send back an error saying
 			//       this character is not part of this board.
-			next();	
+			next();
 		}
 	});
 };

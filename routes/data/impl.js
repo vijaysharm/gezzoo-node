@@ -30,13 +30,16 @@ function extractOpponent(user, game) {
 	});
 };
 
+function isString(s) {
+	return typeof(id) === 'string';
+};
+
 /**
  * @param id can be a string ID, or object ID
  */
 function findOneById( db, id, collection, callback ) {
 	if ( id ) {
-		var obj = typeof(id) === 'string' ? 
-						  util.toObjectId(id) : id;
+		var obj = isString(id) ? util.toObjectId(id) : id;
 		var query = {_id:obj};
 		findOne( db, query, collection, callback );
 	} else {
@@ -59,15 +62,23 @@ exports.getUser = function( db, userid, callback ) {
 	findOneById(db, userid, 'users', callback);
 };
 
-exports.getGame = function( db, gameid, callback ) {
-	findOneById(db, gameid, 'games', callback);
+exports.getGame = function( db, gameid, user, callback ) {
+	if (isString(gameid))
+		gameid = util.toObjectId(gameid);
+
+	var query = {
+		_id:gameid,
+		players: {$in:[user._id]}
+	};
+
+	findOne(db, query, 'games', callback);	
 };
 
 exports.getCharacter = function( db, characterid, callback ) {
 	findOneById(db, characterid, 'characters', callback);
 };
 
-exports.getBoard = function( boardid, callback ) {
+exports.getBoard = function( db, boardid, callback ) {
 	findOneById(db, boardid, 'boards', callback );
 };
 
@@ -76,13 +87,18 @@ exports.getBoard = function( boardid, callback ) {
  * @param character is a string id of the character
  */
 exports.getBoardByCharacter = function( db, boardid, characterid, callback ) {
-	characterid = util.toObjectId(characterid);
+	if (isString( characterid ))
+		characterid = util.toObjectId(characterid);
+	
+	if (isString( boardid ))
+		boardid = util.toObjectId(boardid);
+	
 	var query = {
 		_id: boardid,
 		characters: {$all:[characterid]}
 	};
 
-	findOne( query, 'boards', callback );
+	findOne(db, query, 'boards', callback);
 };
 
 exports.getGames = function( req, res ) {
@@ -116,14 +132,15 @@ exports.getGameById = function( req, res ) {
 	res.json({error: 'getGameById not implemented'});
 };
 
+/**
+ * TODO: get a list of all the ongoing games, and use them as
+ * 		 as a filter for users to search for. i.e. do not include
+ * 		 users that this user already has ongoing games with.
+ */
 var createNewGame = function( db, user, res ) {
 	// 1. search for a user to play against
 	// 2. select the board from which they will play
 	// 3. start the game, and return enough info to the client
-
-	// TODO: get a list of all the ongoing games, and use them as
-	//       as a filter for users to search for. i.e. do not include
-	//       users that this user already has ongoing games with.
 
 	// var gamesdb = db.games();
 	// var query = {players:{$all:[util.toObjectId( user.id )]}};
@@ -137,21 +154,31 @@ var createNewGame = function( db, user, res ) {
 		//       to play with
 		var usersdb = db.users();
 		var user_row_limit = 20;
-		var query = {_id:{$nin:[ util.toObjectId( user.id ) ]}};
+		var query = {_id:{$nin:[ user._id ]}};
 		usersdb.find(query).limit(user_row_limit).toArray(function( err, opponents ) {
 			// Choose a random opponent from the list of returned 
 			// users. This could be Improved.
 			var index = util.random(opponents.length-1);
-			createNewGameWithUser( user, opponents[index], db, res );
+			createNewGameWithUser( db, user, opponents[index], res );
 		});
 	// })
 };
 
 /**
+ * TODO: We should check if there is a game already in progress
+ * 		 which isn't ended, and return that game if it exists
+ * 		 otherwise, create a new game
+ *
+ * TODO: I'm just getting the first board from the DB. This can 
+ * 		 be improved so that either we choose a random board, or
+ * 		 we let the user choose a board. (We can even let them 
+ * 		 decide if they want a smaller board for a shorter game
+ * 		 or a larger board for a longer game)
+ *
  * @param user the user object from the DB with all properties
  * @param opponent the user object from the DB with all properties
  */
-var createNewGameWithUser = function( user, opponent, db, res ) {
+var createNewGameWithUser = function( db, user, opponent, res ) {
 	var boardsdb = db.boards();
 	var gamesdb = db.games();
 	var characters = db.characters();
@@ -160,11 +187,6 @@ var createNewGameWithUser = function( user, opponent, db, res ) {
 	boardsdb.find(query).limit(boards_row_count).toArray(function(err, boards) {
 		if ( err ) throw err;
 
-		// TODO: I'm just getting the first board from the DB. This can 
-		//       be improved so that either we choose a random board, or
-		//       we let the user choose a board. (We can even let them 
-		//       decide if they want a smaller board for a shorter game
-		//       or a larger board for a longer game)
 		var board = boards[0];
 		var player_characters = transform(board.characters, {up: true});
 		
@@ -191,10 +213,11 @@ var createNewGameWithUser = function( user, opponent, db, res ) {
 			characters.find(query, options).toArray(function(err, fullcharacters) {
 				db.close();
 				board.characters = fullcharacters;
-				
+
 				// We only need to return back certain fields
 				res.json({
 					players: insertedgame.players,
+					opponent: opponent,
 					turn: insertedgame.turn,
 					_id: insertedgame._id,
 					board: board,
@@ -215,13 +238,17 @@ exports.startNewGame = function( req, res ) {
 	var db = req.db;
 
 	if ( opponent ) {
-		createNewGameWithUser( user, person, db, res );
+		createNewGameWithUser( db, user, opponent, res );
 	} else {
 		createNewGame( db, user, res );
 	}
 };
 
 /**
+ * TODO: If its the opponent that's setting the
+ * 		 character, you don't want to change the
+ * 		 turn since they have to also ask a question
+ *
  * @param user is the user from the userdb
  * @param game is the game object from the db
  * @param character is the character object from the db
@@ -232,9 +259,6 @@ exports.setCharacter = function( req, res ) {
 	var character = req.character;
 	var db = req.db;
 
-	// TODO: If its the opponent that's setting the
-	//       character, you don't want to change the turn
-	//       since they have to also ask a question
 	var nextturn = extractOpponent(user, game);
 	var gamesdb = db.games();
 	var query = {

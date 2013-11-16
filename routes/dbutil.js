@@ -25,10 +25,17 @@ var insertUsers = function( users, db, callback ) {
 	}
 };
 
-var initializeGames = function( db, callback ) {
+var initializeGames = function( games, db, callback ) {
 	var gamesdb = db.games();
 	gamesdb.drop();
-	callback();
+	if ( games && games.length > 0 ) {
+		gamesdb.insert( games, function( err, result ) {
+			if ( err ) throw err;
+			callback();
+		});
+	} else {
+		callback();
+	}
 };
 
 var createBoard = function( name, characters ) {
@@ -72,9 +79,14 @@ var initializeCharacters = function( characters, db, callback ) {
 	}
 };
 
+function isArray( a ) {
+	return (Object.prototype.toString.call( a ) === '[object Array]');
+};
+
 exports.DbBuilder = function() {
 	this.board_category = null;
 	this.characters = [];
+	this.games = [];
 	this.users = [];
 	var that = this;
 	return {
@@ -83,7 +95,7 @@ exports.DbBuilder = function() {
 			return this;
 		},
 		addCharacters: function( c ) {
-			if( Object.prototype.toString.call( c ) === '[object Array]' ) {
+			if( isArray(c) ) {
 				that.characters = that.characters.concat( c );
 			} else {
 				that.characters.push( c );
@@ -91,10 +103,18 @@ exports.DbBuilder = function() {
 			return this;
 		},
 		addUsers: function( u ) {
-			if( Object.prototype.toString.call( u ) === '[object Array]' ) {
+			if( isArray(u) ) {
 				that.users = that.users.concat( u );
 			} else {
 				that.users.push( u );
+			}
+			return this;
+		},
+		addGames: function( g ) {
+			if ( isArray(g) ) {
+				that.games = that.games.concat( g );
+			} else {
+				that.games.push( g );
 			}
 			return this;
 		},
@@ -104,7 +124,7 @@ exports.DbBuilder = function() {
 					initializeCounter( that.users, db, function() {
 						initializeCharacters( that.characters, db, function() {
 							initializeBoards( that.board_category, db, function() {
-								initializeGames( db, function() {
+								initializeGames( that.games, db, function() {
 									db.close();
 									callback();
 								});
