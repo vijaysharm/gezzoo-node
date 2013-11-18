@@ -424,11 +424,11 @@ exports.guess = function( req, res ) {
 		$set: { ended: userguess },
 	};
 
-	pushAction( db, user._id, game, 'guess', userguess, user._id, nextturn, function(result, db) {
+	pushAction( db, query, update, function(result) {
 		db.close();
 		res.json({
 			gameid: game._id,
-			result: userguess
+			guess: userguess
 		});
 	});
 };

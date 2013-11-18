@@ -47,6 +47,8 @@ describe('Guessing', function() {
 	function getGame() {
 		return [
 			{
+				turn:util.toObjectId('52728ca9954deb0b31000004'),
+				_id:util.toObjectId('5286e01d9beb41000000001c'),
 				players:[
 					util.toObjectId('52728ca9954deb0b31000004'),
 					util.toObjectId('52728fbf63a64c904c657ed5')
@@ -55,8 +57,6 @@ describe('Guessing', function() {
 					username:'gezzoo_1',
 					_id:util.toObjectId('52728fbf63a64c904c657ed5')
 				},
-				turn:util.toObjectId('52728ca9954deb0b31000004'),
-				_id:util.toObjectId('5286e01d9beb41000000001c'),
 				board:{
 					name:'test',
 					characters:[
@@ -67,6 +67,10 @@ describe('Guessing', function() {
 					],
 					'_id':'5286fd942200ab0000000002'
 				},
+				actions: [
+					{ player: util.toObjectId('52728ca9954deb0b31000004'), list: []},
+				  	{ player: util.toObjectId('52728fbf63a64c904c657ed5'), list: []}
+				],
 				player_board:[
 					{_id: util.toObjectId('5286e01d8b587b0000000001'), up:true},
 					{_id: util.toObjectId('5286e01d8b587b0000000002'), up:true},
@@ -125,10 +129,24 @@ describe('Guessing', function() {
 		};
 
 		testutil.post(url, data, function(res) {
-			res.status.should.equal(401);
-			res.body.should.equal('Invalid character object');
+			res.status.should.equal(200);
+			res.body.should.have.property('gameid', '5286e01d9beb41000000001c');
+			res.body.should.have.property('guess', false);
+			done();
+		});
+	});
+
+	it('should let the user when they guessed right', function(done) {
+		var data = { 
+			token: token1,
+			character:'5286e01d8b587b0000000002'
+		};
+
+		testutil.post(url, data, function(res) {
+			res.status.should.equal(200);
+			res.body.should.have.property('gameid', '5286e01d9beb41000000001c');
+			res.body.should.have.property('guess', true);
 			done();
 		});
 	});	
-
 });
