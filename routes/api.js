@@ -83,7 +83,7 @@ function fetchBoard( req, res, next ) {
  */
 function fetchCharacter( req, res, next ) {
 	var game = req.game;
-	var boardid = game.board;
+	var boardid = game.board._id;
 	var db = req.db;
 	var characterid = util.extract(req, 'character');
 	impl.getBoardByCharacter(db, boardid, characterid, function(board) {

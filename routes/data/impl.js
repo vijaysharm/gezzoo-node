@@ -31,7 +31,7 @@ function extractOpponent(user, game) {
 };
 
 function isString(s) {
-	return typeof(id) === 'string';
+	return typeof(s) === 'string';
 };
 
 /**
@@ -83,16 +83,18 @@ exports.getBoard = function( db, boardid, callback ) {
 };
 
 /**
- * @param boardid is an object id of the board
- * @param character is a string id of the character
+ * @param boardid 
+ * @param character 
  */
 exports.getBoardByCharacter = function( db, boardid, characterid, callback ) {
-	if (isString( characterid ))
+	if (isString( characterid )) {
 		characterid = util.toObjectId(characterid);
+	}
 	
-	if (isString( boardid ))
+	if (isString( boardid )) {
 		boardid = util.toObjectId(boardid);
-	
+	}
+
 	var query = {
 		_id: boardid,
 		characters: {$all:[characterid]}
@@ -392,6 +394,10 @@ exports.postAction = function( req, res ) {
 	});
 };
 
+/**
+ * TODO: I think users will want to send their boards along
+ * 		 with their guess.
+ */
 exports.guess = function( req, res ) {
 	var user = req.user;
 	var game = req.game;
@@ -399,6 +405,7 @@ exports.guess = function( req, res ) {
 	var db = req.db;
 
 	var opponent = extractOpponent(user, game);
+	var nextturn = extractOpponent(user, game);
 	var result = findGamePropertyByUser(game.selected_characters, opponent);
 	var userguess = result.character.equals(character._id);
 

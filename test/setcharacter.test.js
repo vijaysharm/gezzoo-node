@@ -20,12 +20,27 @@ describe('Set Character', function() {
 		];
 	};
 
+	function getBoards() {
+		return [
+			{
+				_id : util.toObjectId("5286fd942200ab0000000002"),
+				name : "test", 
+				characters : [ 	
+					util.toObjectId("5286e01d8b587b0000000001"),
+					util.toObjectId("5286e01d8b587b0000000002"),
+					util.toObjectId("5286e01d8b587b0000000003"),
+					util.toObjectId("5286e01d8b587b0000000004")
+				]
+			}
+		];
+	};
+
 	function getCharcters() {
 		return [
-			{ name:'person 1', category:['test'], img:'1.jpg' },
-			{ name:'person 2', category:['test'], img:'2.jpg' },
-			{ name:'person 3', category:['test'], img:'3.jpg' },
-			{ name:'person 4', category:['test'], img:'4.jpg' }
+			{ name:'person 1', category:['test'], img:'1.jpg', _id:util.toObjectId('5286e01d8b587b0000000001') },
+			{ name:'person 2', category:['test'], img:'2.jpg', _id:util.toObjectId('5286e01d8b587b0000000002') },
+			{ name:'person 3', category:['test'], img:'3.jpg', _id:util.toObjectId('5286e01d8b587b0000000003') },
+			{ name:'person 4', category:['test'], img:'4.jpg', _id:util.toObjectId('5286e01d8b587b0000000004') }
 		];
 	};
 
@@ -45,12 +60,12 @@ describe('Set Character', function() {
 				board:{
 					name:'test',
 					characters:[
-						{name:'person 1',img:'1.jpg',_id:util.toObjectId('5286e01d8b587b0000000001')},
-						{name:'person 2',img:'2.jpg',_id:util.toObjectId('5286e01d8b587b0000000002')},
-						{name:'person 3',img:'3.jpg',_id:util.toObjectId('5286e01d8b587b0000000003')},
-						{name:'person 4',img:'4.jpg',_id:util.toObjectId('5286e01d8b587b0000000004')}
+						{name:'person 1', img:'1.jpg', _id:util.toObjectId('5286e01d8b587b0000000001')},
+						{name:'person 2', img:'2.jpg', _id:util.toObjectId('5286e01d8b587b0000000002')},
+						{name:'person 3', img:'3.jpg', _id:util.toObjectId('5286e01d8b587b0000000003')},
+						{name:'person 4', img:'4.jpg', _id:util.toObjectId('5286e01d8b587b0000000004')}
 					],
-					'_id':'5286e01d8b587b0000000005'
+					'_id':'5286fd942200ab0000000002'
 				},
 				player_board:[
 					{_id: util.toObjectId('5286e01d8b587b0000000001'), up:true},
@@ -62,26 +77,12 @@ describe('Set Character', function() {
 		];
 	};
 
-	function assertGame( game ) {
-		game.should.have.property('players');
-		game.players.should.have.length(2);
-		game.players.should.include(token1);
-		game.players.should.include(token2);
-		game.should.have.property('turn', token1);
-		game.should.have.property('opponent');
-		game.opponent.should.have.property('_id', token2);
-		game.opponent.should.have.property('username', 'gezzoo_1');
-		game.should.have.property('_id');
-		game.should.have.property('board');
-		game.should.have.property('player_board');
-	};
-
 	before(function(done) {
 		new DbBuilder()
 			.addUsers(getUsers())
 			.addCharacters(getCharcters())
 			.addGames(getGame())
-			.setCategory('test')
+			.addBoards(getBoards())
 			.build(function() {
 				done();
 			});
@@ -124,16 +125,29 @@ describe('Set Character', function() {
 		});
 	});
 
-	// it('', function(done) {
-	// 	var data = { 
-	// 		token: token1,
-	// 		character:'5286e01d8b587b0000000001'
-	// 	};
+	it('should not let user 2 set their character', function(done) {
+		var data = { 
+			token: token2,
+			character:'5286e01d8b587b0000000001'
+		};
 
-	// 	testutil.post(url, data, function(res) {
-	// 		res.status.should.equal(401);
-	// 		res.body.should.equal('Invalid character object');
-	// 		done();
-	// 	});
-	// });	
+		testutil.post(url, data, function(res) {
+			res.status.should.equal(401);
+			res.body.should.equal('Not your turn');
+			done();
+		});
+	});	
+
+	it('should let user 1 set their character', function(done) {
+		var data = { 
+			token: token1,
+			character:'5286e01d8b587b0000000001'
+		};
+
+		testutil.post(url, data, function(res) {
+			console.log(res.body);
+			res.status.should.equal(200);
+			done();
+		});
+	});	
 });

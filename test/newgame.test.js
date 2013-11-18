@@ -29,10 +29,10 @@ describe('New Game', function() {
 
 	function getCharcters() {
 		return [
-			{ name:'person 1', category:['test'], img:'1.jpg' },
-			{ name:'person 2', category:['test'], img:'2.jpg' },
-			{ name:'person 3', category:['test'], img:'3.jpg' },
-			{ name:'person 4', category:['test'], img:'4.jpg' }
+			{ name:'person 1', category:['test'], img:'1.jpg', _id:util.toObjectId('5286e01d8b587b0000000001') },
+			{ name:'person 2', category:['test'], img:'2.jpg', _id:util.toObjectId('5286e01d8b587b0000000002') },
+			{ name:'person 3', category:['test'], img:'3.jpg', _id:util.toObjectId('5286e01d8b587b0000000003') },
+			{ name:'person 4', category:['test'], img:'4.jpg', _id:util.toObjectId('5286e01d8b587b0000000004') }
 		];
 	};
 

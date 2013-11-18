@@ -45,12 +45,17 @@ var createBoard = function( name, characters ) {
 	};
 };
 
-var initializeBoards = function( category, db, callback ) {
+var initializeBoards = function( category, boards, db, callback ) {
 	var boardsdb = db.boards();
 	var charactersdb = db.characters();
 	boardsdb.drop();
 
-	if ( category ) {
+	if ( boards && boards.length > 0 ) {
+		boardsdb.insert(boards, function(err, results) {
+			if ( err ) throw err;
+			callback();
+		});
+	} else if ( category ) {
 		var query = {category:{$all:[ category ]}};
 		charactersdb.find(query).limit(24).toArray(function(err, characters) {
 			if ( err ) throw err;
@@ -84,38 +89,40 @@ function isArray( a ) {
 };
 
 exports.DbBuilder = function() {
-	this.board_category = null;
+	this.category = null;
+	this.boards = [];
 	this.characters = [];
 	this.games = [];
 	this.users = [];
 	var that = this;
+
+	this.add = function(a, col) {
+		if ( isArray(a) ) {
+			that[col] = that[col].concat(a);
+		} else {
+			that[col].push(a);
+		}
+	};
+
 	return {
 		setCategory: function( c ) {
-			that.board_category = c;
+			that.category = c;
+			return this;
+		},
+		addBoards: function( b ) {
+			that.add(b,'boards');
 			return this;
 		},
 		addCharacters: function( c ) {
-			if( isArray(c) ) {
-				that.characters = that.characters.concat( c );
-			} else {
-				that.characters.push( c );
-			}
+			that.add(c,'characters');
 			return this;
 		},
 		addUsers: function( u ) {
-			if( isArray(u) ) {
-				that.users = that.users.concat( u );
-			} else {
-				that.users.push( u );
-			}
+			that.add(u,'users');
 			return this;
 		},
 		addGames: function( g ) {
-			if ( isArray(g) ) {
-				that.games = that.games.concat( g );
-			} else {
-				that.games.push( g );
-			}
+			that.add(g,'games');
 			return this;
 		},
 		build: function(callback) {
@@ -123,7 +130,7 @@ exports.DbBuilder = function() {
 				insertUsers( that.users, db, function() {
 					initializeCounter( that.users, db, function() {
 						initializeCharacters( that.characters, db, function() {
-							initializeBoards( that.board_category, db, function() {
+							initializeBoards( that.category, that.boards, db, function() {
 								initializeGames( that.games, db, function() {
 									db.close();
 									callback();
