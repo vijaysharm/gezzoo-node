@@ -30,7 +30,7 @@ exports.verifySetCharacter = function( req, res, next ) {
 		// Check if the game object has any set characters
 		// and check if that player has a character set.
 		var c = _.find(game.selected_characters, function(p) {
-			result = user._id.equals(p.player);
+			return user._id.equals(p.player);
 		});
 		if ( c ) {
 			result = 'Character already set';
@@ -51,7 +51,7 @@ exports.verifySetCharacter = function( req, res, next ) {
 	}
 };
 
-exports.verifyAskQuestion = function( req, res, next ) {
+exports.verifyAction = function( req, res, next ) {
 	var user = req.user;
 	var game = req.game;
 	var action = req.action;
@@ -97,6 +97,13 @@ exports.verifyAskQuestion = function( req, res, next ) {
 	} else {
 		next();	
 	}
+};
+
+exports.verifyQuestion = function( req, res, next ) {
+	var user = req.user;
+	var game = req.game;
+	var player_board = req.player_board;
+	var board = res.board;
 };
 
 exports.verifyUpdateBoard = function( req, res, next ) {

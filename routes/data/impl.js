@@ -432,3 +432,37 @@ exports.guess = function( req, res ) {
 		});
 	});
 };
+
+exports.askQuestion = function( req, res ) {
+	var user = req.user;
+	var game = req.game;
+	var question = req.value;
+
+	var query = {
+		_id: game._id,
+		'actions.player': user._id
+	};
+
+	var actionitem = {
+		action: 'question',
+		value: question,
+		by: user._id
+	};
+	var update = {
+		$push: { 'actions.$.list': actionitem },
+		$set: { turn: nextturn },
+		$set: { ended: userguess },
+	};
+
+	pushAction( db, query, update, function(result) {
+		db.close();
+		res.json({
+			gameid: game._id,
+		});
+	});
+
+};
+
+exports.postReply = function( req, res ) {
+
+};

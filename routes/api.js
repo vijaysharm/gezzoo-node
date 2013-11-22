@@ -6,6 +6,17 @@ var connection = require('./database');
 var _ = require('underscore');
 
 /*** Middleware CHECKS ***/
+function fetchQuestion( req, res, next ) {
+	req.question = util.extract( req, 'question' );
+	next();
+};
+
+// function fetchReply( req, res, next ) {
+// 	req.questionid = util.extract( req, 'question' );
+// 	req.reply = util.extract( req, 'reply' );
+// 	next();
+// };
+
 function fetchAction( req, res, next ) {
 	req.action = util.extract( req, 'action' );
 	req.value = util.extract( req, 'value' );
@@ -42,9 +53,9 @@ function fetchGame( req, res, next ) {
  * Assumes getGame has already been called and is
  * set in the req.game field.
  * 
- * What I don't particularly like is the fact that
- * I'm building the what a character in the player 
- * board looks like. This could be improved
+ * TODO: What I don't particularly like is the fact that
+ * 		 I'm building the what a character in the player 
+ * 		 board looks like. This could be improved
  */
 function fetchBoard( req, res, next ) {
 	var game = req.game;
@@ -60,6 +71,7 @@ function fetchBoard( req, res, next ) {
 				});
 
 				if ( exists ) {
+					// TODO: To be improved
 					fullboard.push({
 						_id: id,
 						up: character.up
@@ -83,7 +95,7 @@ function fetchBoard( req, res, next ) {
  */
 function fetchCharacter( req, res, next ) {
 	var game = req.game;
-	var boardid = game.board._id;
+	var boardid = game.board;
 	var db = req.db;
 	var characterid = util.extract(req, 'character');
 	impl.getBoardByCharacter(db, boardid, characterid, function(board) {
@@ -135,27 +147,35 @@ exports.install = function( app ) {
 			 fetchCharacter,
 			 engine.verifySetCharacter,
 			 impl.setCharacter);
-	app.post('/api/games/:id/action',
-			 getDb,
-			 authenticate,
-			 fetchGame,
-			 fetchAction,
-			 fetchBoard,
-			 fetchCharacter,
-			 engine.verifyAskQuestion,
-			 impl.postAction);
-	app.post('/api/games/:id/board',
+	app.post('/api/games/:id/question',
 			 getDb,
 			 authenticate,
 			 fetchGame,
 			 fetchBoard,
-			 engine.verifyUpdateBoard,
-			 impl.updateBoard);	
+			 fetchQuestion,
+			 // engine.verifyAskQuestion,
+			 impl.askQuestion);
+	// app.post('/api/games/:id/reply',
+	// 		 getDb,
+	// 		 authenticate,
+	// 		 fetchGame,
+	// 		 fetchAction,
+	// 		 fetchBoard,
+	// 		 fetchCharacter,
+	// 		 engine.verifyAskQuestion,
+	// 		 impl.postReply);
 	app.post('/api/games/:id/guess',
 			 getDb,
 			 authenticate,
 			 fetchGame,
 			 fetchCharacter,
 			 engine.verifyGuess,
-			 impl.guess);		
+			 impl.guess);
+	// app.post('/api/games/:id/board',
+	// 		 getDb,
+	// 		 authenticate,
+	// 		 fetchGame,
+	// 		 fetchBoard,
+	// 		 engine.verifyUpdateBoard,
+	// 		 impl.updateBoard);	
 };
