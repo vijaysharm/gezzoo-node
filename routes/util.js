@@ -25,3 +25,14 @@ exports.toObjectId = function( id ) {
 exports.isObjectId = function( id ) {
   return !(id != null && 'number' != typeof id && (id.length != 12 && id.length != 24))
 };
+
+exports.log = function( data ) {
+	if ( typeof( data ) === 'string' )
+		console.log(data)
+	else
+		console.log(JSON.stringify( data ));
+};
+
+exports.isString = function( s ) {
+	return typeof(s) === 'string';
+};

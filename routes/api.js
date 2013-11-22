@@ -2,6 +2,7 @@ var login = require('./login');
 var impl = require('./data/impl');
 var engine = require('./data/engine');
 var util = require('./util');
+var gameutil = require('./game.util');
 var connection = require('./database');
 var _ = require('underscore');
 
@@ -24,8 +25,12 @@ function fetchAction( req, res, next ) {
 };
 
 function fetchOpponent( req, res, next ) {
-	var opponent = util.extract( req, 'opponent');
+	var user = req.user;
 	var db = req.db;
+	var opponent = util.extract( req, 'opponent' );
+	if ( req.game )
+		opponent = opponent || gameutil.extractOpponent(user, req.game)
+
 	impl.getUser(db, opponent, function(person) {
 		if ( person ) {
 			req.opponent = person;
@@ -152,6 +157,7 @@ exports.install = function( app ) {
 			 authenticate,
 			 fetchGame,
 			 fetchBoard,
+			 fetchOpponent,
 			 fetchQuestion,
 			 // engine.verifyAskQuestion,
 			 impl.askQuestion);
@@ -168,6 +174,7 @@ exports.install = function( app ) {
 			 getDb,
 			 authenticate,
 			 fetchGame,
+			 fetchOpponent,
 			 fetchCharacter,
 			 engine.verifyGuess,
 			 impl.guess);

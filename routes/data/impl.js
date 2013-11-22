@@ -1,5 +1,10 @@
 var connection = require('../database');
 var util = require('../util');
+var isString = util.isString;
+var log = util.log;
+var toObjectId = util.toObjectId;
+var gameutil = require('../game.util');
+var Game = gameutil.Game;
 var _ = require('underscore');
 
 function findGamePropertyByUser( list, playerid ) {
@@ -17,29 +22,12 @@ function transform(list,value) {
 	return a;
 };
 
-function log( data ) {
-	if ( typeof( data ) === 'string' )
-		console.log(data)
-	else
-		console.log(JSON.stringify( data ));
-};
-
-function extractOpponent(user, game) {
-	return _.find(game.players, function(player) {
-		return ! user._id.equals(player);
-	});
-};
-
-function isString(s) {
-	return typeof(s) === 'string';
-};
-
 /**
  * @param id can be a string ID, or object ID
  */
 function findOneById( db, id, collection, callback ) {
 	if ( id ) {
-		var obj = isString(id) ? util.toObjectId(id) : id;
+		var obj = isString(id) ? toObjectId(id) : id;
 		var query = {_id:obj};
 		findOne( db, query, collection, callback );
 	} else {
@@ -192,21 +180,33 @@ var createNewGameWithUser = function( db, user, opponent, res ) {
 		var board = boards[0];
 		var player_characters = transform(board.characters, {up: true});
 		
-		var game = {
-			players: [user._id, opponent._id],
-			board: board._id,
-			selected_characters: [],
-			turn: user._id,
-			ended: false,
-			actions: [
-				{ player: user._id, list:[] },
-				{ player: opponent._id, list:[] },
-			],
-			player_board : [
-				{ player: user._id, board: player_characters },
-				{ player: opponent._id, board: player_characters },
-			]
-		};
+		// var game = {
+		// 	players: [user._id, opponent._id],
+		// 	board: board._id,
+		// 	selected_characters: [],
+		// 	turn: user._id,
+		// 	ended: false,
+		// 	actions: [
+		// 		{ player: user._id, list:[] },
+		// 		{ player: opponent._id, list:[] },
+		// 	],
+		// 	player_board : [
+		// 		{ player: user._id, board: player_characters },
+		// 		{ player: opponent._id, board: player_characters },
+		// 	]
+		// };
+		var game = new Game()
+			.board(board._id)
+			.turn(user._id)
+			.addPlayer({
+				id: user._id,
+				board: player_characters
+			})
+			.addPlayer({
+				id: opponent._id,
+				board: player_characters
+			})
+			.toDbObject();
 
 		gamesdb.insert(game, function(err, results) {
 			var insertedgame = results[0];
@@ -261,7 +261,7 @@ exports.setCharacter = function( req, res ) {
 	var character = req.character;
 	var db = req.db;
 
-	var nextturn = extractOpponent(user, game);
+	var nextturn = gameutil.extractOpponent(user, game);
 	var gamesdb = db.games();
 	var query = {
 		_id: game._id
@@ -291,7 +291,7 @@ exports.updateBoard = function( req, res ) {
 	var board = req.board;
 	var player_board = req.player_board;
 	var db = req.db;
-	var nextturn = extractOpponent(user, game);
+	var nextturn = gameutil.extractOpponent(user, game);
 
 	var gamesdb = db.games();
 	var playerid = user._id;
@@ -350,8 +350,8 @@ exports.postAction = function( req, res ) {
 	var character = req.character;
 	var db = req.db;
 
-	var opponent = extractOpponent(user, game);
-	var nextturn = extractOpponent(user, game);
+	var opponent = gameutil.extractOpponent(user, game);
+	var nextturn = gameutil.extractOpponent(user, game);
 	var playerid = action === 'reply' ? opponent : user._id;
 	var result = findGamePropertyByUser(game.selected_characters, opponent);
 	var userguess = false;
@@ -404,8 +404,8 @@ exports.guess = function( req, res ) {
 	var character = req.character;
 	var db = req.db;
 
-	var opponent = extractOpponent(user, game);
-	var nextturn = extractOpponent(user, game);
+	var opponent = gameutil.extractOpponent(user, game);
+	var nextturn = gameutil.extractOpponent(user, game);
 	var result = findGamePropertyByUser(game.selected_characters, opponent);
 	var userguess = result.character.equals(character._id);
 
