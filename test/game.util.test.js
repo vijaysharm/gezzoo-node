@@ -8,10 +8,7 @@ describe('Game Util', function() {
 
 	it('should create a single object array for db', function() {
 
-		var games = new Game(gameid).toDbObject();
-		games.should.have.length(1);
-
-		var game = games[0];
+		var game = new Game(gameid).toDbObject();
 		game.should.have.property('_id', gameid);
 		game.should.have.property('players');
 		game.players.should.be.empty;
@@ -26,45 +23,36 @@ describe('Game Util', function() {
 	});
 
 	it('should set the ended property', function() {
-		var games = new Game(gameid)
+		var game = new Game(gameid)
 			.ended(true)
 			.toDbObject();
-		games.should.have.length(1);
-
-		var game = games[0];
 		game.should.have.property('ended', true);
 	});	
 
 	it('should set the board ID property', function() {
 		var boardid = toObjectId('5286e01d9beb41000000001a');
-		var games = new Game(gameid)
+		var game = new Game(gameid)
 			.board(boardid)
 			.toDbObject();
-		games.should.have.length(1);
 
-		var game = games[0];
 		game.should.have.property('board', boardid);
 	});
 
 	it('should set the turn property', function() {
 		var turnid = toObjectId('5286e01d9beb41000000001a');
-		var games = new Game(gameid)
+		var game = new Game(gameid)
 			.turn(turnid)
 			.toDbObject();
-		games.should.have.length(1);
-
-		var game = games[0];
+		
 		game.should.have.property('turn', turnid);
 	});
 
 	it('should add a player by object ID', function() {
 		var player = toObjectId('5286e01d9beb41000000001a');
-		var games = new Game(gameid)
+		var game = new Game(gameid)
 			.addPlayer(player)
 			.toDbObject();
-		games.should.have.length(1);
 
-		var game = games[0];
 		game.should.have.property('players');
 		game.players.should.have.length(1);
 		game.should.have.property('actions');
@@ -74,14 +62,11 @@ describe('Game Util', function() {
 	});
 
 	it('should add a player by object literal', function() {
-		var games = new Game(gameid)
+		var game = new Game(gameid)
 			.addPlayer({
 				id: toObjectId('5286e01d9beb41000000001a')
 			})
 			.toDbObject();
-		games.should.have.length(1);
-
-		var game = games[0];
 		game.should.have.property('players');
 		game.players.should.have.length(1);
 		game.should.have.property('actions');
@@ -91,15 +76,13 @@ describe('Game Util', function() {
 	});
 
 	it('should add all player properties by object literal', function() {
-		var games = new Game(gameid)
+		var game = new Game(gameid)
 			.addPlayer({
 				id: toObjectId('5286e01d9beb41000000001a'),
 				character: toObjectId('5286e01d9beb41000000001e')
 			})
 			.toDbObject();
-		games.should.have.length(1);
 
-		var game = games[0];
 		game.should.have.property('players');
 		game.players.should.have.length(1);
 		game.should.have.property('actions');
@@ -126,15 +109,13 @@ describe('Game Util', function() {
 			board: board
 		}
 
-		var games = new Game(gameid)
+		var game = new Game(gameid)
 			.board(boardid)
 			.turn(user1.id)
 			.addPlayer(user1)
 			.addPlayer(user2)
 			.toDbObject();
-		games.should.have.length(1);
 
-		var game = games[0];
 		game.should.have.property('_id', gameid);
 		game.should.have.property('players');
 		game.players.should.have.length(2);

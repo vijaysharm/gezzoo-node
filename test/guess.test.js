@@ -61,7 +61,7 @@ describe('Guessing', function() {
 			{_id: util.toObjectId(character_id[3]), up:true}
 		];
 
-		return new Game('5286e01d9beb41000000001c')
+		var game = new Game('5286e01d9beb41000000001c')
 			.board(boardid)
 			.addPlayer({
 				id: token1,
@@ -74,6 +74,7 @@ describe('Guessing', function() {
 			})
 			.turn(token1)
 			.toDbObject();
+		return [game];
 	};
 
 	before(function(done) {
@@ -135,7 +136,7 @@ describe('Guessing', function() {
 				{_id: util.toObjectId(character_id[3]), up:true}
 			];
 
-			return new Game('5286e01d9beb41000000001c')
+			var game = new Game('5286e01d9beb41000000001c')
 				.board(boardid)
 				.addPlayer({
 					id: token1,
@@ -149,6 +150,8 @@ describe('Guessing', function() {
 				})
 				.turn(token1)
 				.toDbObject();
+
+			return [game];
 		};
 
 		before(function(done) {

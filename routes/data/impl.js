@@ -198,6 +198,7 @@ var createNewGameWithUser = function( db, user, opponent, res ) {
 		var game = new Game()
 			.board(board._id)
 			.turn(user._id)
+			.ended(false)
 			.addPlayer({
 				id: user._id,
 				board: player_characters

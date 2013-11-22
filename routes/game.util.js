@@ -72,18 +72,16 @@ exports.Game = function( id ) {
 			return this;
 		},
 		toDbObject: function() {
-			return [
-				{
-					_id: that.id,
-					players: that.players,
-					turn: that.turn,
-					ended: that.ended,
-					board: that.board,
-					actions: that.actions,
-					player_board: that.player_board,
-					selected_characters: that.selected_characters
-				}
-			];
+			return{
+				_id: that.id,
+				players: that.players,
+				turn: that.turn,
+				ended: that.ended,
+				board: that.board,
+				actions: that.actions,
+				player_board: that.player_board,
+				selected_characters: that.selected_characters
+			};
 		}
 	};
 };
