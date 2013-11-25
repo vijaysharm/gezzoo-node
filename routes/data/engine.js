@@ -244,16 +244,12 @@ exports.verifySetCharacter = function( req, res, next ) {
 };
 
 exports.verifyAskQuestion = function( req, res, next ) {
-	var user = req.user;
-	var game = req.game;
-	var player_board = req.player_board;
-	var board = res.board;
+	checkUser( req, res, function() {
 
-
+	});
 };
 
 exports.verifyGuess = function( req, res, next ){
-	var opponent = req.opponent;
 	checkUser( req, res, function() {
 		checkGame( req, res, function() {
 			checkTurn( req, res, function() {
