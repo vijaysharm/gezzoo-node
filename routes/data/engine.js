@@ -1,4 +1,7 @@
 var _ = require('underscore');
+var util = require('../util');
+var toObjectId = util.toObjectId;
+
 /**
  * This class is meant as the business logic center of 
  * Gezzoo. Don't be stingy with your checking. Imagine the
@@ -7,31 +10,7 @@ var _ = require('underscore');
  * can be made.
  */
 
-function checkUser( user, res, callback ) {
-	if ( user ) {
-		callback();
-	} else {
-		res.json( 401, 'Invalid user object' );
-	}
-};
-
-function checkCharacter( character, res, callback ) {
-	if ( character ) {
-		callback();
-	} else {
-		res.json( 401, 'Invalid character object' );
-	}
-};
-
-function checkGame( game, user, res, callback ) {
-	if ( game ) {
-		callback();
-	} else {
-		res.json( 401, 'Invalid game object' );
-	}
-};
-
-function checkIsCharacterSet( game, user, expected, res, callback ) {
+function validateCharacterState( game, user, expected, res, callback ) {
 	// Check if the game object has any set characters
 	// and check if that player has a character set.
 	var c = _.find(game.selected_characters, function(p) {
@@ -53,8 +32,109 @@ function checkIsCharacterSet( game, user, expected, res, callback ) {
 	}
 };
 
-function checkTurn( game, user, res, callback ) {
+function validatePlayerBoard( board, player_board ) {
+	if ( board.length === player_board.length ) {
+		var copy = board.slice(0);
+		var isValid = true;
+		_.each(player_board, function(character) {
+			var id = toObjectId(character._id);
+			for ( var i = 0; i < copy.length; i++ ) {
+				var c = copy[i];
+				if ( id.equals(c) ) {
+					copy.splice(i, 1);
+					break;
+				}
+			}
+		});
+		return copy.length === 0;
+	} else {
+		return false;
+	}
+};
+
+function checkPlayerBoard( req, res, callback ) {
+	var player_board = req.player_board;
+	var board = req.board;
+	if ( player_board ) {
+		if ( board ) {
+			var isValid = validatePlayerBoard( board.characters, player_board );
+			if ( isValid ) {
+				callback();
+			} else {
+				res.json(401, 'Player board is not valid.');
+			}
+		} else {
+			res.json(401, "Can't validate player board without a game board.");
+		}
+	} else {
+		callback();
+	}
+};
+
+function checkUser( req, res, callback ) {
+	var user = req.user;
+	if ( user ) {
+		callback();
+	} else {
+		res.json( 401, 'Invalid user object' );
+	}
+};
+
+function checkCharacter( req, res, callback ) {
+	var character = req.character;
+	if ( character ) {
+		callback();
+	} else {
+		res.json( 401, 'Invalid character object' );
+	}
+};
+
+function checkGame( req, res, callback ) {
+	var game = req.game;
+	if ( game ) {
+		if ( game.ended ) {
+			res.json(401, 'Game has ended. Cannot be modified');
+		} else {
+			callback();
+		}
+	} else {
+		res.json( 401, 'Invalid game object' );
+	}
+};
+
+function checkIsCharacterSet( req, res, callback ) {
+	var game = req.game;
+	var user = req.user;
+
+	validateCharacterState( game, user, true, res, callback );
+};
+
+function checkIsCharacterUnset( req, res, callback ) {
+	var game = req.game;
+	var user = req.user;
+
+	validateCharacterState( game, user, false, res, callback );
+};
+
+function checkIsOpponentCharacterUnset( req, res, callback ) {
+	var game = req.game;
+	var opponent = req.opponent;
+
+	validateCharacterState( game, opponent, false, res, callback );
+};
+
+function checkIsOpponentCharacterSet( req, res, callback ) {
+	var game = req.game;
+	var opponent = req.opponent;
+
+	validateCharacterState( game, opponent, true, res, callback );
+};
+
+function checkTurn( req, res, callback ) {
+	var game = req.game;
+	var user = req.user;
 	var turn = user._id.equals(game.turn);
+
 	if ( turn === false ) {
 		res.json( 401, 'Not your turn' );
 	} else {
@@ -110,13 +190,6 @@ exports.verifyAction = function( req, res, next ) {
 	}
 };
 
-exports.verifyQuestion = function( req, res, next ) {
-	var user = req.user;
-	var game = req.game;
-	var player_board = req.player_board;
-	var board = res.board;
-};
-
 exports.verifyUpdateBoard = function( req, res, next ) {
 	var user = req.user;
 	var game = req.game;
@@ -157,14 +230,11 @@ exports.verifyUpdateBoard = function( req, res, next ) {
 };
 
 exports.verifySetCharacter = function( req, res, next ) {
-	var user = req.user;
-	var character = req.character;
-	var game = req.game;
-	checkUser( user, res, function() {
-		checkGame( game, user, res, function() {
-			checkTurn( game, user, res, function() {
-				checkCharacter( character, res, function() {
-					checkIsCharacterSet( game, user, false, res, function() {
+	checkUser( req, res, function() {
+		checkGame( req, res, function() {
+			checkTurn( req, res, function() {
+				checkCharacter( req, res, function() {
+					checkIsCharacterUnset( req, res, function() {
 						next();
 					});
 				});
@@ -173,18 +243,26 @@ exports.verifySetCharacter = function( req, res, next ) {
 	});
 };
 
-exports.verifyGuess = function( req, res, next ){
+exports.verifyAskQuestion = function( req, res, next ) {
 	var user = req.user;
-	var character = req.character;
 	var game = req.game;
+	var player_board = req.player_board;
+	var board = res.board;
+
+
+};
+
+exports.verifyGuess = function( req, res, next ){
 	var opponent = req.opponent;
-	checkUser( user, res, function() {
-		checkGame( game, user, res, function() {
-			checkTurn( game, user, res, function() {
-				checkCharacter( character, res, function() {
-					checkIsCharacterSet( game, user, true, res, function() {
-						checkIsCharacterSet( game, opponent, true, res, function() {
-							next();
+	checkUser( req, res, function() {
+		checkGame( req, res, function() {
+			checkTurn( req, res, function() {
+				checkCharacter( req, res, function() {
+					checkIsCharacterSet( req, res, function() {
+						checkIsOpponentCharacterSet( req, res, function() {
+							checkPlayerBoard( req, res, function() {
+								next();
+							});
 						});
 					});
 				});

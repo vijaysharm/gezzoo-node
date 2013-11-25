@@ -48,7 +48,6 @@ function fetchGame( req, res, next ) {
 			req.game = game;
 			next();
 		} else {
-			db.close();
 			res.json(401, 'No game with ID ' + gameid);
 		}
 	});
@@ -67,26 +66,9 @@ function fetchBoard( req, res, next ) {
 	var db = req.db;
 	var player_board = util.extract(req, 'player_board');
 	if ( player_board ) {
+		req.player_board = player_board;
 		impl.getBoard(db, game.board, function(board) {
-			var fullboard = [];
-			_.each(player_board, function(character) {
-				var id = util.toObjectId(character._id);
-				var exists = _.find(board.characters, function(c) {
-					return id.equals(c);
-				});
-
-				if ( exists ) {
-					// TODO: To be improved
-					fullboard.push({
-						_id: id,
-						up: character.up
-					})
-				}
-			});
-
-			req.player_board = fullboard;
 			req.board = board;
-
 			next();
 		});
 	} else {
@@ -122,6 +104,9 @@ function fetchCharacter( req, res, next ) {
 function getDb( req, res, next ) {
 	connection.getInstance(function(db) {
 		req.db = db;
+		res.on('finish', function() {
+			req.db.close();
+		});
 		next();
 	});
 };
@@ -159,7 +144,7 @@ exports.install = function( app ) {
 			 fetchBoard,
 			 fetchOpponent,
 			 fetchQuestion,
-			 // engine.verifyAskQuestion,
+			 engine.verifyAskQuestion,
 			 impl.askQuestion);
 	// app.post('/api/games/:id/reply',
 	// 		 getDb,
@@ -176,6 +161,7 @@ exports.install = function( app ) {
 			 fetchGame,
 			 fetchOpponent,
 			 fetchCharacter,
+			 fetchBoard,
 			 engine.verifyGuess,
 			 impl.guess);
 	// app.post('/api/games/:id/board',

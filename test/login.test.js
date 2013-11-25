@@ -10,7 +10,7 @@ describe('Login', function() {
 		subdomain: '/api/login'
 	};
 
-	before(function(done) {
+	beforeEach(function(done) {
 		new DbBuilder().build(function() {
 			done();
 		});

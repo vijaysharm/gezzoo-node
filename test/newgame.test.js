@@ -50,7 +50,7 @@ describe('New Game', function() {
 		game.should.have.property('player_board');
 	};
 
-	before(function(done) {
+	beforeEach(function(done) {
 		new DbBuilder()
 			.addUsers(getUsers())
 			.addCharacters(getCharcters())

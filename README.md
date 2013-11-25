@@ -93,3 +93,28 @@ This is a two player game, where each player takes turn trying to guess the oppo
     }
   ]
 }
+
+## I want to change the schema to the following
+  {
+    "players":[
+      {
+        id: "52728ca9954deb0b31000004",
+        actions:[],
+        selected_character: "djfsjfhsdjhfsjhfds"
+        board:[
+          {"_id":"5286e01d8b587b0000000001","up":true},
+          {"_id":"5286e01d8b587b0000000002","up":true},
+          {"_id":"5286e01d8b587b0000000003","up":true},
+          {"_id":"5286e01d8b587b0000000004","up":true}        
+        ]
+      }
+      "52728fbf63a64c904c657ed5"
+    ],
+    "opponent":{
+      "username":"gezzoo_1",
+      "_id":"52728fbf63a64c904c657ed5"
+    },
+    "turn":"52728ca9954deb0b31000004",
+    "_id":"5286e01d9beb41000000001c",
+    "board":"kfsjfkdsgjjsfghjkfdhgjkd"
+  }

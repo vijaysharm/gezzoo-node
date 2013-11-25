@@ -2,6 +2,8 @@ var assert = require('assert');
 var request = require('supertest');
 var should = require('should'); 
 var util = require('../routes/util');
+var toObjectId = util.toObjectId;
+var Game = require('../routes/game.util').Game;
 var DbBuilder = require('../routes/dbutil').DbBuilder;
 var testutil = require('./util.test');
 
@@ -53,46 +55,30 @@ describe('Set Character', function() {
 	};
 
 	function getGame() {
-		return [
-			{
-				_id:util.toObjectId('5286e01d9beb41000000001c'),
-				players:[
-					util.toObjectId(token1),
-					util.toObjectId(token2)
-				],
-				turn:util.toObjectId(token1),
-				ended: false,
-				board: util.toObjectId(boardid),
-				actions: [
-					{ player: util.toObjectId(token1), list: []},
-				  	{ player: util.toObjectId(token2), list: []}
-				],
-				player_board:[ 
-					{
-						player: util.toObjectId(token1),
-						board: [
-							{_id: util.toObjectId(character_id[0]), up:true},
-							{_id: util.toObjectId(character_id[1]), up:true},
-							{_id: util.toObjectId(character_id[2]), up:true},
-							{_id: util.toObjectId(character_id[3]), up:true}
-						]
-					},
-					{
-						player: util.toObjectId(token2),
-						board: [
-							{_id: util.toObjectId(character_id[0]), up:true},
-							{_id: util.toObjectId(character_id[1]), up:true},
-							{_id: util.toObjectId(character_id[2]), up:true},
-							{_id: util.toObjectId(character_id[3]), up:true}
-						]
-					}					
-				],
-				selected_characters: []
-			}
+		var board = [
+			{_id: toObjectId(character_id[0]), up:true},
+			{_id: toObjectId(character_id[1]), up:true},
+			{_id: toObjectId(character_id[2]), up:true},
+			{_id: toObjectId(character_id[3]), up:true}
 		];
+
+		var game = new Game('5286e01d9beb41000000001c')
+			.board(boardid)
+			.addPlayer({
+				id: token1,
+				board: board
+			})
+			.addPlayer({
+				id: token2,
+				board: board
+			})
+			.turn(token1)
+			.toDbObject();
+
+		return [game];
 	};
 
-	before(function(done) {
+	beforeEach(function(done) {
 		new DbBuilder()
 			.addUsers(getUsers())
 			.addCharacters(getCharcters())
@@ -160,7 +146,6 @@ describe('Set Character', function() {
 		};
 
 		testutil.post(url, data, function(res) {
-			console.log(res.body);
 			res.status.should.equal(200);
 			done();
 		});

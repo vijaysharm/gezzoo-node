@@ -30,6 +30,9 @@ function findToken( db, token, callback ) {
 function getDb( req, res, next ) {
 	connection.getInstance(function(db) {
 		req.db = db;
+		res.on('finish', function() {
+			req.db.close();
+		});
 		next();
 	});
 };
@@ -51,7 +54,6 @@ var login = function( req, res ) {
 
 	if ( token ) {
 		findToken( db, token, function(err, user) {
-			db.close();
 			req.user = user;
 			if ( user ) {
 				res.json(createSerializedUser( user ));
@@ -80,7 +82,6 @@ var login = function( req, res ) {
 				// Here, im using the _id of the record as the session 
 				// token, this should probably be changed to being different 
 				// so that you can have multiple logged in sessions
-				db.close();
 				req.user = user;
 				res.json(createSerializedUser( user ));
 			});

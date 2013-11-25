@@ -43,9 +43,6 @@ function findOne( db, query, collection, callback ) {
 	});
 };
 
-/**
- * @param user is the user ID as a string
- */
 exports.getUser = function( db, userid, callback ) {
 	findOneById(db, userid, 'users', callback);
 };
@@ -70,10 +67,6 @@ exports.getBoard = function( db, boardid, callback ) {
 	findOneById(db, boardid, 'boards', callback );
 };
 
-/**
- * @param boardid 
- * @param character 
- */
 exports.getBoardByCharacter = function( db, boardid, characterid, callback ) {
 	if (isString( characterid )) {
 		characterid = util.toObjectId(characterid);
@@ -108,7 +101,6 @@ exports.getGames = function( req, res ) {
 	};
 
 	gamesdb.find(query, options).toArray(function(err, games) {
-		db.close();
 		res.json({error: 'getGames not implemented'});
 	});
 };
@@ -117,8 +109,6 @@ exports.getGameById = function( req, res ) {
 	var game = req.game;
 	var user = req.user;
 	var db = req.db;
-
-	db.close();
 	res.json({error: 'getGameById not implemented'});
 };
 
@@ -127,7 +117,7 @@ exports.getGameById = function( req, res ) {
  * 		 as a filter for users to search for. i.e. do not include
  * 		 users that this user already has ongoing games with.
  */
-var createNewGame = function( db, user, res ) {
+function createNewGame( db, user, res ) {
 	// 1. search for a user to play against
 	// 2. select the board from which they will play
 	// 3. start the game, and return enough info to the client
@@ -168,7 +158,7 @@ var createNewGame = function( db, user, res ) {
  * @param user the user object from the DB with all properties
  * @param opponent the user object from the DB with all properties
  */
-var createNewGameWithUser = function( db, user, opponent, res ) {
+function createNewGameWithUser( db, user, opponent, res ) {
 	var boardsdb = db.boards();
 	var gamesdb = db.games();
 	var characters = db.characters();
@@ -214,7 +204,6 @@ var createNewGameWithUser = function( db, user, opponent, res ) {
 			var query = {_id:{ $in: board.characters }};
 			var options = {name:1, img:1};
 			characters.find(query, options).toArray(function(err, fullcharacters) {
-				db.close();
 				board.characters = fullcharacters;
 
 				// We only need to return back certain fields
@@ -231,10 +220,6 @@ var createNewGameWithUser = function( db, user, opponent, res ) {
 	});
 };
 
-/**
- * @param user the user object from the users db
- * @param opponent the user object form the users db
- */
 exports.startNewGame = function( req, res ) {
 	var user = req.user;
 	var opponent = req.opponent;
@@ -251,10 +236,6 @@ exports.startNewGame = function( req, res ) {
  * TODO: If its the opponent that's setting the
  * 		 character, you don't want to change the
  * 		 turn since they have to also ask a question
- *
- * @param user is the user from the userdb
- * @param game is the game object from the db
- * @param character is the character object from the db
  */
 exports.setCharacter = function( req, res ) {
 	var user = req.user;
@@ -281,42 +262,8 @@ exports.setCharacter = function( req, res ) {
 	var options = { upsert:false, 'new':true };
 	var sort = [['_id','1']];
 	gamesdb.findAndModify(query, sort, update, options, function(err, insertedgame) {
-		db.close();			
 		res.json(200);
 	});
-};
-
-exports.updateBoard = function( req, res ) {
-	var user = req.user;
-	var game = req.game;
-	var board = req.board;
-	var player_board = req.player_board;
-	var db = req.db;
-	var nextturn = gameutil.extractOpponent(user, game);
-
-	var gamesdb = db.games();
-	var playerid = user._id;
-
-	var query = {
-		_id: game._id,
-		'player_board.player': playerid
-	};
-	var update = {
-		$set: { 'player_board.$.board': player_board },
-		$set: { turn: nextturn }
-	};
-	var options = { upsert:false, 'new':true };
-	var sort = [['_id','1']];
-
-	gamesdb.findAndModify(query, sort, update, options, function(err, game) {
-		if ( err ) throw err;
-
-		var result = findGamePropertyByUser(game.player_board, playerid);
-		db.close();
-
-		// TODO: I should probably also return the game id
-		res.json(result);
-	});	
 };
 
 function pushAction( db, query, update, callback ) {
@@ -326,8 +273,6 @@ function pushAction( db, query, update, callback ) {
 	var sort = [['_id','1']];
 	gamesdb.findAndModify(query, sort, update, options, function(err, game) {
 		if ( err ) throw err;
-
-		db.close();
 		callback(game);
 	});
 }
@@ -398,11 +343,15 @@ exports.postAction = function( req, res ) {
 /**
  * TODO: I think users will want to send their boards along
  * 		 with their guess.
+ *
+ * TODO: We're assuming that the player_board is in the 'right
+ *  	 form' for saving to the database.
  */
 exports.guess = function( req, res ) {
 	var user = req.user;
 	var game = req.game;
 	var character = req.character;
+	var player_board = req.player_board;
 	var db = req.db;
 
 	var opponent = gameutil.extractOpponent(user, game);
@@ -412,7 +361,7 @@ exports.guess = function( req, res ) {
 
 	var query = {
 		_id: game._id,
-		'actions.player': user._id
+		'actions.player': user._id,
 	};
 	var actionitem = {
 		action: 'guess',
@@ -425,13 +374,53 @@ exports.guess = function( req, res ) {
 		$set: { ended: userguess },
 	};
 
+	if ( req.player_board ) {
+		_.extend( query, {
+			'player_board.player': user._id
+		});
+
+		_.extend( update, {
+			$set: { 'player_board.$.board': player_board }
+		});
+	}
+
 	pushAction( db, query, update, function(result) {
-		db.close();
 		res.json({
 			gameid: game._id,
 			guess: userguess
 		});
 	});
+};
+
+exports.updateBoard = function( req, res ) {
+	var user = req.user;
+	var game = req.game;
+	var board = req.board;
+	var player_board = req.player_board;
+	var db = req.db;
+	var nextturn = gameutil.extractOpponent(user, game);
+
+	var gamesdb = db.games();
+	var playerid = user._id;
+
+	var query = {
+		_id: game._id,
+		'player_board.player': playerid
+	};
+	var update = {
+		$set: { 'player_board.$.board': player_board },
+		$set: { turn: nextturn }
+	};
+	var options = { upsert:false, 'new':true };
+	var sort = [['_id','1']];
+
+	gamesdb.findAndModify(query, sort, update, options, function(err, game) {
+		if ( err ) throw err;
+
+		var result = findGamePropertyByUser(game.player_board, playerid);
+		// TODO: I should probably also return the game id
+		res.json(result);
+	});	
 };
 
 exports.askQuestion = function( req, res ) {
@@ -456,7 +445,6 @@ exports.askQuestion = function( req, res ) {
 	};
 
 	pushAction( db, query, update, function(result) {
-		db.close();
 		res.json({
 			gameid: game._id,
 		});

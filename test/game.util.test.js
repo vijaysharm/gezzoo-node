@@ -7,7 +7,6 @@ describe('Game Util', function() {
 	var gameid = toObjectId('5286e01d9beb41000000001c');
 
 	it('should create a single object array for db', function() {
-
 		var game = new Game(gameid).toDbObject();
 		game.should.have.property('_id', gameid);
 		game.should.have.property('players');

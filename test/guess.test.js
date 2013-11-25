@@ -2,6 +2,7 @@ var assert = require('assert');
 var request = require('supertest');
 var should = require('should'); 
 var util = require('../routes/util');
+var toObjectId = util.toObjectId;
 var Game = require('../routes/game.util').Game;
 var DbBuilder = require('../routes/dbutil').DbBuilder;
 var testutil = require('./util.test');
@@ -24,21 +25,21 @@ describe('Guessing', function() {
 
 	function getUsers() {
 		return [
-			{ username:'gezzoo_0', _id:util.toObjectId(token1) },
-			{ username:'gezzoo_1', _id:util.toObjectId(token2) }
+			{ username:'gezzoo_0', _id:toObjectId(token1) },
+			{ username:'gezzoo_1', _id:toObjectId(token2) }
 		];
 	};
 
 	function getBoards() {
 		return [
 			{
-				_id : util.toObjectId(boardid),
+				_id : toObjectId(boardid),
 				name : "test", 
 				characters : [ 	
-					util.toObjectId(character_id[0]),
-					util.toObjectId(character_id[1]),
-					util.toObjectId(character_id[2]),
-					util.toObjectId(character_id[3])
+					toObjectId(character_id[0]),
+					toObjectId(character_id[1]),
+					toObjectId(character_id[2]),
+					toObjectId(character_id[3])
 				]
 			}
 		];
@@ -46,94 +47,96 @@ describe('Guessing', function() {
 
 	function getCharcters() {
 		return [
-			{ name:'person 1', category:['test'], img:'1.jpg', _id:util.toObjectId(character_id[0]) },
-			{ name:'person 2', category:['test'], img:'2.jpg', _id:util.toObjectId(character_id[1]) },
-			{ name:'person 3', category:['test'], img:'3.jpg', _id:util.toObjectId(character_id[2]) },
-			{ name:'person 4', category:['test'], img:'4.jpg', _id:util.toObjectId(character_id[3]) }
+			{ name:'person 1', category:['test'], img:'1.jpg', _id:toObjectId(character_id[0]) },
+			{ name:'person 2', category:['test'], img:'2.jpg', _id:toObjectId(character_id[1]) },
+			{ name:'person 3', category:['test'], img:'3.jpg', _id:toObjectId(character_id[2]) },
+			{ name:'person 4', category:['test'], img:'4.jpg', _id:toObjectId(character_id[3]) }
 		];
 	};
 
-	function getGame() {
-		var board = [
-			{_id: util.toObjectId(character_id[0]), up:true},
-			{_id: util.toObjectId(character_id[1]), up:true},
-			{_id: util.toObjectId(character_id[2]), up:true},
-			{_id: util.toObjectId(character_id[3]), up:true}
-		];
+	describe('without opponent character set', function() {
+		function getGame() {
+			var board = [
+				{_id: toObjectId(character_id[0]), up:true},
+				{_id: toObjectId(character_id[1]), up:true},
+				{_id: toObjectId(character_id[2]), up:true},
+				{_id: toObjectId(character_id[3]), up:true}
+			];
 
-		var game = new Game('5286e01d9beb41000000001c')
-			.board(boardid)
-			.addPlayer({
-				id: token1,
-				board: board,
-				character: character_id[0]
-			})
-			.addPlayer({
-				id: token2,
-				board: board,
-			})
-			.turn(token1)
-			.toDbObject();
-		return [game];
-	};
+			var game = new Game('5286e01d9beb41000000001c')
+				.board(boardid)
+				.addPlayer({
+					id: token1,
+					board: board,
+					character: character_id[0]
+				})
+				.addPlayer({
+					id: token2,
+					board: board,
+				})
+				.turn(token1)
+				.toDbObject();
+			return [game];
+		};
 
-	before(function(done) {
-		new DbBuilder()
-			.addUsers(getUsers())
-			.addCharacters(getCharcters())
-			.addGames(getGame())
-			.addBoards(getBoards())
-			.build(function() {
+		beforeEach(function(done) {
+			new DbBuilder()
+				.addUsers(getUsers())
+				.addCharacters(getCharcters())
+				.addGames(getGame())
+				.addBoards(getBoards())
+				.build(function() {
+					done();
+				});
+		});
+
+		it('should not let player 2 guess because its not their turn', function(done) {
+			var data = { 
+				token: token2,
+				character: '5286e01d8b587b0000000001'
+			};
+
+			testutil.post(url, data, function(res) {
+				res.status.should.equal(401);
+				res.body.should.equal('Not your turn');
 				done();
 			});
-	});
-
-	it('should not let player 2 guess because its not their turn', function(done) {
-		var data = { 
-			token: token2,
-			character: '5286e01d8b587b0000000001'
-		};
-
-		testutil.post(url, data, function(res) {
-			res.status.should.equal(401);
-			res.body.should.equal('Not your turn');
-			done();
 		});
-	});
 
-	it('should not let the user guess with an invalid character', function(done) {
-		var data = { 
-			token: token1,
-			character: '5286e01d8b587b0000000000'
-		};
+		it('should not let the user guess with an invalid character', function(done) {
+			var data = { 
+				token: token1,
+				character: '5286e01d8b587b0000000000'
+			};
 
-		testutil.post(url, data, function(res) {
-			res.status.should.equal(401);
-			res.body.should.equal('Invalid character object');
-			done();
+			testutil.post(url, data, function(res) {
+				res.status.should.equal(401);
+				res.body.should.equal('Invalid character object');
+				done();
+			});
 		});
-	});
 
-	it('should not let the user guess if player two has no character set', function(done) {
-		var data = { 
-			token: token1,
-			character: character_id[1]
-		};
+		it('should not let the user guess if player two has no character set', function(done) {
+			var data = { 
+				token: token1,
+				character: character_id[1]
+			};
 
-		testutil.post(url, data, function(res) {
-			res.status.should.equal(401);
-			res.body.should.equal('Character not set');
-			done();
+			testutil.post(url, data, function(res) {
+				res.status.should.equal(401);
+				res.body.should.equal('Character not set');
+				done();
+			});
 		});
 	});
 
 	describe('with opponent character set', function() {
 		function getGame() {
 			var board = [
-				{_id: util.toObjectId(character_id[0]), up:true},
-				{_id: util.toObjectId(character_id[1]), up:true},
-				{_id: util.toObjectId(character_id[2]), up:true},
-				{_id: util.toObjectId(character_id[3]), up:true}
+				{_id: toObjectId(character_id[0]), up:true},
+				{_id: toObjectId(character_id[1]), up:true},
+				{_id: toObjectId(character_id[2]), up:true},
+				{_id: toObjectId(character_id[3]), up:true}
 			];
 
 			var game = new Game('5286e01d9beb41000000001c')
@@ -154,7 +157,7 @@ describe('Guessing', function() {
 			return [game];
 		};
 
-		before(function(done) {
+		beforeEach(function(done) {
 			new DbBuilder()
 				.addUsers(getUsers())
 				.addCharacters(getCharcters())
@@ -191,7 +194,46 @@ describe('Guessing', function() {
 				res.body.should.have.property('guess', true);
 				done();
 			});
-		});			
-	});
+		});
 
+		it('should not let the user set the board if board is invalid', function(done) {
+			var data = { 
+				token: token1,
+				character:'5286e01d8b587b0000000002',
+				player_board: [
+					{_id: toObjectId(character_id[0]), up:true},
+					{_id: toObjectId(character_id[1]), up:false},
+					{_id: toObjectId(character_id[2]), up:true},
+					// This is not on the board
+					{_id: toObjectId(character_id[0]), up:false}
+				]
+			};
+
+			testutil.post(url, data, function(res) {
+				res.status.should.equal(401);
+				res.body.should.equal('Player board is not valid.');
+				done();
+			});
+		});
+
+		it('should let the user set the board', function(done) {
+			var data = { 
+				token: token1,
+				character:'5286e01d8b587b0000000002',
+				player_board: [
+					{_id: toObjectId(character_id[0]), up:true},
+					{_id: toObjectId(character_id[1]), up:false},
+					{_id: toObjectId(character_id[2]), up:true},
+					{_id: toObjectId(character_id[3]), up:false}
+				]
+			};
+
+			testutil.post(url, data, function(res) {
+				res.status.should.equal(200);
+				res.body.should.have.property('gameid', '5286e01d9beb41000000001c');
+				res.body.should.have.property('guess', true);
+				done();
+			});
+		});
+	});
 });

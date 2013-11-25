@@ -2,6 +2,7 @@ var _ = require('underscore');
 var util = require('./util');
 var isString = util.isString;
 var toObjectId = util.toObjectId;
+
 exports.extractOpponent = function(user, game) {
 	return _.find(game.players, function(player) {
 		return ! user._id.equals(player);
