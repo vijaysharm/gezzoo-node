@@ -149,5 +149,5 @@ describe('Set Character', function() {
 			res.status.should.equal(200);
 			done();
 		});
-	});	
+	});
 });

@@ -167,7 +167,7 @@ describe('Guessing', function() {
 					done();
 				});
 		});
-
+	
 		it('should let the user know when they guessed wrong', function(done) {
 			var data = { 
 				token: token1,

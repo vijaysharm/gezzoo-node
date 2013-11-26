@@ -52,8 +52,8 @@ exports.getGame = function( db, gameid, user, callback ) {
 		gameid = util.toObjectId(gameid);
 
 	var query = {
-		_id:gameid,
-		players: {$in:[user._id]}
+		'_id':gameid,
+		'players.id': {$in:[user._id]}
 	};
 
 	findOne(db, query, 'games', callback);	
@@ -85,24 +85,24 @@ exports.getBoardByCharacter = function( db, boardid, characterid, callback ) {
 };
 
 exports.getGames = function( req, res ) {
-	var user = req.user;
-	var db = req.db;
+	// var user = req.user;
+	// var db = req.db;
 
-	var gamesdb = db.games();
-	var query = {
-		players: {$in:[user._id]},
-		ended: false
-	};
+	// var gamesdb = db.games();
+	// var query = {
+	// 	'players.id': {$in:[user._id]},
+	// 	'ended': false
+	// };
 
-	var options = {
-		players: 1,
-		turn: 1,
-		_id: 1
-	};
+	// var options = {
+	// 	players: 1,
+	// 	turn: 1,
+	// 	_id: 1
+	// };
 
-	gamesdb.find(query, options).toArray(function(err, games) {
+	// gamesdb.find(query, options).toArray(function(err, games) {
 		res.json({error: 'getGames not implemented'});
-	});
+	// });
 };
 
 exports.getGameById = function( req, res ) {
@@ -170,21 +170,6 @@ function createNewGameWithUser( db, user, opponent, res ) {
 		var board = boards[0];
 		var player_characters = transform(board.characters, {up: true});
 		
-		// var game = {
-		// 	players: [user._id, opponent._id],
-		// 	board: board._id,
-		// 	selected_characters: [],
-		// 	turn: user._id,
-		// 	ended: false,
-		// 	actions: [
-		// 		{ player: user._id, list:[] },
-		// 		{ player: opponent._id, list:[] },
-		// 	],
-		// 	player_board : [
-		// 		{ player: user._id, board: player_characters },
-		// 		{ player: opponent._id, board: player_characters },
-		// 	]
-		// };
 		var game = new Game()
 			.board(board._id)
 			.turn(user._id)
@@ -213,7 +198,7 @@ function createNewGameWithUser( db, user, opponent, res ) {
 					turn: insertedgame.turn,
 					_id: insertedgame._id,
 					board: board,
-					player_board: player_characters
+					ended: insertedgame.ended
 				});
 			});
 		});
@@ -246,18 +231,12 @@ exports.setCharacter = function( req, res ) {
 	var nextturn = gameutil.extractOpponent(user, game);
 	var gamesdb = db.games();
 	var query = {
-		_id: game._id
+		_id: game._id,
+		'players.id': user._id
 	};
 	var update = {
-		$push: {
-			selected_characters:{ 
-				player:user._id,
-				character:character._id 
-			}
-		},
-		$set: {
-			turn: nextturn
-		}
+		$set: { 'players.$.character': character._id },
+		$set: { turn: nextturn }
 	};
 	var options = { upsert:false, 'new':true };
 	var sort = [['_id','1']];
@@ -341,9 +320,6 @@ exports.postAction = function( req, res ) {
 };
 
 /**
- * TODO: I think users will want to send their boards along
- * 		 with their guess.
- *
  * TODO: We're assuming that the player_board is in the 'right
  *  	 form' for saving to the database.
  */
@@ -355,32 +331,31 @@ exports.guess = function( req, res ) {
 	var db = req.db;
 
 	var opponent = gameutil.extractOpponent(user, game);
-	var nextturn = gameutil.extractOpponent(user, game);
-	var result = findGamePropertyByUser(game.selected_characters, opponent);
-	var userguess = result.character.equals(character._id);
+	var userguess = opponent.character.equals(character._id);
 
 	var query = {
 		_id: game._id,
-		'actions.player': user._id,
+		'players.id': user._id,
 	};
+
+	// Here, im storing who the user guessed. 
+	// The client can decipher whether to show if its right or not
+	// We will however, save that the game is over if the user guessed correctly.
+	// And we will return whether the guess was right or wrong
 	var actionitem = {
 		action: 'guess',
-		value: userguess,
+		value: character._id,
 		by: user._id
 	};
 	var update = {
-		$push: { 'actions.$.list': actionitem },
-		$set: { turn: nextturn },
+		$push: { 'players.$.actions': actionitem },
+		$set: { turn: opponent },
 		$set: { ended: userguess },
 	};
 
 	if ( req.player_board ) {
-		_.extend( query, {
-			'player_board.player': user._id
-		});
-
 		_.extend( update, {
-			$set: { 'player_board.$.board': player_board }
+			$set: { 'players.$.board': player_board }
 		});
 	}
 
@@ -392,66 +367,41 @@ exports.guess = function( req, res ) {
 	});
 };
 
-exports.updateBoard = function( req, res ) {
+exports.askQuestion = function( req, res ) {
 	var user = req.user;
 	var game = req.game;
-	var board = req.board;
+	var question = req.question;
 	var player_board = req.player_board;
 	var db = req.db;
 	var nextturn = gameutil.extractOpponent(user, game);
 
-	var gamesdb = db.games();
-	var playerid = user._id;
-
 	var query = {
 		_id: game._id,
-		'player_board.player': playerid
+		'players.id': user._id,
 	};
-	var update = {
-		$set: { 'player_board.$.board': player_board },
-		$set: { turn: nextturn }
-	};
-	var options = { upsert:false, 'new':true };
-	var sort = [['_id','1']];
-
-	gamesdb.findAndModify(query, sort, update, options, function(err, game) {
-		if ( err ) throw err;
-
-		var result = findGamePropertyByUser(game.player_board, playerid);
-		// TODO: I should probably also return the game id
-		res.json(result);
-	});	
-};
-
-exports.askQuestion = function( req, res ) {
-	var user = req.user;
-	var game = req.game;
-	var question = req.value;
-
-	var query = {
-		_id: game._id,
-		'actions.player': user._id
-	};
-
 	var actionitem = {
 		action: 'question',
 		value: question,
 		by: user._id
 	};
 	var update = {
-		$push: { 'actions.$.list': actionitem },
-		$set: { turn: nextturn },
-		$set: { ended: userguess },
+		$push: { 'players.$.actions': actionitem },
+		$set: { turn: nextturn.id }
 	};
+
+	if ( req.player_board ) {
+		_.extend( update, {
+			$set: { 'players.$.board': player_board }
+		});
+	}
 
 	pushAction( db, query, update, function(result) {
 		res.json({
-			gameid: game._id,
+			gameid: game._id
 		});
 	});
-
 };
 
 exports.postReply = function( req, res ) {
-
+	res.json({error: 'not implemented'});
 };

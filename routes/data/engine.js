@@ -10,14 +10,14 @@ var toObjectId = util.toObjectId;
  * can be made.
  */
 
-function validateCharacterState( game, user, expected, res, callback ) {
+function validateCharacterExistence( game, user, expected, res, callback ) {
 	// Check if the game object has any set characters
 	// and check if that player has a character set.
-	var c = _.find(game.selected_characters, function(p) {
-		return user._id.equals(p.player);
+	var player = _.find(game.players, function(p) {
+		return user._id.equals(p.id);
 	});
 
-	if ( c ) {
+	if ( player.character ) {
 		if ( expected ) {
 			callback();
 		} else {
@@ -106,28 +106,36 @@ function checkIsCharacterSet( req, res, callback ) {
 	var game = req.game;
 	var user = req.user;
 
-	validateCharacterState( game, user, true, res, callback );
+	validateCharacterExistence( game, user, true, res, callback );
 };
 
 function checkIsCharacterUnset( req, res, callback ) {
 	var game = req.game;
 	var user = req.user;
 
-	validateCharacterState( game, user, false, res, callback );
+	validateCharacterExistence( game, user, false, res, callback );
 };
 
 function checkIsOpponentCharacterUnset( req, res, callback ) {
 	var game = req.game;
 	var opponent = req.opponent;
 
-	validateCharacterState( game, opponent, false, res, callback );
+	if ( opponent ) {
+		validateCharacterExistence( game, opponent, false, res, callback );
+	} else {
+		res.json(401, 'Invalid opponent user');
+	}
 };
 
 function checkIsOpponentCharacterSet( req, res, callback ) {
 	var game = req.game;
 	var opponent = req.opponent;
 
-	validateCharacterState( game, opponent, true, res, callback );
+	if ( opponent ) {
+		validateCharacterExistence( game, opponent, true, res, callback );
+	} else {
+		res.json(401, 'Invalid opponent user');
+	}
 };
 
 function checkTurn( req, res, callback ) {
@@ -140,7 +148,21 @@ function checkTurn( req, res, callback ) {
 	} else {
 		callback();
 	}
-}
+};
+
+function checkQuestion( req, res, callback ) {
+	var question = req.question;
+
+	if ( question ) {
+		callback();
+	} else {
+		res.json(401, 'No question provided');
+	}
+};
+
+function checkReply( req, res, callback ) {
+	callback();
+};
 
 exports.verifyAction = function( req, res, next ) {
 	var user = req.user;
@@ -190,43 +212,10 @@ exports.verifyAction = function( req, res, next ) {
 	}
 };
 
-exports.verifyUpdateBoard = function( req, res, next ) {
-	var user = req.user;
-	var game = req.game;
-	var board = req.board;
-	var player_board = req.player_board;
-	var result = null;
-
-	if ( ! user ) {
-		result = 'Invalid user object';
-	}
-
-	if ( ! board ) {
-		result = 'Invalid board';
-	}
-
-	if ( player_board ) {
-		if ( player_board.length !== board.characters.length ) {
-			result = 'Invalid player board length';
-		}
-	} else {
-		result = 'Invalid player board';
-	}
-
-	if ( game ) {
-		var turn = user._id.equals(game.turn);
-		if ( turn === false ) {
-			result = 'Not your turn';
-		}
-	} else {
-		result = 'Invalid game object';
-	}
-
-	if ( result ) {
-		res.json(401, result);
-	} else {
-		next();	
-	}
+exports.verifyNewGame = function( req, res, next ) {
+	checkUser( req, res, function() {
+		next();
+	});
 };
 
 exports.verifySetCharacter = function( req, res, next ) {
@@ -245,7 +234,19 @@ exports.verifySetCharacter = function( req, res, next ) {
 
 exports.verifyAskQuestion = function( req, res, next ) {
 	checkUser( req, res, function() {
-
+		checkGame( req, res, function() {
+			checkTurn( req, res, function() {
+				checkIsCharacterSet( req, res, function() {
+					checkIsOpponentCharacterSet( req, res, function() {
+						checkQuestion( req, res, function() {
+							checkPlayerBoard( req, res, function() {
+								next();
+							});
+						});
+					});
+				});
+			});
+		});
 	});
 };
 

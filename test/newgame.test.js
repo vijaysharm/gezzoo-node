@@ -36,18 +36,30 @@ describe('New Game', function() {
 		];
 	};
 
+	function assertGamePlayer( player ) {
+ 		player.should.have.property('id');
+ 		player.should.have.property('actions');
+ 		player.should.have.property('board');
+	};
+
 	function assertGame( game ) {
+		game.should.have.property('_id');
+		game.should.have.property('ended', false);
+		game.should.have.property('turn');
+		game.should.have.property('board');
 		game.should.have.property('players');
+
 		game.players.should.have.length(2);
-		game.players.should.include(token1);
-		game.players.should.include(token2);
-		game.should.have.property('turn', token1);
+		assertGamePlayer( game.players[0] );
+		assertGamePlayer( game.players[1] );
+
 		game.should.have.property('opponent');
 		game.opponent.should.have.property('_id', token2);
 		game.opponent.should.have.property('username', 'gezzoo_1');
-		game.should.have.property('_id');
-		game.should.have.property('board');
-		game.should.have.property('player_board');
+
+		game.board.should.have.property('_id');
+		game.board.should.have.property('characters');
+		game.board.should.have.property('name');
 	};
 
 	beforeEach(function(done) {
@@ -59,37 +71,6 @@ describe('New Game', function() {
 				done();
 			});
 	});
-
-	/*
-	{
-		"players":[
-			"52728ca9954deb0b31000004",
-			"52728fbf63a64c904c657ed5"
-		],
-		"opponent":{
-			"username":"gezzoo_1",
-			"_id":"52728fbf63a64c904c657ed5"
-		},
-		"turn":"52728ca9954deb0b31000004",
-		"_id":"5286e01d9beb41000000001c",
-		"board":{
-			"name":"test",
-			"characters":[
-				{"name":"person 1","img":"1.jpg","_id":"5286e01d8b587b0000000001"},
-				{"name":"person 2","img":"2.jpg","_id":"5286e01d8b587b0000000002"},
-				{"name":"person 3","img":"3.jpg","_id":"5286e01d8b587b0000000003"},
-				{"name":"person 4","img":"4.jpg","_id":"5286e01d8b587b0000000004"}
-			],
-			"_id":"5286e01d8b587b0000000005"
-		},
-		"player_board":[
-			{"_id":"5286e01d8b587b0000000001","up":true},
-			{"_id":"5286e01d8b587b0000000002","up":true},
-			{"_id":"5286e01d8b587b0000000003","up":true},
-			{"_id":"5286e01d8b587b0000000004","up":true}
-		]
-	}
-	*/
 
 	it('should create a new game with random character', function( done ) {
 		var data = { token: token1 };
@@ -106,6 +87,6 @@ describe('New Game', function() {
 			// console.log(JSON.stringify(res.body));
 			assertGame(res.body);
 			done();
-		});		
+		});
 	});
 });

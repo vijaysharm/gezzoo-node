@@ -29,7 +29,7 @@ function fetchOpponent( req, res, next ) {
 	var db = req.db;
 	var opponent = util.extract( req, 'opponent' );
 	if ( req.game )
-		opponent = opponent || gameutil.extractOpponent(user, req.game)
+		opponent = gameutil.extractOpponent(user, req.game).id || opponent;
 
 	impl.getUser(db, opponent, function(person) {
 		if ( person ) {
@@ -94,8 +94,6 @@ function fetchCharacter( req, res, next ) {
 				next();
 			});
 		} else {
-			// TODO: Should probably send back an error saying
-			//       this character is not part of this board.
 			next();
 		}
 	});
@@ -129,6 +127,7 @@ exports.install = function( app ) {
 			 getDb,
 			 authenticate,
 			 fetchOpponent,
+			 engine.verifyNewGame,
 			 impl.startNewGame);
 	app.post('/api/games/:id/character',
 			 getDb,

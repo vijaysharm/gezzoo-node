@@ -5,7 +5,7 @@ var toObjectId = util.toObjectId;
 
 exports.extractOpponent = function(user, game) {
 	return _.find(game.players, function(player) {
-		return ! user._id.equals(player);
+		return ! user._id.equals(player.id);
 	});
 };
 
@@ -44,20 +44,17 @@ exports.Game = function( id ) {
 				pid = p;
 			}
 
-			that.players.push( pid );
-			that.actions.push({ player: pid, list: [] });
-			
-			that.player_board.push({ 
-				player: pid, 
+			var player = {
+				id: pid,
+				actions: [],
 				board: p.board || []
-			});
-
+			};
 			if ( p.character ) {
-				that.selected_characters.push({ 
-					player: pid,
+				_.extend( player, {
 					character: objId( p.character )
 				});
 			}
+			that.players.push( player );
 
 			if ( ! that.turn )
 				this.turn( pid );
@@ -79,9 +76,9 @@ exports.Game = function( id ) {
 				turn: that.turn,
 				ended: that.ended,
 				board: that.board,
-				actions: that.actions,
-				player_board: that.player_board,
-				selected_characters: that.selected_characters
+				// actions: that.actions,
+				// player_board: that.player_board,
+				// selected_characters: that.selected_characters
 			};
 		}
 	};
