@@ -46,7 +46,7 @@ exports.Game = function( id ) {
 
 			var player = {
 				id: pid,
-				actions: [],
+				actions: p.actions || [],
 				board: p.board || []
 			};
 			if ( p.character ) {

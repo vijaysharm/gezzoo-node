@@ -140,6 +140,10 @@ exports.DbBuilder = function() {
 			that.add(g,'games');
 			return this;
 		},
+		addActions: function( a ) {
+			that.add(a,'actions');
+			return this;
+		},
 		build: function(callback) {
 			connection.getInstance(function(db) {
 				initializeActions( that.actions, db, function() {

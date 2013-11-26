@@ -165,54 +165,6 @@ function checkReply( req, res, callback ) {
 	callback();
 };
 
-exports.verifyAction = function( req, res, next ) {
-	var user = req.user;
-	var game = req.game;
-	var action = req.action;
-	var value = req.value;
-	var result = null;
-	var board = req.board;
-	var player_board = req.player_board;
-	var character = req.character;
-
-	if ( action === 'question' || action === 'reply' || action === 'guess' ) {
-
-	} else {
-		result = 'Invalid action [' + action + ']';
-	}
-
-	if ( ! user ) {
-		result = 'Invalid user object';
-	}
-
-	if ( player_board && action === 'guess' ) {
-		result = "Can't update board and guess your character";
-	}
-
-	if ( player_board || board ) {
-		if ( player_board.length !== board.characters.length ) {
-			result = 'Invalid player board length';
-		}
-	} else {
-		result = 'Invalid player board';
-	}
-
-	if ( game ) {
-		var turn = user._id.equals(game.turn);
-		if ( turn === false ) {
-			result = 'Not your turn';
-		}
-	} else {
-		result = 'Invalid game object';
-	}
-
-	if ( result ) {
-		res.json(401, result);
-	} else {
-		next();	
-	}
-};
-
 exports.verifyNewGame = function( req, res, next ) {
 	checkUser( req, res, function() {
 		next();
@@ -243,6 +195,22 @@ exports.verifyAskQuestion = function( req, res, next ) {
 							checkPlayerBoard( req, res, function() {
 								next();
 							});
+						});
+					});
+				});
+			});
+		});
+	});
+};
+
+exports.verifyPostReply = function( req, res, next ) {
+	checkUser( req, res, function() {
+		checkGame( req, res, function() {
+			checkTurn( req, res, function() {
+				checkIsCharacterSet( req, res, function() {
+					checkIsOpponentCharacterSet( req, res, function() {
+						checkReply( req, res, function() {
+							next();
 						});
 					});
 				});

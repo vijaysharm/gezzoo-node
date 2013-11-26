@@ -12,16 +12,21 @@ function fetchQuestion( req, res, next ) {
 	next();
 };
 
-// function fetchReply( req, res, next ) {
-// 	req.questionid = util.extract( req, 'question' );
-// 	req.reply = util.extract( req, 'reply' );
-// 	next();
-// };
-
-function fetchAction( req, res, next ) {
-	req.action = util.extract( req, 'action' );
-	req.value = util.extract( req, 'value' );
+function fetchReply( req, res, next ) {
+	req.questionid = util.extract( req, 'question' );
+	req.reply = util.extract( req, 'reply' );
 	next();
+};
+
+
+function fetchOpponentActions( req, res, next ) {
+	var user = req.user;
+	var db = req.db;
+	var opponent = gameutil.extractOpponent(user, req.game);
+	impl.getActions(db, opponent, function(actions) {
+		req.opponent_actions = actions;
+		next();
+	});
 };
 
 function fetchOpponent( req, res, next ) {
@@ -145,15 +150,16 @@ exports.install = function( app ) {
 			 fetchQuestion,
 			 engine.verifyAskQuestion,
 			 impl.askQuestion);
-	// app.post('/api/games/:id/reply',
-	// 		 getDb,
-	// 		 authenticate,
-	// 		 fetchGame,
-	// 		 fetchAction,
-	// 		 fetchBoard,
-	// 		 fetchCharacter,
-	// 		 engine.verifyAskQuestion,
-	// 		 impl.postReply);
+	app.post('/api/games/:id/reply',
+			 getDb,
+			 authenticate,
+			 fetchGame,
+			 fetchBoard,
+			 fetchOpponent,
+			 fetchOpponentActions,
+			 fetchReply,
+			 engine.verifyPostReply,
+			 impl.postReply);
 	app.post('/api/games/:id/guess',
 			 getDb,
 			 authenticate,
@@ -163,11 +169,4 @@ exports.install = function( app ) {
 			 fetchBoard,
 			 engine.verifyGuess,
 			 impl.guess);
-	// app.post('/api/games/:id/board',
-	// 		 getDb,
-	// 		 authenticate,
-	// 		 fetchGame,
-	// 		 fetchBoard,
-	// 		 engine.verifyUpdateBoard,
-	// 		 impl.updateBoard);	
 };

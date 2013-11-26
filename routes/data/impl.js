@@ -7,6 +7,10 @@ var gameutil = require('../game.util');
 var Game = gameutil.Game;
 var _ = require('underscore');
 
+function objId( p ) {
+	return isString( p ) ? toObjectId( p ) : p;
+};
+
 function findGamePropertyByUser( list, playerid ) {
 	return _.find(list, function(item) {
 		return playerid.equals(item.player);
@@ -27,7 +31,7 @@ function transform(list,value) {
  */
 function findOneById( db, id, collection, callback ) {
 	if ( id ) {
-		var obj = isString(id) ? toObjectId(id) : id;
+		var obj = objId( id );
 		var query = {_id:obj};
 		findOne( db, query, collection, callback );
 	} else {
@@ -48,9 +52,7 @@ exports.getUser = function( db, userid, callback ) {
 };
 
 exports.getGame = function( db, gameid, user, callback ) {
-	if (isString(gameid))
-		gameid = util.toObjectId(gameid);
-
+	gameid = objId(gameid);
 	var query = {
 		'_id':gameid,
 		'players.id': {$in:[user._id]}
@@ -68,20 +70,30 @@ exports.getBoard = function( db, boardid, callback ) {
 };
 
 exports.getBoardByCharacter = function( db, boardid, characterid, callback ) {
-	if (isString( characterid )) {
-		characterid = util.toObjectId(characterid);
-	}
-	
-	if (isString( boardid )) {
-		boardid = util.toObjectId(boardid);
-	}
-
+	characterid = objId(characterid);
+	boardid = objId(boardid);
 	var query = {
 		_id: boardid,
 		characters: {$all:[characterid]}
 	};
 
 	findOne(db, query, 'boards', callback);
+};
+
+/**
+ * @param user assumes this is the user
+ * 		  object stored in the game object
+ */
+exports.getActions = function( db, user, callback ) {
+	var actionsdb = db.actions();
+	var query = {
+		_id: {$in:user.actions},
+		by: user.id
+	};
+	actionsdb.find(query).toArray(function(err, actions) {
+		if (err) throw err;
+ 		callback(actions);
+	});
 };
 
 exports.getGames = function( req, res ) {
@@ -255,69 +267,6 @@ function pushAction( db, query, update, callback ) {
 		callback(game);
 	});
 }
-
-/**
- * TODO: If the action is a guess, we should set the game to ended
- *       and we should return that the user guessed right in the 
- *       response
- *
- * combinations:
- *		{ action: question, value: hi.. }
- * 		{ action: reply, value: hi.. }
- * 		{ action: guess, value: ?, character: objectid }
- */
-exports.postAction = function( req, res ) {
-	var user = req.user;
-	var game = req.game;
-	var action = req.action;
-	var value = req.value;
-	var player_board = req.player_board;
-	var character = req.character;
-	var db = req.db;
-
-	var opponent = gameutil.extractOpponent(user, game);
-	var nextturn = gameutil.extractOpponent(user, game);
-	var playerid = action === 'reply' ? opponent : user._id;
-	var result = findGamePropertyByUser(game.selected_characters, opponent);
-	var userguess = false;
-
-	if ( action === 'guess' && result && character ) {
-		userguess = result.character.equals(character._id);
-		/** the character should be */
-		value = userguess;
-	}
-
-	var query = {
-		_id: game._id,
-		'actions.player': playerid
-	};
-
-	var actionitem = {
-		action:action,
-		value:value,
-		by: by
-	};
-	
-	var update = {
-		$push: { 'actions.$.list': actionitem },
-		$set: { turn: nextturn }
-	};
-
-	if ( player_board ) {
-		_.extend( query, {'player_board.player': playerid} );
-		_.extend( update, {$set: { 'player_board.$.board': player_board }} );
-	}
-
-	if ( action === 'guess' ) {
-		_.extend( update, {$set:{ ended: userguess }});
-	}
-
-	pushAction( db, query, update, function(result) {
-		// TODO: I need to return the board if it was passed in
-		_.extend(actionitem, {gameid: game._id});
-		res.json(actionitem);
-	});
-};
 
 /**
  * TODO: We're assuming that the player_board is in the 'right
