@@ -1,7 +1,7 @@
 var assert = require('assert');
 var request = require('supertest');
 var should = require('should'); 
-var util = require('./util.test');
+var util = require('./testutil');
 var DbBuilder = require('../routes/dbutil').DbBuilder;
 
 describe('Login', function() {

@@ -36,3 +36,10 @@ exports.log = function( data ) {
 exports.isString = function( s ) {
 	return typeof(s) === 'string';
 };
+
+exports.isBlank = function(str) {
+	if ( str === null || str === undefined )
+		return true;
+
+    return !/\S/.test(str);
+}

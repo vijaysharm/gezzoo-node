@@ -1,5 +1,6 @@
 var _ = require('underscore');
 var util = require('../util');
+var isBlank = util.isBlank;
 var toObjectId = util.toObjectId;
 
 /**
@@ -153,7 +154,7 @@ function checkTurn( req, res, callback ) {
 function checkQuestion( req, res, callback ) {
 	var question = req.question;
 
-	if ( question ) {
+	if ( question && !isBlank(question) ) {
 		callback();
 	} else {
 		res.json(401, 'No question provided');

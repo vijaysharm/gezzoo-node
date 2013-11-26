@@ -18,6 +18,9 @@ var wrapdb = function( db ) {
 		characters: function() {
 			return db.collection('characters');
 		},
+		actions: function() {
+			return db.collection('actions');
+		},
 		close: function() {
 			db.close();
 		}

@@ -5,7 +5,7 @@ var util = require('../routes/util');
 var toObjectId = util.toObjectId;
 var Game = require('../routes/game.util').Game;
 var DbBuilder = require('../routes/dbutil').DbBuilder;
-var testutil = require('./util.test');
+var testutil = require('./testutil');
 
 describe('Guessing', function() {
 	var url = {

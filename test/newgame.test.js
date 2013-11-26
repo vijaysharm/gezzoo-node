@@ -3,7 +3,7 @@ var request = require('supertest');
 var should = require('should'); 
 var util = require('../routes/util');
 var DbBuilder = require('../routes/dbutil').DbBuilder;
-var testutil = require('./util.test');
+var testutil = require('./testutil');
 
 /**
  * TODO: Need to test when creating a game with an opponent

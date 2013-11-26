@@ -333,36 +333,40 @@ exports.guess = function( req, res ) {
 	var opponent = gameutil.extractOpponent(user, game);
 	var userguess = opponent.character.equals(character._id);
 
-	var query = {
-		_id: game._id,
-		'players.id': user._id,
-	};
-
 	// Here, im storing who the user guessed. 
 	// The client can decipher whether to show if its right or not
 	// We will however, save that the game is over if the user guessed correctly.
 	// And we will return whether the guess was right or wrong
-	var actionitem = {
+	var guessitem = {
+		gameid: game._id,
 		action: 'guess',
 		value: character._id,
 		by: user._id
 	};
-	var update = {
-		$push: { 'players.$.actions': actionitem },
-		$set: { turn: opponent },
-		$set: { ended: userguess },
-	};
 
-	if ( req.player_board ) {
-		_.extend( update, {
-			$set: { 'players.$.board': player_board }
-		});
-	}
+	db.actions().insert(guessitem, function(err, guessitem) {
+		var query = {
+			_id: game._id,
+			'players.id': user._id,
+		};
 
-	pushAction( db, query, update, function(result) {
-		res.json({
-			gameid: game._id,
-			guess: userguess
+		var update = {
+			$push: { 'players.$.actions': guessitem._id },
+			$set: { turn: opponent },
+			$set: { ended: userguess },
+		};
+
+		if ( req.player_board ) {
+			_.extend( update, {
+				$set: { 'players.$.board': player_board }
+			});
+		}
+
+		pushAction( db, query, update, function(result) {
+			res.json({
+				gameid: game._id,
+				guess: userguess
+			});
 		});
 	});
 };
@@ -375,29 +379,34 @@ exports.askQuestion = function( req, res ) {
 	var db = req.db;
 	var nextturn = gameutil.extractOpponent(user, game);
 
-	var query = {
-		_id: game._id,
-		'players.id': user._id,
-	};
-	var actionitem = {
+	var questionitem = {
+		gameid: game._id,
 		action: 'question',
 		value: question,
 		by: user._id
 	};
-	var update = {
-		$push: { 'players.$.actions': actionitem },
-		$set: { turn: nextturn.id }
-	};
 
-	if ( req.player_board ) {
-		_.extend( update, {
-			$set: { 'players.$.board': player_board }
-		});
-	}
+	db.actions().insert(questionitem, function(err, questionitem) {
+		var query = {
+			_id: game._id,
+			'players.id': user._id,
+		};
+		
+		var update = {
+			$push: { 'players.$.actions': questionitem._id },
+			$set: { turn: nextturn.id }
+		};
 
-	pushAction( db, query, update, function(result) {
-		res.json({
-			gameid: game._id
+		if ( req.player_board ) {
+			_.extend( update, {
+				$set: { 'players.$.board': player_board }
+			});
+		}
+
+		pushAction( db, query, update, function(result) {
+			res.json({
+				gameid: game._id
+			});
 		});
 	});
 };

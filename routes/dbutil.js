@@ -84,6 +84,19 @@ var initializeCharacters = function( characters, db, callback ) {
 	}
 };
 
+var initializeActions = function( actions, db, callback ) {
+	var actonsdb = db.actions();
+	actonsdb.drop();
+	if ( actions && actions.length > 0 ) {
+		actonsdb.insert(actions, function(err, result) {
+			if ( err ) throw err;
+			callback();
+		});
+	} else {
+		callback();
+	}
+};
+
 function isArray( a ) {
 	return (Object.prototype.toString.call( a ) === '[object Array]');
 };
@@ -94,6 +107,8 @@ exports.DbBuilder = function() {
 	this.characters = [];
 	this.games = [];
 	this.users = [];
+	this.actions = [];
+	
 	var that = this;
 
 	this.add = function(a, col) {
@@ -127,13 +142,15 @@ exports.DbBuilder = function() {
 		},
 		build: function(callback) {
 			connection.getInstance(function(db) {
-				insertUsers( that.users, db, function() {
-					initializeCounter( that.users, db, function() {
-						initializeCharacters( that.characters, db, function() {
-							initializeBoards( that.category, that.boards, db, function() {
-								initializeGames( that.games, db, function() {
-									db.close();
-									callback();
+				initializeActions( that.actions, db, function() {
+					insertUsers( that.users, db, function() {
+						initializeCounter( that.users, db, function() {
+							initializeCharacters( that.characters, db, function() {
+								initializeBoards( that.category, that.boards, db, function() {
+									initializeGames( that.games, db, function() {
+										db.close();
+										callback();
+									});
 								});
 							});
 						});
