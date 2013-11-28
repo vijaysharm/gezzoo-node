@@ -201,6 +201,17 @@ function checkReply( req, res, callback ) {
 	}
 };
 
+exports.verifyGetGames = function( req, res, next ) {
+	checkUser( req, res, function() {
+		next();
+	});
+};
+
+/**
+ * TODO: Should we to determine what the 'next expected action'
+ * 		 will be? i.e. opponent needs to select a character, or 
+ * 		 opponent needs to reply, or user needs to reply, etc..
+ */
 exports.verifyGameById = function( req, res, next ) {
 	checkUser( req, res, function() {
 		next();

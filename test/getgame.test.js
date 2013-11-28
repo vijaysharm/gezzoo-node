@@ -144,11 +144,35 @@ describe('Get Games', function() {
 			});
 		});
 
-		it('', function(done) {
+		it('should return a full game object', function(done) {
 			testutil.get(getUrl(gameid), token1, function(res) {
-				console.log(res.body);
+				res.body.should.have.property('_id', gameid);
+				res.body.should.have.property('me');
+				res.body.should.have.property('opponent');
+				res.body.should.have.property('board');
+				res.body.should.have.property('turn');
+				res.body.should.have.property('ended');
+
+				res.body.me.should.have.property('username');
+				res.body.me.should.have.property('_id');
+				res.body.me.should.have.property('board');
+				res.body.me.should.have.property('character');
+				res.body.me.should.have.property('actions');
+
+				res.body.opponent.should.have.property('username');
+				res.body.opponent.should.have.property('_id');
+				res.body.opponent.should.not.have.property('board');
+				res.body.opponent.should.not.have.property('character');
+				res.body.opponent.should.have.property('actions');
 				done();
 			});
 		});
+
+		it('should return a list of games', function(done) {
+			testutil.get(getUrl(''), token2, function(res) {
+				console.log(res.body);
+				done();
+			});
+		})
 	});
 });

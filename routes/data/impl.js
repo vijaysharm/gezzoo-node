@@ -100,32 +100,72 @@ exports.getActions = function( db, user, callback ) {
 	});
 };
 
+/**
+ * TODO: Currently, this returns all the games by this user.
+ * 		 It should constrain itself to ongoing games, its just
+ * 		 that we want the user to know when the opponent guessed
+ * 		 right (at which point the game is over).
+ *
+ * TODO: Currently, we return back a partial game object (no
+ * 		 board information, no action information). Should we
+ * 		 improve this to return more?
+ */
 exports.getGames = function( req, res ) {
-	// var user = req.user;
-	// var db = req.db;
+	var user = req.user;
+	var db = req.db;
 
-	// var gamesdb = db.games();
-	// var query = {
-	// 	'players.id': {$in:[user._id]},
-	// 	'ended': false
-	// };
+	var gamesdb = db.games();
+	var query = {
+		'players.id': {$in:[user._id]},
+		// 'ended': false
+	};
 
-	// var options = {
-	// 	players: 1,
-	// 	turn: 1,
-	// 	_id: 1
-	// };
-
-	// gamesdb.find(query, options).toArray(function(err, games) {
+	var options = {
+		'players.id': 1,
+		turn: 1,
+		_id: 1
+	};
+	
+	// I think at this point, i need to do a MAP REDUCE
+	// so i can collapse the opponents information in.
+	gamesdb.find(query, options).toArray(function(err, games) {
 		res.json({error: 'getGames not implemented'});
-	// });
+	});
 };
 
+/**
+ * TODO: Get fancy and modify any of the guess 
+ * 		 actions and add whether the guess was 
+ *  	 right or wrong
+ *
+ * TODO: Do we want to send back the state that 
+ * 		 the UI show? Like 'needs reply', or 
+ * 		 'needs character'
+ */
 exports.getGameById = function( req, res ) {
 	var game = req.game;
 	var user = req.user;
 	var db = req.db;
-	res.json(game);
+	var gameopponent = gameutil.extractOpponent(user, game);
+	var gameuser = gameutil.extractUser(user, game);
+
+	delete req.board._id;
+
+	var me = _.extend(user,_.pick(gameuser, 'board', 'character'));
+	me = _.extend(me, {actions: req.user_actions});
+
+	var opponent = _.extend(req.opponent, {actions: req.opponent_actions});
+
+	var result = {
+		_id : game._id,
+		me: me,
+		opponent: opponent,
+		board: req.board,
+		ended: game.ended,
+		turn: game.turn
+	};
+
+	res.json(result);
 };
 
 /**

@@ -78,23 +78,19 @@ function fetchGame( req, res, next ) {
  * Assumes getGame has already been called and is
  * set in the req.game field.
  * 
- * TODO: What I don't particularly like is the fact that
- * 		 I'm building the what a character in the player 
- * 		 board looks like. This could be improved
+ * Also extract the player's board from the request
  */
 function fetchBoard( req, res, next ) {
 	var game = req.game;
 	var db = req.db;
 	var player_board = util.extract(req, 'player_board');
-	if ( player_board ) {
-		req.player_board = player_board;
-		impl.getBoard(db, game.board, function(board) {
-			req.board = board;
-			next();
-		});
-	} else {
+	impl.getBoard(db, game.board, function(board) {
+		req.board = board;
+		if ( player_board ) {
+			req.player_board = player_board;
+		}
 		next();
-	}
+	});
 };
 
 /**
@@ -147,6 +143,7 @@ exports.install = function( app ) {
 			fetchOpponent,
 			fetchActions,
 			fetchOpponentActions,
+			engine.verifyGameById,
 			impl.getGameById);
 	app.post('/api/games',
 			 getDb,
