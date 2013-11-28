@@ -23,7 +23,7 @@ exports.toObjectId = function( id ) {
 };
 
 exports.isObjectId = function( id ) {
-  return !(id != null && 'number' != typeof id && (id.length != 12 && id.length != 24))
+  return !(id != null && 'number' != typeof id && (id.length != 12 && id.length != 24));
 };
 
 exports.log = function( data ) {

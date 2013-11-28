@@ -35,7 +35,8 @@ exports.getInstance = function( callback ) {
 		});
 	} else {
 		// mongodb://localhost/gezzoo
-		var db = new Db('gezzoo', new Server('127.0.0.1', 27017, {}), {safe: false, strict: false});
+		var options = {safe: false, strict: true, fsync:true, journal:true};
+		var db = new Db('gezzoo', new Server('127.0.0.1', 27017, {}), options);
 		db.open(function(err, db) {
 			if( err ) throw err;
 			callback(wrapdb( db ));

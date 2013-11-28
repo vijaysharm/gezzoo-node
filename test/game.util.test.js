@@ -6,19 +6,19 @@ var should = require('should');
 describe('Game Util', function() {
 	var gameid = toObjectId('5286e01d9beb41000000001c');
 
-	it('should create a single object array for db', function() {
+	it('should create a single object db', function() {
 		var game = new Game(gameid).toDbObject();
 		game.should.have.property('_id', gameid);
 		game.should.have.property('players');
 		game.players.should.be.empty;
 		game.should.have.property('ended', false);
 		game.should.have.property('board', null);
-		game.should.have.property('actions');
-		game.actions.should.be.empty;
-		game.should.have.property('player_board');
-		game.player_board.should.be.empty;
-		game.should.have.property('selected_characters');
-		game.selected_characters.should.be.empty;
+		// game.should.have.property('actions');
+		// game.actions.should.be.empty;
+		// game.should.have.property('player_board');
+		// game.player_board.should.be.empty;
+		// game.should.have.property('selected_characters');
+		// game.selected_characters.should.be.empty;
 	});
 
 	it('should set the ended property', function() {
@@ -54,10 +54,11 @@ describe('Game Util', function() {
 
 		game.should.have.property('players');
 		game.players.should.have.length(1);
-		game.should.have.property('actions');
-		game.actions.should.have.length(1);
-		game.should.have.property('selected_characters');
-		game.selected_characters.should.be.empty;
+		game.players[0].should.have.property('actions');
+		game.players[0].actions.should.have.length(0);
+		game.players[0].should.have.property('board');
+		game.players[0].board.should.have.length(0);
+		game.players[0].should.not.have.property('character');
 	});
 
 	it('should add a player by object literal', function() {
@@ -66,12 +67,13 @@ describe('Game Util', function() {
 				id: toObjectId('5286e01d9beb41000000001a')
 			})
 			.toDbObject();
+
 		game.should.have.property('players');
 		game.players.should.have.length(1);
-		game.should.have.property('actions');
-		game.actions.should.have.length(1);
-		game.should.have.property('selected_characters');
-		game.selected_characters.should.be.empty;
+		game.players[0].should.have.property('actions');
+		game.players[0].actions.should.have.length(0);
+		game.players[0].should.have.property('board');
+		game.players[0].board.should.have.length(0);
 	});
 
 	it('should add all player properties by object literal', function() {
@@ -84,10 +86,10 @@ describe('Game Util', function() {
 
 		game.should.have.property('players');
 		game.players.should.have.length(1);
-		game.should.have.property('actions');
-		game.actions.should.have.length(1);
-		game.should.have.property('selected_characters');
-		game.selected_characters.should.have.length(1);
+		game.players[0].should.have.property('actions');
+		game.players[0].actions.should.have.length(0);
+		game.players[0].should.have.property('board');
+		game.players[0].board.should.have.length(0);
 	});
 
 	it('should build a full object for db storage', function() {
@@ -101,11 +103,13 @@ describe('Game Util', function() {
 
 		var user1 = {
 			id: toObjectId('5286e01d9beb41000000001a'),
-			board: board
+			board: board,
+			character: board[0]._id
 		};
 		var user2 = {
 			id: toObjectId('5286e01d9beb41000000001b'),
-			board: board
+			board: board,
+			actions:[toObjectId('5286e01d8b587b0000000005')]
 		}
 
 		var game = new Game(gameid)
@@ -119,13 +123,17 @@ describe('Game Util', function() {
 		game.should.have.property('players');
 		game.players.should.have.length(2);
 		game.should.have.property('ended', false);
-		game.should.have.property('board', boardid);
-		game.should.have.property('turn', user1.id);
-		game.should.have.property('actions');
-		game.actions.should.have.length(2);
-		game.should.have.property('player_board');
-		game.player_board.should.have.length(2);
-		game.should.have.property('selected_characters');
-		game.selected_characters.should.be.empty;
+		game.should.have.property('turn', user1._id);
+
+		game.players[0].should.have.property('id');
+		game.players[0].should.have.property('actions');
+		game.players[0].should.have.property('board');
+		game.players[0].board.should.have.length(4);
+		game.players[0].should.have.property('character', board[0]._id);
+
+		game.players[1].should.have.property('id');
+		game.players[1].should.have.property('actions');
+		game.players[1].should.have.property('board');
+		game.players[1].board.should.have.length(4);
 	});
 });

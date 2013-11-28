@@ -57,44 +57,6 @@ This is a two player game, where each player takes turn trying to guess the oppo
 /theirturn
 
 # GAME SCHEMA
-{
-  "players":[
-    "52728ca9954deb0b31000004",
-    "52728fbf63a64c904c657ed5"
-  ],
-  "board":"52796403b6ef6a6cc3000019",
-  "selected_characters":[],
-  "turn":"52728ca9954deb0b31000004",
-  "_id":"52796405b6ef6a6cc300001b",
-  "actions":[
-    {
-      "player":#playerid, 
-      "list":[]
-    },
-    {
-      "player":..., // this action list is owned by player Y
-      "list":[
-        {
-          "action": "question",
-          "value": "Hi...",
-          "by": #playerid
-        },
-        {
-          "action": "reply",
-          "value": "...Bye!",
-          "by": #playerid
-        },
-        {
-          "action": "guess",
-          "value": "#characterid",
-          "by": #playerid
-        },
-      ]
-    }
-  ]
-}
-
-## I want to change the schema to the following
   {
     "players":[
       {

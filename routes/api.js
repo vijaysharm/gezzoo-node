@@ -13,9 +13,15 @@ function fetchQuestion( req, res, next ) {
 };
 
 function fetchReply( req, res, next ) {
-	req.questionid = util.extract( req, 'question' );
-	req.reply = util.extract( req, 'reply' );
-	next();
+	var db = req.db;
+	var question = util.extract( req, 'question' );
+	impl.getActionById(db, question, function(question) {
+		req.reply = util.extract( req, 'reply' );
+		if ( question ) {
+			req.questionid = question._id;
+		}
+		next();
+	});
 };
 
 
@@ -25,6 +31,16 @@ function fetchOpponentActions( req, res, next ) {
 	var opponent = gameutil.extractOpponent(user, req.game);
 	impl.getActions(db, opponent, function(actions) {
 		req.opponent_actions = actions;
+		next();
+	});
+};
+
+function fetchActions( req, res, next ) {
+	var user = req.user;
+	var db = req.db;
+	var gameuser = gameutil.extractUser(user, req.game);
+	impl.getActions(db, gameuser, function(actions) {
+		req.user_actions = actions;
 		next();
 	});
 };
@@ -127,12 +143,16 @@ exports.install = function( app ) {
 			getDb,
 			authenticate,
 			fetchGame,
+			fetchBoard,
+			fetchOpponent,
+			fetchActions,
+			fetchOpponentActions,
 			impl.getGameById);
 	app.post('/api/games',
 			 getDb,
 			 authenticate,
 			 fetchOpponent,
-			 engine.verifyNewGame,
+			 engine.verifyCreateNewGame,
 			 impl.startNewGame);
 	app.post('/api/games/:id/character',
 			 getDb,

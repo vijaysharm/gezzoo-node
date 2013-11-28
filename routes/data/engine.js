@@ -53,6 +53,26 @@ function validatePlayerBoard( board, player_board ) {
 	}
 };
 
+function validateQuestionID( questionid, opponent_actions, res, callback ) {
+	var action = _.find( opponent_actions, function( action ) {
+		return questionid.equals( action._id );
+	});
+
+	if ( action ) {
+		if ( action.action === 'question' ) {
+			if ( action.reply ) {
+				res.json(401,'Cannot post reply to question which already has a reply');
+			} else {
+				callback();
+			}
+		} else {
+			res.json(401, 'Replies can only be sent to question types');
+		}
+	} else {
+		res.json(401, 'Invalid question ID provided: ' + questionid);
+	}
+};
+
 function checkPlayerBoard( req, res, callback ) {
 	var player_board = req.player_board;
 	var board = req.board;
@@ -154,18 +174,40 @@ function checkTurn( req, res, callback ) {
 function checkQuestion( req, res, callback ) {
 	var question = req.question;
 
-	if ( question && !isBlank(question) ) {
-		callback();
-	} else {
+	if ( isBlank( question ) ) {
 		res.json(401, 'No question provided');
+	} else {
+		callback();
 	}
 };
 
 function checkReply( req, res, callback ) {
-	callback();
+	var reply = req.reply;
+	var questionid = req.questionid;
+	var opponent_actions = req.opponent_actions;
+
+	if ( isBlank( reply ) ) {
+		res.json(401, 'No reply provided');
+	} else {
+		if ( questionid ) {
+			if ( opponent_actions ) {
+				validateQuestionID( questionid, opponent_actions, res, callback );
+			} else {
+				res.json(401, 'List of opponent actions not available. Cannot save reply');
+			}
+		} else {
+			res.json(401, 'Invalid question ID provided');
+		}
+	}
 };
 
-exports.verifyNewGame = function( req, res, next ) {
+exports.verifyGameById = function( req, res, next ) {
+	checkUser( req, res, function() {
+		next();
+	});
+};
+
+exports.verifyCreateNewGame = function( req, res, next ) {
 	checkUser( req, res, function() {
 		next();
 	});

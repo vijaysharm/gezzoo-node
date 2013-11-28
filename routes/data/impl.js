@@ -80,6 +80,10 @@ exports.getBoardByCharacter = function( db, boardid, characterid, callback ) {
 	findOne(db, query, 'boards', callback);
 };
 
+exports.getActionById = function( db, actionid, callback ) {
+	findOneById(db, actionid, 'actions', callback );
+};
+
 /**
  * @param user assumes this is the user
  * 		  object stored in the game object
@@ -121,7 +125,7 @@ exports.getGameById = function( req, res ) {
 	var game = req.game;
 	var user = req.user;
 	var db = req.db;
-	res.json({error: 'getGameById not implemented'});
+	res.json(game);
 };
 
 /**
@@ -361,5 +365,21 @@ exports.askQuestion = function( req, res ) {
 };
 
 exports.postReply = function( req, res ) {
-	res.json({error: 'not implemented'});
+	var reply = req.reply;
+	var questionid = req.questionid;
+	var db = req.db;
+
+	var query = {
+		_id: questionid
+	};
+	var update = {
+		$set: {reply: { value: reply }}
+	};
+	var options = { upsert:false, 'new':true };
+	var sort = [['_id','1']];
+
+	db.actions().findAndModify(query, sort, update, options, function(err, action) {
+		if ( err ) throw err;
+		res.json(200, action);
+	});
 };

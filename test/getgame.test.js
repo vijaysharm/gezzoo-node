@@ -8,16 +8,13 @@ var DbBuilder = require('../routes/dbutil').DbBuilder;
 var testutil = require('./testutil');
 var _ = require('underscore');
 
-describe('Replying to questions', function() {
-	var url = {
-		domain: 'http://localhost:3000',
-		subdomain: '/api/games/5286e01d9beb41000000001c/reply'
-	};
-
+describe('Get Games', function() {
 	var token1 = '52728ca9954deb0b31000004';
 	var token2 = '52728fbf63a64c904c657ed5';
-	var invalidToken = '52728fbf63a64c904c657e55';
+	var token3 = '52728fbf63a64c904c657ea6';
+
 	var gameid = '5286e01d9beb41000000001c';
+	var gameid2 = '5286e01d9beb41000b00003a';
 	var boardid = '5286fd942200ab0000000002';
 	var board = [
 		{_id: toObjectId('5286e01d8b587b0000000001'), up:true},
@@ -26,18 +23,27 @@ describe('Replying to questions', function() {
 		{_id: toObjectId('5286e01d8b587b0000000004'), up:true}
 	];
 
+	function getUrl(id) {
+		return {
+			domain: 'http://localhost:3000',
+			subdomain: '/api/games/' + id
+		};
+	};
+
 	function getUsers() {
 		return [
 			{ username:'gezzoo_0', _id:toObjectId(token1) },
-			{ username:'gezzoo_1', _id:toObjectId(token2) }
+			{ username:'gezzoo_1', _id:toObjectId(token2) },
+			{ username:'gezzoo_2', _id:toObjectId(token3) }
 		];
 	};
 
 	function getBoards() {
+		var characterids = _.pluck(board, '_id');
 		return [{
 			_id : toObjectId(boardid),
 			name : "test", 
-			characters : [ board[0]._id, board[1]._id, board[2]._id, board[3]._id ]
+			characters : characterids
 		}];
 	};
 
@@ -82,7 +88,7 @@ describe('Replying to questions', function() {
 		return [a1, a2, a3];
 	};
 
-	describe('with actions set', function() {
+	describe('by IDs', function() {
 		var actionids = _.pluck(getActions(), '_id');
 		function getGame() {
 			var game = new Game(gameid)
@@ -100,7 +106,22 @@ describe('Replying to questions', function() {
 				})
 				.turn(token1)
 				.toDbObject();
-			return [game];
+			var otherGame = new Game(gameid2)
+				.board(boardid)
+				.addPlayer({
+					id: token3,
+					board: board,
+					character: board[0]._id
+				})
+				.addPlayer({
+					id: token2,
+					board: board,
+					character: board[1]._id,
+					actions: actionids
+				})
+				.turn(token1)
+				.toDbObject();
+			return [game, otherGame];
 		};
 
 		beforeEach(function(done) {
@@ -115,98 +136,17 @@ describe('Replying to questions', function() {
 				});
 		});
 
-		it('should fails if reply is not given', function(done) {
-			var data = { 
-				token: token1,
-				question: toObjectId('52728ca9954deb0b31000123')
-			};
-
-			testutil.post(url, data, function(res) {
+		it('should fail if the game requested is not for the given user token', function(done) {
+			testutil.get(getUrl(gameid2), token1, function(res) {
 				res.status.should.equal(401);
-				res.body.should.equal('No reply provided');
+				res.body.should.equal('No game with ID 5286e01d9beb41000b00003a');
 				done();
 			});
 		});
 
-		it('should fails if reply is empty string', function(done) {
-			var data = { 
-				token: token1,
-				question: toObjectId('52728ca9954deb0b31000123'),
-				reply: ' '
-			};
-
-			testutil.post(url, data, function(res) {
-				res.status.should.equal(401);
-				res.body.should.equal('No reply provided');
-				done();
-			});
-		});
-
-		it('should fails if question id is not given', function(done) {
-			var data = { 
-				token: token1,
-				reply: 'hi'
-			};
-
-			testutil.post(url, data, function(res) {
-				res.status.should.equal(401);
-				res.body.should.equal('Invalid question ID provided');
-				done();
-			});
-		});
-
-		it('should fails if invalid question id is given', function(done) {
-			var data = { 
-				token: token1,
-				question: toObjectId('52728ca9954d1b0b31000123'),
-				reply: 'hi'
-			};
-
-			testutil.post(url, data, function(res) {
-				res.status.should.equal(401);
-				res.body.should.equal('Invalid question ID provided');
-				done();
-			});
-		});
-
-		it('should fails if question id for a guess action is given', function(done) {
-			var data = { 
-				token: token1,
-				question: toObjectId('52728ca9954deb0b31000125'),
-				reply: 'hi'
-			};
-
-			testutil.post(url, data, function(res) {
-				res.status.should.equal(401);
-				res.body.should.equal('Replies can only be sent to question types');
-				done();
-			});
-		});
-
-		it('should fails if question id already has a reply', function(done) {
-			var data = { 
-				token: token1,
-				question: toObjectId('52728ca9954deb0b31000123'),
-				reply: 'hi'
-			};
-
-			testutil.post(url, data, function(res) {
-				res.status.should.equal(401);
-				res.body.should.equal('Cannot post reply to question which already has a reply');
-				done();
-			});
-		});
-
-		it('should allow setting a reply', function(done) {
-			var data = { 
-				token: token1,
-				question: toObjectId('52728ca9954deb0b31000124'),
-				reply: 'hi'
-			};
-
-			testutil.post(url, data, function(res) {
-				console.log('to be completed');
-				res.status.should.equal(200);
+		it('', function(done) {
+			testutil.get(getUrl(gameid), token1, function(res) {
+				console.log(res.body);
 				done();
 			});
 		});

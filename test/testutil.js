@@ -16,3 +16,13 @@ exports.post = function( url, data, callback ) {
 			callback(res);
 		});
 };
+
+exports.get = function( url, token, callback ) {
+	request(url.domain)
+		.get(url.subdomain)
+		.set('token', token)
+		.end(function(err, res) {
+			if( err ) throw err;
+			callback( res );
+		});
+};

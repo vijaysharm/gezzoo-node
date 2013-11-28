@@ -9,6 +9,12 @@ exports.extractOpponent = function(user, game) {
 	});
 };
 
+exports.extractUser = function(user, game) {
+	return _.find(game.players, function(player) {
+		return user._id.equals(player.id);
+	});
+};
+
 function objId( p ) {
 	return isString( p ) ? toObjectId( p ) : p;
 };
@@ -75,10 +81,7 @@ exports.Game = function( id ) {
 				players: that.players,
 				turn: that.turn,
 				ended: that.ended,
-				board: that.board,
-				// actions: that.actions,
-				// player_board: that.player_board,
-				// selected_characters: that.selected_characters
+				board: that.board
 			};
 		}
 	};
