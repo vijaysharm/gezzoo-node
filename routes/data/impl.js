@@ -100,15 +100,42 @@ exports.getActions = function( db, user, callback ) {
 	});
 };
 
+function formatGamesResponse( user, games, boards, users, actions ) {
+	var gs = [];
+	_.each(games, function(game) {
+		// process game to be formatted properly
+		var board = _.find(boards, function(board) {
+			return board._id.equals(game.board);
+		});
+		var gameopponent = gameutil.extractOpponent(user, game);
+		var gameuser = gameutil.extractUser(user, game);
+		var me = _.extend(user,_.pick(gameuser, 'board', 'character'));
+		// me = _.extend(me, {actions: req.user_actions});
+		var opponent = _.find(users, function(user) {
+			return user._id.equals(gameopponent.id);
+		});
+
+		gs.push({
+			_id: game._id,
+			me: me,
+			opponent: opponent,
+			board: board,
+			turn: game.turn,
+			ended: game.ended
+		});
+	});
+
+	return gs;
+}
 /**
  * TODO: Currently, this returns all the games by this user.
  * 		 It should constrain itself to ongoing games, its just
  * 		 that we want the user to know when the opponent guessed
- * 		 right (at which point the game is over).
+ * 		 right (at which point the game is over). Maybe we need
+ * 		 a new state.
  *
- * TODO: Currently, we return back a partial game object (no
- * 		 board information, no action information). Should we
- * 		 improve this to return more?
+ * TODO: Currently, we do not return the action information per user
+ *		 should we improve that?
  */
 exports.getGames = function( req, res ) {
 	var user = req.user;
@@ -119,17 +146,27 @@ exports.getGames = function( req, res ) {
 		'players.id': {$in:[user._id]},
 		// 'ended': false
 	};
-
-	var options = {
-		'players.id': 1,
-		turn: 1,
-		_id: 1
-	};
 	
-	// I think at this point, i need to do a MAP REDUCE
-	// so i can collapse the opponents information in.
-	gamesdb.find(query, options).toArray(function(err, games) {
-		res.json({error: 'getGames not implemented'});
+	// TODO: Here begins the crazy data processing.
+	//		 I get the feeling the code below will not 
+	//		 scale.
+	gamesdb.find(query).toArray(function(err, games) {
+		if ( err ) throw err;
+		var pre = _.chain(games).pluck('players').flatten();
+		var users = pre.uniq(function(obj){ return obj.id.toString(); }).pluck('id').value();
+		var actions = pre.pluck('actions').flatten().value();
+		var boards = _.chain(games).pluck('board').uniq(function(obj){ return obj.toString(); }).value();
+
+		db.boards().find({ _id: {$in:boards}}).toArray(function(err, boards) {
+			if ( err ) throw err;
+			db.actions().find({ _id: {$in:actions}}).toArray(function(err, actions) {
+				if ( err ) throw err;
+				db.users().find({ _id: {$in:users}}).toArray(function(err, users) {
+					if ( err ) throw err;
+					res.json(formatGamesResponse(user, games, boards, users, actions))
+				});
+			})
+		});
 	});
 };
 
@@ -172,32 +209,51 @@ exports.getGameById = function( req, res ) {
  * TODO: get a list of all the ongoing games, and use them as
  * 		 as a filter for users to search for. i.e. do not include
  * 		 users that this user already has ongoing games with.
+ * 
+ * TODO: Improve this query so that the selected users
+ * 		 Are newer and the more active users. This way
+ * 		 this user has a better chance to have people
+ * 		 to play with
  */
 function createNewGame( db, user, res ) {
-	// 1. search for a user to play against
-	// 2. select the board from which they will play
-	// 3. start the game, and return enough info to the client
+	// 1) we find all the games that the current user is playing
+	var gamesdb = db.games();
+	var query = {'players.id':{$in:[ user._id ]}};
+	gamesdb.find(query).toArray(function( err, matches ) {
+		if ( err ) throw err;
 
-	// var gamesdb = db.games();
-	// var query = {players:{$all:[util.toObjectId( user.id )]}};
-	// log( query );
-	// gamesdb.find(query).toArray(function( err, matches ) {
-	// 	if ( err ) throw err;
+		// 2) If the user has ongoing games, get the list of all the
+		//	  players they are currently playing against, else just
+		// 	  include the user himself.
+		var users;
+		if ( matches && matches.length > 0 ) {
+			users = _.chain(games)
+						.pluck('players')
+						.flatten()
+						.uniq(function(obj){ return obj.id.toString(); })
+						.pluck('id')
+						.value();
+		} else {
+			users = [user._id];
+		}
 
-		// TODO: Improve this query so that the selected users
-		//       Are newer and the more active users. This way
-		//       this user has a better chance to have people
-		//       to play with
+		// 3) Find users that the current user does not have current
+		//	  games in progress with.
 		var usersdb = db.users();
 		var user_row_limit = 20;
-		var query = {_id:{$nin:[ user._id ]}};
+		var query = {_id:{$nin:users}};
 		usersdb.find(query).limit(user_row_limit).toArray(function( err, opponents ) {
-			// Choose a random opponent from the list of returned 
-			// users. This could be Improved.
-			var index = util.random(opponents.length-1);
-			createNewGameWithUser( db, user, opponents[index], res );
+			if ( err ) throw err;
+			if ( opponent.length > 0 ) {
+				// Choose a random opponent from the list of returned 
+				// users. This could be Improved.
+				var index = util.random(opponents.length-1);
+				createNewGameWithUser( db, user, opponents[index], res );				
+			} else {
+				res.json(401, {error: 'aww, there isnt anyone else you can play with :('});
+			}
 		});
-	// })
+	});
 };
 
 /**

@@ -134,6 +134,7 @@ exports.install = function( app ) {
 	app.get('/api/games',
 			getDb,
 			authenticate,
+			engine.verifyGetGames,
 			impl.getGames);
 	app.get('/api/games/:id',
 			getDb,

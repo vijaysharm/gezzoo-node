@@ -119,7 +119,7 @@ describe('Get Games', function() {
 					character: board[1]._id,
 					actions: actionids
 				})
-				.turn(token1)
+				.turn(token2)
 				.toDbObject();
 			return [game, otherGame];
 		};
