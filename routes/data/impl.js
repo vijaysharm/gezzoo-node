@@ -244,7 +244,7 @@ function createNewGame( db, user, res ) {
 		var query = {_id:{$nin:users}};
 		usersdb.find(query).limit(user_row_limit).toArray(function( err, opponents ) {
 			if ( err ) throw err;
-			if ( opponent.length > 0 ) {
+			if ( opponents.length > 0 ) {
 				// Choose a random opponent from the list of returned 
 				// users. This could be Improved.
 				var index = util.random(opponents.length-1);
