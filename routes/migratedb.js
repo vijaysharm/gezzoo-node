@@ -5,7 +5,7 @@ var DbBuilder = require('./dbutil').DbBuilder;
 
 var _ = require('underscore');
 
-var getUsers = function() {
+function getUsers() {
 	return [
 		{ username:'gezzoo_0', _id:util.toObjectId('52728ca9954deb0b31000004') },
 		{ username:'gezzoo_1', _id:util.toObjectId('52728fbf63a64c904c657ed5') },
@@ -13,7 +13,7 @@ var getUsers = function() {
 	];
 };
 
-var getCharcters = function() {
+function getCharcters() {
 	return [
 		{name:'Shah Rukh Khan', category:['bollywood'], img:'http://ia.media-imdb.com/images/M/MV5BMTQxMjg4Mzk1Nl5BMl5BanBnXkFtZTcwMzQyMTUxNw@@._V1_SY317_CR1,0,214,317_.jpg'},
 		{name:'Arjun Rampal', category:['bollywood'], img:'http://ia.media-imdb.com/images/M/MV5BMTg0NTAzOTU4Ml5BMl5BanBnXkFtZTcwMzg1MjUyOA@@._V1_SX214_CR0,0,214,317_.jpg'},

@@ -2,6 +2,7 @@ var _ = require('underscore');
 var util = require('../util');
 var isBlank = util.isBlank;
 var toObjectId = util.toObjectId;
+var gameutil = require('../game.util');
 
 /**
  * This class is meant as the business logic center of 
@@ -201,6 +202,34 @@ function checkReply( req, res, callback ) {
 	}
 };
 
+/**
+ * This is used to determine what state the game is in
+ * If the opponent needs to set a character, or if
+ * its time to reply, etc...
+ */
+function setGameState( req, res, callback ) {
+	var user = req.user;
+	var game = req.game;
+	var gameuser = gameutil.extractUser(user, game);
+	var gameopponent = gameutil.extractOpponent(user, game);
+	var turn = game.turn;
+	if (turn.equals( gameuser.id )) {
+		if ( gameuser.character ) {
+			req.state = 'user-reply';
+		} else {
+			req.state = 'user-set-character';
+		}
+	} else {
+		if ( gameopponent.character ) {
+			req.state = 'opponent-reply';
+		} else {
+			req.state = 'opponent-set-character';
+		}
+	}
+
+	callback();
+};
+
 exports.verifyGetGames = function( req, res, next ) {
 	checkUser( req, res, function() {
 		next();
@@ -214,7 +243,9 @@ exports.verifyGetGames = function( req, res, next ) {
  */
 exports.verifyGameById = function( req, res, next ) {
 	checkUser( req, res, function() {
-		next();
+		setGameState( req, res, function() {
+			next();
+		});
 	});
 };
 

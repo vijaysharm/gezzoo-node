@@ -182,8 +182,6 @@ exports.getGames = function( req, res ) {
 exports.getGameById = function( req, res ) {
 	var game = req.game;
 	var user = req.user;
-	var db = req.db;
-	var gameopponent = gameutil.extractOpponent(user, game);
 	var gameuser = gameutil.extractUser(user, game);
 
 	delete req.board._id;
@@ -191,7 +189,9 @@ exports.getGameById = function( req, res ) {
 	var me = _.extend(user,_.pick(gameuser, 'board', 'character'));
 	me = _.extend(me, {actions: req.user_actions});
 
-	var opponent = _.extend(req.opponent, {actions: req.opponent_actions});
+	var opponent = _.extend(req.opponent, {
+		actions: req.opponent_actions
+	});
 
 	var result = {
 		_id : game._id,
@@ -199,7 +199,8 @@ exports.getGameById = function( req, res ) {
 		opponent: opponent,
 		board: req.board,
 		ended: game.ended,
-		turn: game.turn
+		turn: game.turn,
+		state: req.state,
 	};
 
 	res.json(result);

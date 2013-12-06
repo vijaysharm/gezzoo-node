@@ -3,218 +3,42 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" href="/stylesheets/normalize.css">
+	<link rel="stylesheet" href="/stylesheets/style.css">
 	<title>Gezzo?</title>
-	<!-- <link rel="stylesheet" type="text/css" href="/stylesheets/reset.css"> -->
-	<link rel="stylesheet" type="text/css" href="/stylesheets/normalize.css">
-	<!-- <link rel="stylesheet" type="text/css" href="/stylesheets/bootstrap.css"> -->
-	<link rel="stylesheet" type="text/css" href="/stylesheets/style.css">
 </head>
 <body>
-	<!-- handlebar templates -->
-	<script type="text/x-handlebars">
-		<div id="main">
-			{{outlet}}
+
+	<script id="fullscreen-loading" type="text/x-handlebars-template">
+		<span>Loading...</span>
+	</script>
+
+	<script id="game-list" type="text/x-handlebars-template">
+		<div class="block new-game">
+			<div>+New Game</div>
 		</div>
+		{{#each game}}
+			<div class="block myturn">
+    			<img src="http://placehold.it/100x100"/>
+    			<div class="game-info">
+	        		<div class="username">{{opponent.username}}</div>
+	        		<div class="state">Turn?</div>
+	        		<div class='time'>12h</div>
+    			</div>
+			</div>			
+		{{/each}}
 	</script>
 
-	<script type="text/x-handlebars" data-template-name="login">
-		<form class="form-inline" {{action login on="submit"}}>
-			{{input value=username type="text" placeholder="Hi! Who are you?"}}
-			{{input class="btn" type="submit" value="Let's Play!"}}
-		</form>
+	<script id="character-select" type="text/x-handlebars-template">
+
 	</script>
 
-	<script type="text/x-handlebars" data-template-name="games">
-		<div class="container">
-			<h2>My Games</h2>
-			<div class="games">
-				<ul class="games-list">
-					<li>
-						<!-- User Sees that the opponent guessed -->
-						{{#link-to "myturn.answer" classNames="game-list-item"}}
-							Opponent guessed
-						{{/link-to}}
-					</li>
-					<li>
-						<!-- User needs to answer the opponents question -->
-						{{#link-to "myturn.answer" classNames="game-list-item"}}
-							Answer Opponent question
-						{{/link-to}}
-					</li>
-					<li>
-						<!-- User does not have a character assigned -->
-						{{#link-to "myturn.pick" classNames="game-list-item"}}
-							No character set
-						{{/link-to}}
-					</li>
-				</ul>
-				<div>
-					<!-- New game 
-					{{#link-to "myturn.pick" classNames="game-list-item"}}
-						New Game
-					{{/link-to}} -->
-					<a href="#" class="game-list-item" {{action newgame bubbles=false}}>New Game</a>
-				</div>
-			</div>
-		</div>
-	</script>
+	<div id='main'/>
 
-	<script type="text/x-handlebars" data-template-name="theirturn">
-		<h2>Their Turn</h2>
-	</script>
-
-	<script type="text/x-handlebars" data-template-name="myturn">
-		<div class="container">
-			<h2>My Turn</h2>
-			<p>Against User A</p>
-			{{outlet}}
-		</div>
-	</script>
-
-	<script type="text/x-handlebars" data-template-name="myturn/pick">
-		<ul class="image-list">
-			<li class="image-item">
-				{{#link-to "games"}}
-					<img src="/images/alba.jpg"/>
-				{{/link-to}}
-			</li>
-			<li class="image-item">
-				{{#link-to "games"}}
-					<img src="/images/alba.jpg"/>
-				{{/link-to}}
-			</li>
-			<li class="image-item">
-				{{#link-to "games"}}
-					<img src="/images/alba.jpg"/>
-				{{/link-to}}
-			</li>
-			<li class="image-item">
-				{{#link-to "games"}}
-					<img src="/images/alba.jpg"/>
-				{{/link-to}}
-			</li>
-			<li class="image-item">
-				{{#link-to "games"}}
-					<img src="/images/alba.jpg"/>
-				{{/link-to}}
-			</li>
-			<li class="image-item">
-				{{#link-to "games"}}
-					<img src="/images/alba.jpg"/>
-				{{/link-to}}
-			</li>
-			<li class="image-item">
-				{{#link-to "games"}}
-					<img src="/images/alba.jpg"/>
-				{{/link-to}}
-			</li>
-			<li class="image-item">
-				{{#link-to "games"}}
-					<img src="/images/alba.jpg"/>
-				{{/link-to}}
-			</li>
-			<li class="image-item">
-				{{#link-to "games"}}
-					<img src="/images/alba.jpg"/>
-				{{/link-to}}
-			</li>
-			<li class="image-item">
-				{{#link-to "games"}}
-					<img src="/images/alba.jpg"/>
-				{{/link-to}}
-			</li>
-			<li class="image-item">
-				{{#link-to "games"}}
-					<img src="/images/alba.jpg"/>
-				{{/link-to}}
-			</li>
-			<li class="image-item">
-				{{#link-to "games"}}
-					<img src="/images/alba.jpg"/>
-				{{/link-to}}
-			</li>
-			<li class="image-item">
-				{{#link-to "games"}}
-					<img src="/images/alba.jpg"/>
-				{{/link-to}}
-			</li>
-			<li class="image-item">
-				{{#link-to "games"}}
-					<img src="/images/alba.jpg"/>
-				{{/link-to}}
-			</li>
-			<li class="image-item">
-				{{#link-to "games"}}
-					<img src="/images/alba.jpg"/>
-				{{/link-to}}
-			</li>
-			<li class="image-item">
-				{{#link-to "games"}}
-					<img src="/images/alba.jpg"/>
-				{{/link-to}}
-			</li>
-		</ul>
-	</script>
-
-	<script type="text/x-handlebars" data-template-name="myturn/answer">
-		<p>Answer Opponent</p>
-		<div class="questions">
-			<ul class="question-list">
-				<li class="question-list-item">Question 1</li>
-				<li class="question-list-item">Response 1</li>
-				<li class="question-list-item">Question 2</li>
-				<li class="question-list-item">Response 2</li>
-				<li class="question-list-item">Question 3</li>
-			</ul>
-			<div class="question-list-item">
-				<input type="text" placeholder="?">
-				{{#link-to "ask.question" classNames="action-button"}}
-					Respond
-				{{/link-to}}
-			</div>
-		</div>
-	</script>
-
-	<script type="text/x-handlebars" data-template-name="ask">
-		<ul class="ask-navigation">
-			<li>
-			{{#link-to "ask.question" classNames="action-button"}}
-				Ask
-			{{/link-to}}
-			</li>
-			<li>
-			{{#link-to "ask.guess" classNames="action-button"}}
-				Board
-			{{/link-to}}
-			</li>
-		</ul>
-		
-		{{outlet}}
-	</script>
-
-	<script type="text/x-handlebars" data-template-name="ask/question">
-		<div class="questions">
-			<ul class="question-list">
-				<li class="question-list-item">Question 1</li>
-				<li class="question-list-item">Response 1</li>
-				<li class="question-list-item">Question 2</li>
-				<li class="question-list-item">Response 2</li>
-				<li class="question-list-item">Question 3</li>
-			</ul>
-			<div class="question-list-item">
-				<input type="text" placeholder="?">
-				{{#link-to "games" classNames="action-button"}}
-					Respond
-				{{/link-to}}
-			</div>
-		</div>		
-	</script>
-
-	<script type="text/x-handlebars" data-template-name="ask/guess">
-		<p>Guess</p>
-	</script>
-
-	<!-- import application -->
-	<script data-main="/javascripts/gezzoo", src="/javascripts/require.js"></script>
+	<script src="/javascripts/jquery.js"></script>
+	<script src="/javascripts/underscore.js"></script>
+	<script src="/javascripts/handlebars.js"></script>
+	<script src="/javascripts/kerangka.js"></script>
+	<script src="/javascripts/main.js"></script>
 </body>
 </html>

@@ -1,89 +1,42 @@
-html, body, div, h1, h2, h3, h4, h5, li, ul, p {
-	margin: 0;
-	padding: 0;
+/* Mobile First Smallest devices */
+body {
+    font-family: Helvetica
 }
 
-ul {
-	list-style: none;
+.block {
+    overflow: hidden;
+    height: 100px;
+    vertical-align: middle;
 }
 
-a {
-	text-decoration: none;
+.new-game {
+    background: #40ADF1;
+    color: white;
 }
 
-/* apply a natural box layout model to all elements */
-*, *:before, *:after {
-	-moz-box-sizing: border-box; 
-	-webkit-box-sizing: border-box; 
-	box-sizing: border-box;
+.myturn {
+    background: tomato;
 }
 
-h2 {
-	color: #F39C12;
+.myturn img {
+    float: left;    
 }
 
-a {
-	color: #F39C12;
+.game-info {
+    float: left;
+    padding: 8px;
 }
 
-#main {
-	background: #F1C40F;
-	width: 100%;
+.username {
+    font-size: 1.5em;
 }
 
-.container {
-	padding: 8px;
+.state {
+    font-size: 1.1em;
 }
 
-.games, .questions {
-	margin: 0 auto;
-}
-
-.game-list-item, .question-list-item {
-	display: block;
-	background: white;
-	height: 54px;
-	margin-bottom: 1px;
-}
-
-.image-list {
-	overflow: hidden;
-}
-
-.image-item {
-	float: left;
-	width: 50%;
-	overflow: hidden;
-	padding: 4px;
-}
-
-.image-item img {
-	float: left;
-	width: 100%;
-}
-
-.action-button {
-	color: white;
-	background: #F39C12;
-	padding: 16px;
-}
-
-.ask-navigation {
-	width: 100%;
-	overflow: hidden;
-	margin: 8px 0;
-}
-
-.ask-navigation li {
-	float: left;
-	width: 50%;
-	overflow: hidden;
-}
-
-.ask-navigation li a {
-	float: left;
-	width: 100%;
-	text-align: center;
+.time {
+    font-size: 1.1em;
 }
 
 /* Small devices */
