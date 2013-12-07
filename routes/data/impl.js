@@ -121,18 +121,23 @@ function formatGamesResponse( user, games, boards, users, actions ) {
 			opponent: opponent,
 			board: board,
 			turn: game.turn,
-			ended: game.ended
+			ended: game.ended,
+			modified: game.modified
 		});
 	});
 
 	return gs;
 }
+
 /**
  * TODO: Currently, this returns all the games by this user.
  * 		 It should constrain itself to ongoing games, its just
  * 		 that we want the user to know when the opponent guessed
  * 		 right (at which point the game is over). Maybe we need
  * 		 a new state.
+ *
+ * TODO: We shouldn't return all the games that a user has ongoing
+ *		 with the same opponent. Only the latest game.
  *
  * TODO: Currently, we do not return the action information per user
  *		 should we improve that?
@@ -201,6 +206,7 @@ exports.getGameById = function( req, res ) {
 		ended: game.ended,
 		turn: game.turn,
 		state: req.state,
+		modified: game.modified
 	};
 
 	res.json(result);
@@ -311,7 +317,8 @@ function createNewGameWithUser( db, user, opponent, res ) {
 					turn: insertedgame.turn,
 					_id: insertedgame._id,
 					board: board,
-					ended: insertedgame.ended
+					ended: insertedgame.ended,
+					modified: insertedgame.modified
 				});
 			});
 		});
@@ -349,7 +356,8 @@ exports.setCharacter = function( req, res ) {
 	};
 	var update = {
 		$set: { 'players.$.character': character._id },
-		$set: { turn: nextturn }
+		$set: { turn: nextturn },
+		$set: { modified: new Date() }
 	};
 	var options = { upsert:false, 'new':true };
 	var sort = [['_id','1']];
@@ -391,7 +399,8 @@ exports.guess = function( req, res ) {
 		gameid: game._id,
 		action: 'guess',
 		value: character._id,
-		by: user._id
+		by: user._id,
+		modified: new Date()
 	};
 
 	db.actions().insert(guessitem, function(err, guessitem) {
@@ -404,6 +413,7 @@ exports.guess = function( req, res ) {
 			$push: { 'players.$.actions': guessitem._id },
 			$set: { turn: opponent },
 			$set: { ended: userguess },
+			$set: { modified: new Date() }
 		};
 
 		if ( req.player_board ) {
@@ -433,7 +443,8 @@ exports.askQuestion = function( req, res ) {
 		gameid: game._id,
 		action: 'question',
 		value: question,
-		by: user._id
+		by: user._id,
+		modified: new Date()
 	};
 
 	db.actions().insert(questionitem, function(err, questionitem) {
@@ -444,7 +455,8 @@ exports.askQuestion = function( req, res ) {
 		
 		var update = {
 			$push: { 'players.$.actions': questionitem._id },
-			$set: { turn: nextturn.id }
+			$set: { turn: nextturn.id },
+			$set: { modified: new Date() }
 		};
 
 		if ( req.player_board ) {
@@ -461,6 +473,9 @@ exports.askQuestion = function( req, res ) {
 	});
 };
 
+/**
+ * TODO: The game's 'modified' property is not updated
+ */
 exports.postReply = function( req, res ) {
 	var reply = req.reply;
 	var questionid = req.questionid;
@@ -470,7 +485,8 @@ exports.postReply = function( req, res ) {
 		_id: questionid
 	};
 	var update = {
-		$set: {reply: { value: reply }}
+		$set: {reply: { value: reply, date: new Date() }},
+		$set: {modified: new Date()}
 	};
 	var options = { upsert:false, 'new':true };
 	var sort = [['_id','1']];

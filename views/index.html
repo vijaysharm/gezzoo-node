@@ -18,12 +18,12 @@
 			<div>+New Game</div>
 		</div>
 		{{#each game}}
-			<div class="block myturn">
+			<div class="block {{turn_class}}" data-game={{_id}}>
     			<img src="http://placehold.it/100x100"/>
     			<div class="game-info">
 	        		<div class="username">{{opponent.username}}</div>
-	        		<div class="state">Turn?</div>
-	        		<div class='time'>12h</div>
+	        		<div class="state">{{turn_print}}</div>
+	        		<div class='time'>{{game_date}}</div>
     			</div>
 			</div>			
 		{{/each}}

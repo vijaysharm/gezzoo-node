@@ -7,6 +7,8 @@ body {
     overflow: hidden;
     height: 100px;
     vertical-align: middle;
+    margin: 2px 0;
+    cursor: pointer;
 }
 
 .new-game {
@@ -14,11 +16,15 @@ body {
     color: white;
 }
 
-.myturn {
+.my-turn {
     background: tomato;
 }
 
-.myturn img {
+.their-turn {
+    background: purple;
+}
+
+.block img {
     float: left;    
 }
 

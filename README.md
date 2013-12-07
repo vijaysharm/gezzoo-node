@@ -36,25 +36,10 @@ This is a two player game, where each player takes turn trying to guess the oppo
 * Design the 'opponent guessed right' page
 * Design the 'opponent guessed wrong' page
 * Design the 'game over' page
-
-## User Stories
-* The user can start a new game
-* The user can see a list of on-going games
-
-## Reminders
-* What happens if a user attempts to cheat by changing the URL to skip a stage. We need to have a game engine on the server that checks whether or not we're transitioning to the right states from the client (i.e. don't allow a client to guess before they've answered their opponent. Don't let them guess twice, etc..)
-* Make sure the back button also sets the UI to its "new state" given that the user just performed an action.
-
-## URLS
-/login
-/games
-/myturn
-  /myturn/pick
-  /myturn/answer
-  /myturn/ask
-    /myturn/ask/question
-    /myturn/ask/guess
-/theirturn
+* Filter out multiple games for a single user. Say I have 3 games on going with a user, then make sure I only return the 'latest' game. Maybe if the user starts a new game with an opponent, we can set the last game as "deprecated" or delete it.
+* Have a way to clean up in-active users and games
+* Track when a user 'touches' a game, that is, update the last updated time.
+* When the opponent selects their character, do not change turns, let the opponent ask a question.
 
 # GAME SCHEMA
   {

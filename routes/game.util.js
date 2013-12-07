@@ -81,7 +81,8 @@ exports.Game = function( id ) {
 				players: that.players,
 				turn: that.turn,
 				ended: that.ended,
-				board: that.board
+				board: that.board,
+				modified: new Date()
 			};
 		}
 	};

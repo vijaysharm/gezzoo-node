@@ -64,6 +64,7 @@ function getActions() {
 		action: 'question',
 		value: 'Are you there?',
 		by: toObjectId(token2),
+		modified: new Date(),
 		reply: {
 			// date:
 			value: 'Yes, im here'
@@ -76,6 +77,7 @@ function getActions() {
 		action: 'question',
 		value: 'Are you there?',
 		by: toObjectId(token2),
+		modified: new Date()
 	};
 
 	var a3 = {
@@ -84,6 +86,7 @@ function getActions() {
 		action: 'guess',
 		value: characters[1]._id,
 		by: toObjectId(token2),
+		modified: new Date()
 	};
 
 	return [a1, a2, a3];
@@ -106,6 +109,17 @@ function getGame() {
 	var actionids = _.pluck(getActions(), '_id');
 	var board = getPlayerBoard();
 
+	/**
+	 * Game 1
+	 * 		* Player 1 and Player 2
+	 * 		* Player 1 Has a character set
+	 *		* Player 2 Has a character set
+	 * 		* Player 2 has taken a few actions 
+	 *			1) asked a question and got a reply
+	 *			2) Asked a question without a reply
+	 *			3) Guessed the user's character 
+	 *		* Its Player 1's turn
+	 */
 	var game = new Game(gameid)
 		.board(boardid)
 		.addPlayer({

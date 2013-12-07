@@ -215,7 +215,17 @@ function setGameState( req, res, callback ) {
 	var turn = game.turn;
 	if (turn.equals( gameuser.id )) {
 		if ( gameuser.character ) {
-			req.state = 'user-reply';
+			// check if there's something to do
+			// with respect to the opponent's actions
+			if ( gameopponent.actions.length === 0 ) {
+				// TODO: Maybe we can check the gameuser's actions
+				//       and if there's something that doesn't make
+				// 		 sense, we can set something to have the turn
+				//	     updated to the opponent
+				req.state = 'user-ask-question';
+			} else {
+
+			}
 		} else {
 			req.state = 'user-set-character';
 		}
