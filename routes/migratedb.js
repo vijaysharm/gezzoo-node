@@ -46,7 +46,7 @@ exports.execute = function( callback ) {
 	new DbBuilder()
 			.addUsers(getUsers())
 			.addCharacters(getCharcters())
-			.setCategory('test')
+			.setCategory('bollywood')
 			.build(function() {
 				console.log('Database Initilization Complete');
 				callback();

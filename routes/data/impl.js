@@ -66,7 +66,20 @@ exports.getCharacter = function( db, characterid, callback ) {
 };
 
 exports.getBoard = function( db, boardid, callback ) {
-	findOneById(db, boardid, 'boards', callback );
+	findOneById(db, boardid, 'boards', function(board) {
+		if ( board ) {
+			var query = {
+				'_id': {$in:board.characters}
+			};
+			db.characters().find(query).toArray(function(err, board_characters) {
+				if ( err ) throw err;
+				board.characters = board_characters;
+				callback( board );
+			})
+		} else {
+			callback( board );
+		}
+	});
 };
 
 exports.getBoardByCharacter = function( db, boardid, characterid, callback ) {
@@ -85,8 +98,12 @@ exports.getActionById = function( db, actionid, callback ) {
 };
 
 /**
+ * TODO: Should probably take the game ID as a 
+ *  	 query parameter
+ * 
  * @param user assumes this is the user
  * 		  object stored in the game object
+ *
  */
 exports.getActions = function( db, user, callback ) {
 	var actionsdb = db.actions();
@@ -141,6 +158,9 @@ function formatGamesResponse( user, games, boards, users, actions ) {
  *
  * TODO: Currently, we do not return the action information per user
  *		 should we improve that?
+ *
+ * TODO: Need to return the characters from the board. Currently doing
+ *		 empty query, and not adding to response.
  */
 exports.getGames = function( req, res ) {
 	var user = req.user;
@@ -164,15 +184,55 @@ exports.getGames = function( req, res ) {
 
 		db.boards().find({ _id: {$in:boards}}).toArray(function(err, boards) {
 			if ( err ) throw err;
-			db.actions().find({ _id: {$in:actions}}).toArray(function(err, actions) {
+			db.characters().find({}).toArray(function(err, board_characters) {
 				if ( err ) throw err;
-				db.users().find({ _id: {$in:users}}).toArray(function(err, users) {
+				db.actions().find({ _id: {$in:actions}}).toArray(function(err, actions) {
 					if ( err ) throw err;
-					res.json(formatGamesResponse(user, games, boards, users, actions))
+					db.users().find({ _id: {$in:users}}).toArray(function(err, users) {
+						if ( err ) throw err;
+						res.json(formatGamesResponse(user, games, boards, users, actions))
+					});
 				});
-			})
+			});
 		});
 	});
+};
+
+function getMostRecentAction( actions ) {
+	if ( actions && actions.length > 0 ) {
+		var sorted_actions = _.sortBy( actions, function(action){ return action.modified });
+		return sorted_actions[sorted_actions.length-1];
+	} else {
+		return null;
+	}
+};
+
+// TODO: Maybe we can check the gameuser's actions
+//       and if there's something that doesn't make
+// 		 sense, we can set something to have the turn
+//	     updated to the opponent
+function getState( user, opponent ) {
+	var opponent_action = getMostRecentAction(opponent.actions);
+	
+	if ( user.character ) {
+		if ( opponent_action ) {
+			if ( opponent_action.action === 'guess' ) {
+				return 'ask-question';
+			} else if ( opponent_action.action === 'question' ) {
+				if ( opponent_action.reply ) {
+					return 'ask-question';
+				} else {
+					return 'give-reply';
+				}
+			} else {
+				return 'error: unknown state ' + opponent_action.action;
+			}
+		} else {
+			return 'ask-question';
+		}
+	} else {
+		return 'pick-character';
+	}
 };
 
 /**
@@ -198,6 +258,8 @@ exports.getGameById = function( req, res ) {
 		actions: req.opponent_actions
 	});
 
+	var state = game.turn.equals(me._id) ? getState(me, opponent) : 'read-only';
+
 	var result = {
 		_id : game._id,
 		me: me,
@@ -205,7 +267,7 @@ exports.getGameById = function( req, res ) {
 		board: req.board,
 		ended: game.ended,
 		turn: game.turn,
-		state: req.state,
+		state: state,
 		modified: game.modified
 	};
 

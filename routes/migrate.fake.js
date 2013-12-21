@@ -2,19 +2,40 @@ var _ = require('underscore');
 var toObjectId = require('./util').toObjectId;
 var DbBuilder = require('./dbutil').DbBuilder;
 var Game = require('./game.util').Game;
+var ObjectID = require('mongodb').ObjectID;
 
 var token1 = '52728ca9954deb0b31000004';
 var token2 = '52728fbf63a64c904c657ed5';
 var token3 = '52728fbf63a64c904c657ea6';
+var token4 = '22728fbf63a64c904c657eaa';
 var gameid = '5286e01d9beb41000000001c';
 var gameid2 = '5286e01d9beb41000b00003a';
 var boardid = '5286fd942200ab0000000002';
+var all_actions = [];
+var random_questions = [
+	 {
+		action: 'question',
+		value: 'Are you there?',
+		reply: {
+			value: 'yes'
+		}
+	},
+	{
+		action: 'question',
+		value: 'What does the fox say?',
+	},
+	{
+		action: 'guess',
+		value: toObjectId('5486e01d8b587b0000000001'),
+	},
+];
 
 function getUsers() {
 	return [
 		{ username:'gezzoo_0', _id:toObjectId(token1) },
 		{ username:'gezzoo_1', _id:toObjectId(token2) },
-		{ username:'gezzoo_2', _id:toObjectId(token3) }
+		{ username:'gezzoo_2', _id:toObjectId(token3) },
+		{ username:'gezzoo_3', _id:toObjectId(token4) }
 	];
 };
 
@@ -49,48 +70,40 @@ function getCharcters() {
 		{_id:toObjectId('5356e01d8b587b0000000001'), name:'Sonakshi Sinha', category:['bollywood'], img:'http://ia.media-imdb.com/images/M/MV5BOTg3MzQxMTkwOF5BMl5BanBnXkFtZTcwNjcyOTM5NA@@._V1_SY317_CR18,0,214,317_.jpg'},
 		{_id:toObjectId('5366e01d8b587b0000000001'), name:'Vidya Balan', category:['bollywood'], img:'http://ia.media-imdb.com/images/M/MV5BNDI3Mjk2MjgzMl5BMl5BanBnXkFtZTcwODQwMjI1OQ@@._V1_SY317_CR3,0,214,317_.jpg'},
 		{_id:toObjectId('5376e01d8b587b0000000001'), name:'Rani Mukerji', category:['bollywood'], img:'http://ia.media-imdb.com/images/M/MV5BMTg0MTI5MDkyMV5BMl5BanBnXkFtZTcwNzIyMDQ4Mg@@._V1_SY317_CR111,0,214,317_.jpg'},
-		{_id:toObjectId('5386e01d8b587b0000000001'), name:'Preity Zinta', category:['bollywood'], img:'http://ia.media-imdb.com/images/M/MV5BMTQyMDc4NTE1Ml5BMl5BanBnXkFtZTcwOTQwMDgxOA@@._V1_SX214_CR0,0,214,317_.jpg'},
-		{_id:toObjectId('5396e01d8b587b0000000001'), name:'Kajol', category:['bollywood'], img:'http://ia.media-imdb.com/images/M/MV5BNzIyNDI1MTYwMV5BMl5BanBnXkFtZTcwNzg5MzcxMw@@._V1_SY317_CR131,0,214,317_.jpg'},
+		{_id:toObjectId('5386e01d8b587b0000000002'), name:'Preity Zinta', category:['bollywood'], img:'http://ia.media-imdb.com/images/M/MV5BMTQyMDc4NTE1Ml5BMl5BanBnXkFtZTcwOTQwMDgxOA@@._V1_SX214_CR0,0,214,317_.jpg'},
+		{_id:toObjectId('5396e01d8b587b0000000002'), name:'Kajol', category:['bollywood'], img:'http://ia.media-imdb.com/images/M/MV5BNzIyNDI1MTYwMV5BMl5BanBnXkFtZTcwNzg5MzcxMw@@._V1_SY317_CR131,0,214,317_.jpg'},
 		{_id:toObjectId('53a6e01d8b587b0000000001'), name:'Madhuri Dixit', category:['bollywood'], img:'http://ia.media-imdb.com/images/M/MV5BMjI1MTMxMDMxMV5BMl5BanBnXkFtZTcwMTUzNzY3Nw@@._V1_SY317_CR18,0,214,317_.jpg'},
 		{_id:toObjectId('53b6e01d8b587b0000000001'), name:'Juhi Chawla', category:['bollywood'], img:'http://ia.media-imdb.com/images/M/MV5BNzI1MzUxODczNV5BMl5BanBnXkFtZTcwNDUyNTA0MQ@@._V1_SY317_CR12,0,214,317_.jpg'}
 	];
 };
 
-function getActions() {
-	var characters = getCharcters();
-	var a1 = {
-		_id: toObjectId('52728ca9954deb0b31000123'),
-		gameid: toObjectId(gameid),
-		action: 'question',
-		value: 'Are you there?',
-		by: toObjectId(token2),
-		modified: new Date(),
-		reply: {
-			// date:
-			value: 'Yes, im here'
+function createActions( gameid, by, actions, modified ) {
+	var full_actions = [];
+
+	for ( var c = 0; c < actions.length; c++ ) {
+		var action = actions[c];
+		var id = new ObjectID();
+		var action_data = {
+			_id: id,
+			gameid: gameid,
+			by: toObjectId(by),
+		};
+		var full_action = _.extend( action_data, action );
+		if ( ! full_action.modified ) {
+			full_action.modified = modified || new Date();
 		}
-	};
 
-	var a2 = {
-		_id: toObjectId('52728ca9954deb0b31000124'),
-		gameid: toObjectId(gameid),
-		action: 'question',
-		value: 'Are you there?',
-		by: toObjectId(token2),
-		modified: new Date()
-	};
+		all_actions.push(full_action);
+		full_actions.push(full_action);
+	}
 
-	var a3 = {
-		_id: toObjectId('52728ca9954deb0b31000125'),
-		gameid: toObjectId(gameid),
-		action: 'guess',
-		value: characters[1]._id,
-		by: toObjectId(token2),
-		modified: new Date()
-	};
+	return full_actions;
+}
 
-	return [a1, a2, a3];
-};
+function getAllActions() {
+	console.log(JSON.stringify(all_actions));
+	return all_actions;
+}
 
 function getPlayerBoard() {
 	var characterids = _.pluck(getCharcters(), '_id');
@@ -106,20 +119,7 @@ function getPlayerBoard() {
 };
 
 function getGame() {
-	var actionids = _.pluck(getActions(), '_id');
 	var board = getPlayerBoard();
-
-	/**
-	 * Game 1
-	 * 		* Player 1 and Player 2
-	 * 		* Player 1 Has a character set
-	 *		* Player 2 Has a character set
-	 * 		* Player 2 has taken a few actions 
-	 *			1) asked a question and got a reply
-	 *			2) Asked a question without a reply
-	 *			3) Guessed the user's character 
-	 *		* Its Player 1's turn
-	 */
 	var game = new Game(gameid)
 		.board(boardid)
 		.addPlayer({
@@ -130,24 +130,35 @@ function getGame() {
 		.addPlayer({
 			id: token2,
 			board: board,
-			character: board[1]._id,
-			actions: actionids
+			character: board[1]._id
 		})
 		.turn(token1)
 		.toDbObject();
+
+	var actions = createActions(gameid2, token3, [
+		random_questions[0],
+		random_questions[0]
+	]);
+	var user3actions = _.pluck(actions, '_id');
+
+	actions = createActions(gameid2, token2, [
+		random_questions[0]
+	]);
+	var user2actions = _.pluck(actions, '_id');
 
 	var otherGame = new Game(gameid2)
 		.board(boardid)
 		.addPlayer({
 			id: token3,
 			board: board,
-			character: board[0]._id
+			character: board[0]._id,
+			actions: user3actions
 		})
 		.addPlayer({
 			id: token2,
 			board: board,
 			character: board[1]._id,
-			actions: actionids
+			actions: user2actions
 		})
 		.turn(token2)
 		.toDbObject();
@@ -160,7 +171,7 @@ exports.execute = function( callback ) {
 		.addCharacters(getCharcters())
 		.addGames(getGame())
 		.addBoards(getBoards())
-		.addActions(getActions())
+		.addActions(getAllActions())
 		.build(function() {
 			console.log('Database Initialization of Fake data complete');
 			callback();

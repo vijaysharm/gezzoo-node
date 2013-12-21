@@ -28,7 +28,7 @@ exports.Game = function( id ) {
 	this.actions = [];
 	this.player_board = [];
 	this.selected_characters = [];
-	
+	this.modified = new Date();
 	var that = this;
 
 	return {
@@ -75,6 +75,9 @@ exports.Game = function( id ) {
 			that.turn = objId( t );
 			return this;
 		},
+		modified: function( date ) {
+			that.modified = new Date(date);
+		},
 		toDbObject: function() {
 			return{
 				_id: that.id,
@@ -82,7 +85,7 @@ exports.Game = function( id ) {
 				turn: that.turn,
 				ended: that.ended,
 				board: that.board,
-				modified: new Date()
+				modified: that.modified
 			};
 		}
 	};

@@ -1,6 +1,10 @@
 var connection = require('./database')
 var _ = require('underscore');
 
+function log(message) {
+	console.log(message);
+}
+
 var initializeCounter = function( users, db, callback ) {
 	var countersdb = db.counters();
 	countersdb.drop();
@@ -18,6 +22,7 @@ var insertUsers = function( users, db, callback ) {
 	if ( users && users.length > 0 ) {
 		usersdb.insert( users, function( err, result ) {
 			if ( err ) throw err;
+			log('Added ' + result.length + ' users');
 			callback();
 		});
 	} else {
@@ -31,6 +36,7 @@ var initializeGames = function( games, db, callback ) {
 	if ( games && games.length > 0 ) {
 		gamesdb.insert( games, function( err, result ) {
 			if ( err ) throw err;
+			log('Added ' + result.length + ' games');
 			callback();
 		});
 	} else {
@@ -38,7 +44,7 @@ var initializeGames = function( games, db, callback ) {
 	}
 };
 
-var createBoard = function( name, characters ) {
+function createBoard( name, characters ) {
 	return {
 		name: name,
 		characters: characters
@@ -53,6 +59,7 @@ var initializeBoards = function( category, boards, db, callback ) {
 	if ( boards && boards.length > 0 ) {
 		boardsdb.insert(boards, function(err, results) {
 			if ( err ) throw err;
+			log('Added ' + results.length + ' boards');
 			callback();
 		});
 	} else if ( category ) {
@@ -63,6 +70,7 @@ var initializeBoards = function( category, boards, db, callback ) {
 			var board = createBoard(category, charids);
 			boardsdb.insert(board, function(err, insertedboard) {
 				if ( err ) throw err;
+				log('Added ' + insertedboard.length + ' board');
 				callback();
 			})
 		});
@@ -77,6 +85,7 @@ var initializeCharacters = function( characters, db, callback ) {
 	if ( characters && characters.length > 0 ) {
 		charactersdb.insert(characters, function(err, result) {
 			if ( err ) throw err;
+			log('Added ' + result.length + ' characters');
 			callback();
 		});
 	} else {
@@ -90,11 +99,42 @@ var initializeActions = function( actions, db, callback ) {
 	if ( actions && actions.length > 0 ) {
 		actonsdb.insert(actions, function(err, result) {
 			if ( err ) throw err;
+			log('Added ' + result.length + ' actions');
 			callback();
 		});
 	} else {
 		callback();
 	}
+};
+
+function validate( db, callback ) {
+	var actionsdb = db.actions();
+	var charactersdb = db.characters();
+	var boardsdb = db.boards();
+	var usersdb = db.users();
+	var gamesdb = db.games();
+
+	actionsdb.find({}).toArray(function(err, results) {
+		if ( err ) throw err;
+		console.log( results.length + ' actions found' );
+		charactersdb.find({}).toArray(function(err, results) {
+			if ( err ) throw err;
+			console.log( results.length + ' characters found' );
+			boardsdb.find({}).toArray(function(err, results) {
+				if ( err ) throw err;
+				console.log( results.length + ' boards found' );
+				usersdb.find({}).toArray(function(err, results) {
+					if ( err ) throw err;
+					console.log( results.length + ' users found' );
+					gamesdb.find({}).toArray(function(err, results) {
+						if ( err ) throw err;
+						console.log( results.length + ' games found' );
+						callback();
+					});
+				});
+			});
+		});
+	});
 };
 
 function isArray( a ) {
@@ -152,8 +192,10 @@ exports.DbBuilder = function() {
 							initializeCharacters( that.characters, db, function() {
 								initializeBoards( that.category, that.boards, db, function() {
 									initializeGames( that.games, db, function() {
-										db.close();
-										callback();
+										validate( db, function() {
+											db.close();
+											callback();
+										});
 									});
 								});
 							});

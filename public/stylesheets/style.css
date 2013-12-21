@@ -1,8 +1,24 @@
 /* Mobile First Smallest devices */
+*, *:before, *:after {
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
 body {
     font-family: Helvetica
 }
 
+#main {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    overflow: hidden;
+}
+
+/* game-list */
 .block {
     overflow: hidden;
     height: 100px;
@@ -43,6 +59,33 @@ body {
 
 .time {
     font-size: 1.1em;
+}
+
+/* ask question */
+.ask-question {
+    width: 100%;
+    height: 100%;
+}
+
+.banner {
+    border: 1px solid black;
+}
+
+.controls {
+    width: 100%;
+    overflow: hidden;
+}
+
+.control {
+    width: 50%; 
+    float: left; 
+    text-align: center; 
+    padding: 20px 0; 
+    border: 1px solid black;
+}
+
+.action {
+    border: 1px solid black;   
 }
 
 /* Small devices */
