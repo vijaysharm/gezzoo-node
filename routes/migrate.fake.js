@@ -101,7 +101,6 @@ function createActions( gameid, by, actions, modified ) {
 }
 
 function getAllActions() {
-	console.log(JSON.stringify(all_actions));
 	return all_actions;
 }
 

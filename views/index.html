@@ -20,7 +20,9 @@
 			</div>
 			{{#each game}}
 				<div class="block {{turn_class}}" data-game={{_id}}>
-	    			<img src="http://placehold.it/100x100"/>
+					<div class="avatar">
+	    				<img src="http://placehold.it/100x100"/>
+	    			</div>
 	    			<div class="game-info">
 		        		<div class="username">{{opponent.username}}</div>
 		        		<div class="state">{{turn_print}}</div>
@@ -31,11 +33,11 @@
 		</div>
 	</script>
 
-	<script id="user_answer_type" type="text/x-handlebars-template">
+	<script id="user_answer_item" type="text/x-handlebars-template">
 		<div>Answer</div>
 	</script>
 
-	<script id="user_question_type" type="text/x-handlebars-template">
+	<script id="user_question_item" type="text/x-handlebars-template">
 		<div class="action">
 			<div>{{question.by}}</div>
 			<div>{{question.value}}</div>
@@ -44,37 +46,44 @@
 		</div>
 	</script>
 
-	<script id="ask_question_type" type="text/x-handlebars-template">
+	<script id="ask_question_item" type="text/x-handlebars-template">
 		<div class="action">
 			<input><button>Ask</button>
 		</div>
 	</script>
 
 	<script id="player_board_item" type="text/x-handlebars-template">
-		<div>
-			<div>{{id}}</div>
-			<div>{{img}}</div>
-			<div>{{name}}</div>
-			<div>{{up}}</div>
+		<div data-character={{id}} class="character {{up}}">
+			<div class="character-img">
+				<div class="character-cover"></div>
+				<img src="{{img}}" alt="{{name}}"/>
+				<div class="character-name">{{name}}</div>
+			</div>
+			<div class="flip-button">Flip</div>
+			<div class="guess-button">Guess</div>
 		</div>
 	</script>
 	
 	<script id="user_turn" type="text/x-handlebars-template">
 		<div class='ask-question'>
 			<div class="banner">
-				<img src="http://placehold.it/48x48"/>
+				<div class="small-avatar">
+					<img src="http://placehold.it/48x48"/>
+				</div>
 				<span>{{opponent.username}}</span>
 			</div>
 			<div class="controls">
-				<div class="control">Questions</div>
-				<div class="control">Board</div>
+				<div class="board-button control">Board</div>	
+				<div class="question-button control">Questions</div>
 			</div>
+
+			<div class="characters">
+				{{{characters this}}}
+			</div>
+
 			<div class="actions">
 				{{{user_actions this}}}
-			</div>
-			<div class="characters">
-				{{characters this}}
-			</div>
+			</div>			
 		</div>
 	</script>
 

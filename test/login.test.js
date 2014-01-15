@@ -59,5 +59,6 @@ describe('Login', function() {
 			res.status.should.equal(404);
 			done();
 		});
-	});	
+	});
+
 });

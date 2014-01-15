@@ -113,6 +113,7 @@ function validate( db, callback ) {
 	var boardsdb = db.boards();
 	var usersdb = db.users();
 	var gamesdb = db.games();
+	var countersdb = db.counters();
 
 	actionsdb.find({}).toArray(function(err, results) {
 		if ( err ) throw err;
@@ -129,7 +130,10 @@ function validate( db, callback ) {
 					gamesdb.find({}).toArray(function(err, results) {
 						if ( err ) throw err;
 						console.log( results.length + ' games found' );
-						callback();
+						countersdb.find({}).toArray(function(err, results) {
+							console.log( results.length + ' counters found' );
+							callback();
+						});
 					});
 				});
 			});
