@@ -1,0 +1,141 @@
+.loading {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+
+	opacity: 0.5;
+	color: white;
+	background-color: black;
+	z-index: 2;
+	text-align: center;
+	padding-top: 60%;
+
+	display: none;
+}
+
+.character-game-item {
+	text-align: center;
+	padding: 4px;
+}
+
+.character-game-item > div {
+	position: relative;
+}
+
+.character-game-item img {
+	width: 100%;
+	height: auto;
+}
+
+.character-game-item .info {
+	color: white;
+	background-color: black;
+	opacity: 0.5;
+	padding: 4px;
+}
+
+.character-game-item .overlay {
+	background-color: white;
+	opacity: 0.0;
+
+	padding-top: 50%;
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	z-index: 1;
+
+	transition: all 0.3s;
+	-webkit-transition: all 0.3s;
+}
+
+.character-game-item .overlay:hover {
+	cursor: pointer;
+	opacity: 0.5;
+}
+
+.character-game-item .overlay:active {
+	color: white;
+	background-color: black;
+	opacity: 0.5;
+}
+
+.character-game-item .controls {
+	position: absolute;
+	bottom: 0;
+	width: 100%;
+}
+
+.character-game-item .control {
+	color: white;
+	background-color: black;
+	opacity: 0.5;
+	padding: 16px 0px;
+	display: none;
+}
+
+.character-game-item:hover .control {
+	display: block;
+}
+
+.character-game-item .control:hover {
+	opacity: 0.7;
+}
+
+.character-game-item .control:active {
+	opacity: 0.8;
+}
+
+.view-controls {
+	text-align: center;
+}
+
+.view-controls li {
+	padding: 24px 0;
+	background-color: white;
+	opacity: 1.0;
+}
+
+.view-controls li:hover {
+	opacity: 0.5;
+}
+
+.view-controls li:active {
+	opacity: 0.3;
+}
+
+.spacer li {
+	height: 10px;
+	background-color: white;
+}
+
+.spacer li.active {
+	background-color: red;	
+}
+
+.my-comment {
+	text-align: right;
+}
+
+.comment {
+	background-color: white;
+}
+
+.comment .info {
+	padding: 8px;
+}
+
+.comments {
+	padding: 8px 0;
+}
+
+.comment-wrapper {
+	padding: 1px 0;	
+}
+
+.comment .guess {
+	text-align: center;
+}

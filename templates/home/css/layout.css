@@ -1,0 +1,34 @@
+body, html {
+	width: 100%;
+	height: 100%;
+}
+
+.l-container {
+	padding: 8px;
+}
+
+.l-align-left {
+	float: left;
+}
+
+.l-two-col-list > li,
+.l-inline-list > li {
+	float: left;
+}
+
+.l-two-col-list > li {
+	width: 50%;
+}
+
+.l-clearfix:after {
+   content: " "; /* Older browser do not support empty content */
+   visibility: hidden;
+   display: block;
+   height: 0;
+   clear: both;
+}
+
+.l-fill-parent {
+	width: 100%;
+	height: 100%;
+}
