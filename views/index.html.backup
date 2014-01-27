@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" href="/stylesheets/base.css">
+	<link rel="stylesheet" href="/stylesheets/layout.css">
+	<link rel="stylesheet" href="/stylesheets/module.css">
+	<link rel="stylesheet" href="/stylesheets/theme.css">
+	<title>Gezzo?</title>
+</head>
+<body>
+
+	<script id="fullscreen-loading" type="text/x-handlebars-template">
+		<span>Loading...</span>
+	</script>
+
+	<script id="game-list" type="text/x-handlebars-template">
+		<div class="game-list">
+			<div class="block new-game">
+				<div>+New Game</div>
+			</div>
+			{{#each game}}
+				<div class="block {{turn_class}}" data-game={{_id}}>
+					<div class="avatar">
+	    				<img src="http://placehold.it/100x100"/>
+	    			</div>
+	    			<div class="game-info">
+		        		<div class="username">{{opponent.username}}</div>
+		        		<div class="state">{{turn_print}}</div>
+		        		<div class='time'>{{game_date}}</div>
+	    			</div>
+				</div>
+			{{/each}}
+		</div>
+	</script>
+
+	<script id="user_answer_item" type="text/x-handlebars-template">
+		<div>Answer</div>
+	</script>
+
+	<script id="user_question_item" type="text/x-handlebars-template">
+		<div class="action">
+			<div>{{question.by}}</div>
+			<div>{{question.value}}</div>
+			<div>{{reply.by}}</div>
+			<div>{{reply.value}}</div>
+		</div>
+	</script>
+
+	<script id="ask_question_item" type="text/x-handlebars-template">
+		<div class="action">
+			<input><button>Ask</button>
+		</div>
+	</script>
+
+	<script id="player_board_item" type="text/x-handlebars-template">
+		<div data-character={{id}} class="character {{up}}">
+			<div class="character-img">
+				<div class="character-cover"></div>
+				<img src="{{img}}" alt="{{name}}"/>
+				<div class="character-name">{{name}}</div>
+			</div>
+			<div class="flip-button">Flip</div>
+			<div class="guess-button">Guess</div>
+		</div>
+	</script>
+	
+	<script id="user_turn" type="text/x-handlebars-template">
+		<div class='ask-question'>
+			<div class="banner">
+				<div class="small-avatar">
+					<img src="http://placehold.it/48x48"/>
+				</div>
+				<span>{{opponent.username}}</span>
+			</div>
+			<div class="controls">
+				<div class="board-button control">Board</div>	
+				<div class="question-button control">Questions</div>
+			</div>
+
+			<div class="characters">
+				{{{characters this}}}
+			</div>
+
+			<div class="actions">
+				{{{user_actions this}}}
+			</div>			
+		</div>
+	</script>
+
+	<div id='main'/>
+
+	<script src="/javascripts/jquery.js"></script>
+	<script src="/javascripts/underscore.js"></script>
+	<script src="/javascripts/handlebars.js"></script>
+	<script src="/javascripts/moment.js"></script>
+	<script src="/javascripts/main.js"></script>
+</body>
+</html>

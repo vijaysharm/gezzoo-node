@@ -58,3 +58,10 @@ table {
 body {
 	font: 300 14px/1em Helvetica,Arial,sans-serif;
 }
+
+input[type="submit"],
+input[type="text"] {
+	margin: 0;
+	padding: 0;
+	border: 0;
+}

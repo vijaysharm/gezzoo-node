@@ -1,4 +1,307 @@
 (function() {
+	var USER = {
+		"name":"gezzoo_1",
+		"token":"52728fbf63a64c904c657ed5",
+		"id":"52728fbf63a64c904c657ed5"
+	};
+
+	var GAMES = [{
+		"_id":"5286e01d9beb41000000001c",
+		"me":{
+			"username":"gezzoo_1",
+			"_id":"52728fbf63a64c904c657ed5",
+			"board":[
+				{"_id":"5386e01d8b587b0000000001","up":true},
+				{"_id":"5486e01d8b587b0000000001","up":true},
+				{"_id":"5586e01d8b587b0000000001","up":true},
+				{"_id":"5686e01d8b587b0000000001","up":true},
+				{"_id":"5786e01d8b587b0000000001","up":true},
+				{"_id":"5886e01d8b587b0000000001","up":true},
+				{"_id":"5986e01d8b587b0000000001","up":true},
+				{"_id":"5a86e01d8b587b0000000001","up":true},
+				{"_id":"5b86e01d8b587b0000000001","up":true},
+				{"_id":"5c86e01d8b587b0000000001","up":true},
+				{"_id":"5d86e01d8b587b0000000001","up":true},
+				{"_id":"5e86e01d8b587b0000000001","up":true},
+				{"_id":"5f86e01d8b587b0000000001","up":true},
+				{"_id":"5316e01d8b587b0000000001","up":true},
+				{"_id":"5326e01d8b587b0000000001","up":true},
+				{"_id":"5336e01d8b587b0000000001","up":true},
+				{"_id":"5346e01d8b587b0000000001","up":true},
+				{"_id":"5356e01d8b587b0000000001","up":true},
+				{"_id":"5366e01d8b587b0000000001","up":true},
+				{"_id":"5376e01d8b587b0000000001","up":true},
+				{"_id":"5386e01d8b587b0000000002","up":true},
+				{"_id":"5396e01d8b587b0000000002","up":true},
+				{"_id":"53a6e01d8b587b0000000001","up":true},
+				{"_id":"53b6e01d8b587b0000000001","up":true}
+			],
+			"character":"5486e01d8b587b0000000001"
+		},
+		"opponent":{
+			"username":"gezzoo_0",
+			"_id":"52728ca9954deb0b31000004"
+		},
+		"board":{
+			"_id":"5286fd942200ab0000000002",
+			"name":"Bollywood",
+			"characters":[
+				"5386e01d8b587b0000000001",
+				"5486e01d8b587b0000000001",
+				"5586e01d8b587b0000000001",
+				"5686e01d8b587b0000000001",
+				"5786e01d8b587b0000000001",
+				"5886e01d8b587b0000000001",
+				"5986e01d8b587b0000000001",
+				"5a86e01d8b587b0000000001",
+				"5b86e01d8b587b0000000001",
+				"5c86e01d8b587b0000000001",
+				"5d86e01d8b587b0000000001",
+				"5e86e01d8b587b0000000001",
+				"5f86e01d8b587b0000000001",
+				"5316e01d8b587b0000000001",
+				"5326e01d8b587b0000000001",
+				"5336e01d8b587b0000000001",
+				"5346e01d8b587b0000000001",
+				"5356e01d8b587b0000000001",
+				"5366e01d8b587b0000000001",
+				"5376e01d8b587b0000000001",
+				"5386e01d8b587b0000000002",
+				"5396e01d8b587b0000000002",
+				"53a6e01d8b587b0000000001",
+				"53b6e01d8b587b0000000001"
+			]
+		},
+		"turn":"52728ca9954deb0b31000004",
+		"ended":false,
+		"modified":"2014-01-15T00:42:42.997Z"
+	},
+	{
+		"_id":"5286e01d9beb41000b00003a",
+		"me":{
+			"username":"gezzoo_1",
+			"_id":"52728fbf63a64c904c657ed5",
+			"board":[
+				{"_id":"5386e01d8b587b0000000001","up":true},
+				{"_id":"5486e01d8b587b0000000001","up":true},
+				{"_id":"5586e01d8b587b0000000001","up":true},
+				{"_id":"5686e01d8b587b0000000001","up":true},
+				{"_id":"5786e01d8b587b0000000001","up":true},
+				{"_id":"5886e01d8b587b0000000001","up":true},
+				{"_id":"5986e01d8b587b0000000001","up":true},
+				{"_id":"5a86e01d8b587b0000000001","up":true},
+				{"_id":"5b86e01d8b587b0000000001","up":true},
+				{"_id":"5c86e01d8b587b0000000001","up":true},
+				{"_id":"5d86e01d8b587b0000000001","up":true},
+				{"_id":"5e86e01d8b587b0000000001","up":true},
+				{"_id":"5f86e01d8b587b0000000001","up":true},
+				{"_id":"5316e01d8b587b0000000001","up":true},
+				{"_id":"5326e01d8b587b0000000001","up":true},
+				{"_id":"5336e01d8b587b0000000001","up":true},
+				{"_id":"5346e01d8b587b0000000001","up":true},
+				{"_id":"5356e01d8b587b0000000001","up":true},
+				{"_id":"5366e01d8b587b0000000001","up":true},
+				{"_id":"5376e01d8b587b0000000001","up":true},
+				{"_id":"5386e01d8b587b0000000002","up":true},
+				{"_id":"5396e01d8b587b0000000002","up":true},
+				{"_id":"53a6e01d8b587b0000000001","up":true},
+				{"_id":"53b6e01d8b587b0000000001","up":true}
+			],
+			"character":"5486e01d8b587b0000000001"
+		},
+		"opponent":{
+			"username":"gezzoo_2",
+			"_id":"52728fbf63a64c904c657ea6"
+		},
+		"board":{
+			"_id":"5286fd942200ab0000000002",
+			"name":"Bollywood",
+			"characters":[
+				"5386e01d8b587b0000000001",
+				"5486e01d8b587b0000000001",
+				"5586e01d8b587b0000000001",
+				"5686e01d8b587b0000000001",
+				"5786e01d8b587b0000000001",
+				"5886e01d8b587b0000000001",
+				"5986e01d8b587b0000000001",
+				"5a86e01d8b587b0000000001",
+				"5b86e01d8b587b0000000001",
+				"5c86e01d8b587b0000000001",
+				"5d86e01d8b587b0000000001",
+				"5e86e01d8b587b0000000001",
+				"5f86e01d8b587b0000000001",
+				"5316e01d8b587b0000000001",
+				"5326e01d8b587b0000000001",
+				"5336e01d8b587b0000000001",
+				"5346e01d8b587b0000000001",
+				"5356e01d8b587b0000000001",
+				"5366e01d8b587b0000000001",
+				"5376e01d8b587b0000000001",
+				"5386e01d8b587b0000000002",
+				"5396e01d8b587b0000000002",
+				"53a6e01d8b587b0000000001",
+				"53b6e01d8b587b0000000001"
+			]
+		},
+		"turn":"52728fbf63a64c904c657ed5",
+		"ended":false,
+		"modified":"2014-01-15T00:42:42.998Z"
+	}];
+
+	// $.getJSON('/api/games/5286e01d9beb41000b00003a?token=52728fbf63a64c904c657ed5', function(result){console.log(result)});
+	var GAME = {
+		"_id":"5286e01d9beb41000b00003a",
+		"me": {
+			"username":"gezzoo_1",
+			"_id":"52728fbf63a64c904c657ed5",
+			"board":[
+				{"_id":"5386e01d8b587b0000000001","up":true},
+				{"_id":"5486e01d8b587b0000000001","up":true},
+				{"_id":"5586e01d8b587b0000000001","up":true},
+				{"_id":"5686e01d8b587b0000000001","up":true},
+				{"_id":"5786e01d8b587b0000000001","up":true},
+				{"_id":"5886e01d8b587b0000000001","up":true},
+				{"_id":"5986e01d8b587b0000000001","up":true},
+				{"_id":"5a86e01d8b587b0000000001","up":true},
+				{"_id":"5b86e01d8b587b0000000001","up":true},
+				{"_id":"5c86e01d8b587b0000000001","up":true},
+				{"_id":"5d86e01d8b587b0000000001","up":true},
+				{"_id":"5e86e01d8b587b0000000001","up":true},
+				{"_id":"5f86e01d8b587b0000000001","up":true},
+				{"_id":"5316e01d8b587b0000000001","up":true},
+				{"_id":"5326e01d8b587b0000000001","up":true},
+				{"_id":"5336e01d8b587b0000000001","up":true},
+				{"_id":"5346e01d8b587b0000000001","up":true},
+				{"_id":"5356e01d8b587b0000000001","up":true},
+				{"_id":"5366e01d8b587b0000000001","up":true},
+				{"_id":"5376e01d8b587b0000000001","up":true},
+				{"_id":"5386e01d8b587b0000000002","up":true},
+				{"_id":"5396e01d8b587b0000000002","up":true},
+				{"_id":"53a6e01d8b587b0000000001","up":true},
+				{"_id":"53b6e01d8b587b0000000001","up":true}
+			],
+			"character":"5486e01d8b587b0000000001",
+			"actions":[
+				{
+					"_id":"52d5d982a4be878f02000003",
+					"gameid":"5286e01d9beb41000b00003a",
+					"by":"52728fbf63a64c904c657ed5",
+					"action":"question",
+					"value":"Are you there?",
+					"reply":{"value":"yes"},
+					"modified":"2014-01-15T00:42:42.998Z"
+				}
+			]
+		},
+		"opponent":{
+			"username":"gezzoo_2",
+			"_id":"52728fbf63a64c904c657ea6",
+			"actions":[
+				{
+					"_id":"52d5d982a4be878f02000001",
+					"gameid":"5286e01d9beb41000b00003a",
+					"by":"52728fbf63a64c904c657ea6",
+					"action":"question",
+					"value":"Are you there?",
+					"reply":{"value":"yes"},
+					"modified":"2014-01-15T00:42:42.998Z"
+				},
+				{
+					"_id":"52d5d982a4be878f02000002",
+					"gameid":"5286e01d9beb41000b00003a",
+					"by":"52728fbf63a64c904c657ea6",
+					"action":"question",
+					"value":"Are you there?",
+					"reply":{"value":"yes"},
+					"modified":"2014-01-15T00:42:42.998Z"
+				}]
+		},
+		"board":{
+			"name":"Bollywood",
+			"characters":[
+				{"_id":"5316e01d8b587b0000000001","name":"Katrina Kaif","category":["bollywood"],"img":"http://ia.media-imdb.com/images/M/MV5BMTUwODY3NzA3NF5BMl5BanBnXkFtZTcwNTEzNDg3OA@@._V1_SY317_CR6,0,214,317_.jpg"},
+				{"_id":"5326e01d8b587b0000000001","name":"Anushka Sharma","category":["bollywood"],"img":"http://ia.media-imdb.com/images/M/MV5BMTc0NDMzMDYyM15BMl5BanBnXkFtZTcwMDEwMTA1NA@@._V1_SY317_CR104,0,214,317_.jpg"},
+				{"_id":"5336e01d8b587b0000000001","name":"Priyanka Chopra","category":["bollywood"],"img":"http://ia.media-imdb.com/images/M/MV5BMjAxNzUwNjExOV5BMl5BanBnXkFtZTcwNDUyMTUxNw@@._V1_SY317_CR105,0,214,317_.jpg"},
+				{"_id":"5346e01d8b587b0000000001","name":"Aishwarya Rai","category":["bollywood"],"img":"http://ia.media-imdb.com/images/M/MV5BMjEyMjEyODkzN15BMl5BanBnXkFtZTcwODkxMTY1Mg@@._V1_SX214_CR0,0,214,317_.jpg"},
+				{"_id":"5356e01d8b587b0000000001","name":"Sonakshi Sinha","category":["bollywood"],"img":"http://ia.media-imdb.com/images/M/MV5BOTg3MzQxMTkwOF5BMl5BanBnXkFtZTcwNjcyOTM5NA@@._V1_SY317_CR18,0,214,317_.jpg"},
+				{"_id":"5366e01d8b587b0000000001","name":"Vidya Balan","category":["bollywood"],"img":"http://ia.media-imdb.com/images/M/MV5BNDI3Mjk2MjgzMl5BMl5BanBnXkFtZTcwODQwMjI1OQ@@._V1_SY317_CR3,0,214,317_.jpg"},
+				{"_id":"5376e01d8b587b0000000001","name":"Rani Mukerji","category":["bollywood"],"img":"http://ia.media-imdb.com/images/M/MV5BMTg0MTI5MDkyMV5BMl5BanBnXkFtZTcwNzIyMDQ4Mg@@._V1_SY317_CR111,0,214,317_.jpg"},
+				{"_id":"5386e01d8b587b0000000001","name":"Shah Rukh Khan","category":["bollywood"],"img":"http://ia.media-imdb.com/images/M/MV5BMTQxMjg4Mzk1Nl5BMl5BanBnXkFtZTcwMzQyMTUxNw@@._V1_SY317_CR1,0,214,317_.jpg"},
+				{"_id":"5386e01d8b587b0000000002","name":"Preity Zinta","category":["bollywood"],"img":"http://ia.media-imdb.com/images/M/MV5BMTQyMDc4NTE1Ml5BMl5BanBnXkFtZTcwOTQwMDgxOA@@._V1_SX214_CR0,0,214,317_.jpg"},
+				{"_id":"5396e01d8b587b0000000002","name":"Kajol","category":["bollywood"],"img":"http://ia.media-imdb.com/images/M/MV5BNzIyNDI1MTYwMV5BMl5BanBnXkFtZTcwNzg5MzcxMw@@._V1_SY317_CR131,0,214,317_.jpg"},
+				{"_id":"53a6e01d8b587b0000000001","name":"Madhuri Dixit","category":["bollywood"],"img":"http://ia.media-imdb.com/images/M/MV5BMjI1MTMxMDMxMV5BMl5BanBnXkFtZTcwMTUzNzY3Nw@@._V1_SY317_CR18,0,214,317_.jpg"},
+				{"_id":"53b6e01d8b587b0000000001","name":"Juhi Chawla","category":["bollywood"],"img":"http://ia.media-imdb.com/images/M/MV5BNzI1MzUxODczNV5BMl5BanBnXkFtZTcwNDUyNTA0MQ@@._V1_SY317_CR12,0,214,317_.jpg"},
+				{"_id":"5486e01d8b587b0000000001","name":"Arjun Rampal","category":["bollywood"],"img":"http://ia.media-imdb.com/images/M/MV5BMTg0NTAzOTU4Ml5BMl5BanBnXkFtZTcwMzg1MjUyOA@@._V1_SX214_CR0,0,214,317_.jpg"},
+				{"_id":"5586e01d8b587b0000000001","name":"Anupam Kher","category":["bollywood"],"img":"http://ia.media-imdb.com/images/M/MV5BMTY0MDkxMzkwN15BMl5BanBnXkFtZTcwODUxNTA5Nw@@._V1_SX214_CR0,0,214,317_.jpg"},
+				{"_id":"5686e01d8b587b0000000001","name":"Sanjay Dutt","category":["bollywood"],"img":"http://ia.media-imdb.com/images/M/MV5BNzU2NTgwNzY1OF5BMl5BanBnXkFtZTcwMjQxNzcxOA@@._V1_SY317_CR131,0,214,317_.jpg"},
+				{"_id":"5786e01d8b587b0000000001","name":"Hrithik Roshan","category":["bollywood"],"img":"http://ia.media-imdb.com/images/M/MV5BMTU1MjQzNDExN15BMl5BanBnXkFtZTcwNzIxMTg0Mw@@._V1_SY317_CR173,0,214,317_.jpg"},
+				{"_id":"5886e01d8b587b0000000001","name":"Akshay Kumar","category":["bollywood"],"img":"http://ia.media-imdb.com/images/M/MV5BMTU4NzM4Nzk1OF5BMl5BanBnXkFtZTcwMTAwMTA1NA@@._V1_SY317_CR104,0,214,317_.jpg"},
+				{"_id":"5986e01d8b587b0000000001","name":"Salman Khan","category":["bollywood"],"img":"http://ia.media-imdb.com/images/M/MV5BMTIyODQyOTA1M15BMl5BanBnXkFtZTcwMDQxNDIzMQ@@._V1_SY317_CR56,0,214,317_.jpg"},
+				{"_id":"5a86e01d8b587b0000000001","name":"Ranveer Singh","category":["bollywood"],"img":"http://ia.media-imdb.com/images/M/MV5BMTExOTcwMDU4NTReQTJeQWpwZ15BbWU3MDA0MjE1MTc@._V1_SY317_CR1,0,214,317_.jpg"},
+				{"_id":"5b86e01d8b587b0000000001","name":"Emraan Hashmi","category":["bollywood"],"img":"http://ia.media-imdb.com/images/M/MV5BMjExNzExNDY3OV5BMl5BanBnXkFtZTcwNzAyMTg2OA@@._V1_SY317_CR0,0,214,317_.jpg"},
+				{"_id":"5c86e01d8b587b0000000001","name":"Amitabh Bachchan","category":["bollywood"],"img":"http://ia.media-imdb.com/images/M/MV5BNTk1OTUxMzIzMV5BMl5BanBnXkFtZTcwMzMxMjI0Nw@@._V1_SY317_CR8,0,214,317_.jpg"},
+				{"_id":"5d86e01d8b587b0000000001","name":"Abhishek Bachchan","category":["bollywood"],"img":"http://ia.media-imdb.com/images/M/MV5BMTk1NjU1NjkxN15BMl5BanBnXkFtZTcwNDI4MDMzMg@@._V1_SY317_CR10,0,214,317_.jpg"},
+				{"_id":"5e86e01d8b587b0000000001","name":"John Abraham","category":["bollywood"],"img":"http://ia.media-imdb.com/images/M/MV5BMTY1MDUyMjI1N15BMl5BanBnXkFtZTYwMjg4MjA0._V1_SX214_CR0,0,214,317_.jpg"},
+				{"_id":"5f86e01d8b587b0000000001","name":"Deepika Padukone","category":["bollywood"],"img":"http://ia.media-imdb.com/images/M/MV5BMjAxMTAwMTY2MV5BMl5BanBnXkFtZTcwOTM5NTQyMg@@._V1_SX214_CR0,0,214,317_.jpg"}
+			]
+		},
+		"ended":false,
+		"turn":"52728fbf63a64c904c657ed5",
+		"state":"ask-question",
+		"modified":"2014-01-15T00:42:42.998Z"
+	};
+
+	var GameModel = function( game ) {
+		return {
+			getOpponentAvatar: function() {
+				return 'http://placehold.it/64x64';
+			},
+			getOpponentName: function() {
+				return game.opponent.username;
+			},
+			getAvatar: function() {
+				return 'http://placehold.it/64x64';
+			},
+			getMostRecentAction: function() {
+				// TODO: Sort the actions and get the most recent one.
+				//		 You can maybe do this before the return statment.
+				var actions = game.me.actions;
+				if ( actions && actions.length > 0 ) {
+					return actions[0];
+				}
+
+				return null;
+			},
+			getBoard: function() {
+				var a = game.me.board.concat( game.board.characters );
+				var b = _.reduce(a, function(m, item) {
+					m[item._id] = ( m[item._id] ? _.extend(m[item._id], item) : item );
+					return m; 
+				}, {});
+
+				return _.values(b);
+			}
+		};
+	};
+
+	var GameItemModel = function( game ) {
+		return {
+			getId: function() {
+				return game._id;
+			},
+			getOpponentName: function() {
+				return game.opponent.username;
+			},
+			getTurn: function() {
+				var turn = game.turn === game.me._id;
+				return turn ? "It's your turn" : "It's their turn";
+			},
+			getDate: function() {
+				return moment(game.modified).fromNow();
+			}
+		};
+	};
+
 	function loadTemplateById(id) {
 		return Handlebars.compile($(id).html());
 	};
@@ -7,281 +310,85 @@
 		console.log(message);
 	};
 
-	function doAjax(options) {
-		$.ajax(options);
-	};
-
-	function doPost(url, data, callback) {
-		doAjax({
-			url: url,
-			type: 'POST',
-			dataType: 'json',
-			success: callback,
-			data: data,
-			cache: false
-		});
-	};
-
-	function findCharacterInBoard( id, board ) {
-		for ( var index = 0; index < board.length; index++ ) {
-			var person = board[index];
-			if ( id === person._id ) {
-				return person;
-			}
-		}
-
-		return undefined;
+	var templates = {
+		gameitem: loadTemplateById('#game-item'),
+		gamelist: loadTemplateById('#game-list'),
+		board: loadTemplateById('#board'),
+		question: loadTemplateById('#question'),
+		character_board: loadTemplateById('#character-board'),
+		my_action: loadTemplateById('#my-action')
 	};
 
 	Handlebars.registerHelper('log', function(obj) {
 		log(JSON.stringify(obj));
 	});
 
-	Handlebars.registerHelper('turn_class', function() {
-		var turn = this.turn === this.me._id;
-		return turn ? 'my-turn' : 'their-turn';
+	function renderQuestionAction( action, model ) {
+		var data = {};
+
+		if ( action && action.action === 'question' ) {
+			data.me = {
+				avatar: model.getAvatar(),
+				value: action.value
+			};
+		}
+
+		if ( action && action.reply ) {
+			data.opponent = {
+				name: model.getOpponentName(),
+				avatar: model.getOpponentAvatar(),
+				value: action.reply.value
+			};
+		}
+
+		return templates.my_action(data);
+	}
+
+	Handlebars.registerHelper('my_actions', function(game) {
+		var model = new GameModel(game);
+		var result = '';
+
+		for ( var i in game.me.actions ) {
+			var action = game.me.actions[i];
+
+			if ( action.action === 'question' ) {
+				result = result + renderQuestionAction( action, model );
+			} else if ( action.action === 'guess' ) {
+
+			}
+		}
+
+		return new Handlebars.SafeString( result );
 	});
 
-	Handlebars.registerHelper('turn_print', function() {
-		var turn = this.turn === this.me._id;
-		return turn ? "It's your turn" : "It's their turn";
+	Handlebars.registerHelper('last_action', function(game) {
+		var model = new GameModel(game);
+		var action = model.getMostRecentAction();
+
+		return new Handlebars.SafeString(renderQuestionAction(action, model));
 	});
 
-	Handlebars.registerHelper('game_date', function() {
-		return moment(this.modified).fromNow();
+	Handlebars.registerHelper('character_board', function(game) {
+		var model = new GameModel( game );
+		var result = templates.character_board({
+			board: model.getBoard()
+		})
+		return new Handlebars.SafeString(result);
+	});
+
+	Handlebars.registerHelper('game_item', function(game) {
+		var model = new GameItemModel( game );
+		var result = templates.gameitem({
+			id: model.getId(),
+			username: model.getOpponentName(),
+			turn: model.getTurn(),
+			date: model.getDate()
+		});
+		return new Handlebars.SafeString(result);
 	});
 
 	var $main = $('#main');
-	var loading_el = loadTemplateById('#fullscreen-loading')();
-
-	function showReadOnly( game ) {
-		log('read only game');
-	};
-
-	function showGiveReply( user, game ) {
-		log('You need to see the opponent actions');
-	};
-
-	function showPickCharacter( user, game ) {
-		log('pick a character');
-	};
-
-	var View = function( user, game ) {
-		this.user = user;
-		this.game = game;
-
-		this.flip = function( e ) {
-			var character = $(e.target).closest('.character');
-			var characterid = character.data('character');
-
-			character.toggleClass('up');
-			character.toggleClass('down');
-
-			log('flip: ' + characterid);
-		};
-
-		this.guess = function( e ) {
-			var characterid = $(e.target).closest('.character').data('character');
-			var board = [];
-			var x = $('.character').each(function() {
-				var $this = $(this);
-				board.push({
-					_id: $this.data('character'),
-					up: $this.hasClass('up')
-				});
-			});
-			log('guess: ' + characterid);
-		};
-
-		this.user_actions = function(game) {
-			var actions = game.me.actions;
-			var items = '';
-			var question = loadTemplateById('#user_question_item');
-			var answer = loadTemplateById('#user_answer_item');
-			var ask = loadTemplateById('#ask_question_item');
-
-			// TODO: You can have a NPE in the obj here for the
-			//		 reply value. This will need to be refactored
-			//		 and made generic for the other use cases.
-			for ( var id = 0; id < actions.length; id++ ) {
-				var action = actions[id];
-				if ( action.action === 'question' ) {
-					var obj = {
-						question: {
-							value: action.value,
-							by: game.me.username
-						},
-						reply: {
-							value: action.reply.value, // TODO: NPE warning
-							by: game.opponent.username
-						}
-					};
-					items += question(obj);
-				} else if ( action.action === 'guess' ) {
-					var obj = {
-
-					};
-					items += answer(obj);
-				} else {
-					// ?? whatever, skip it.
-				}
-			}
-
-			// TODO: What if the opponent has guessed right?
-			//		 You should probably not display this.
-			items += ask();
-
-			return items;
-		};
-
-		/**
-		 * TODO: I need to show the 'last' question at the top
-		 * TODO: I should remap the board into a map so look ups
-		 *		 are faster
-		 */
-		this.characters = function( game ) {
-			var board = game.me.board;
-			var items = '';
-			var character_template = loadTemplateById('#player_board_item');
-
-			for ( var id = 0; id < board.length; id++ ) {
-				var character = board[id];
-				var person = findCharacterInBoard( character._id, game.board.characters );
-				var obj = {
-					id: character._id,
-					img: person.img,
-					name: person.name,
-					up: character.up ? 'up' : 'down'
-				};
-
-				items += character_template(obj);
-			}
-
-			return items;
-		};
-
-		this.show_board = function() {
-			log('show board');
-			$('.characters').show();
-			$('.actions').hide();
-		};
-
-		this.show_actions = function() {
-			log('show actions');
-			$('.actions').show();
-			$('.characters').hide();
-		};
-
-		var me = this;
-		return {
-			events: [{
-				trigger: 'click',
-				id: '.flip-button',
-				callback: me.flip
-			}, {
-				trigger: 'click',
-				id: '.guess-button',
-				callback: me.guess
-			}, {
-				trigger: 'click',
-				id: '.board-button',
-				callback: me.show_board
-			}, {
-				trigger: 'click',
-				id: '.question-button',
-				callback: me.show_actions
-			}],
-
-			template_helpers: [{
-				name: 'characters',
-				callback: me.characters
-			}, {
-				name: 'user_actions',
-				callback: me.user_actions
-			}],
-
-			render: function() {
-				return loadTemplateById('#user_turn')(me.game);
-			}
-		};
-	};
-
-	/**
-	 * View switch core logic.
-	 *
-	 * TODO: Allow for helpers or events to be detached.
-	 * TODO: Let the view know when its been attached so it
-	 * 		 can cache DOM elements.
-	 * TODO: Provide a way for the view to indicate that 
-	 *		 It needs to transition to another view.
-	 */
-	function switchToView( view ) {
-		for ( t in view.template_helpers ) {
-			var helper = view.template_helpers[t];
-			Handlebars.registerHelper( helper.name, helper.callback );
-		}
-
-		$main.html( view.render() );
-
-		for ( e in view.events ) {
-			var ev = view.events[e];
-			$main.on( ev.trigger, ev.id, ev.callback );
-		}
-	};
-
-	function showSomethingWentWrong() {
-		log('Unknown state: ' + game.state);
-	};
-
-	function showGame( user, gameid ) {
-		$main.html(loading_el);
-		var url = '/api/games/' + gameid;
-		$.getJSON(url, {token: user.token}, function(game) {
-			log(game);
-			if ( 'read-only' === game.state ) {
-				showReadOnly( game );
-			} else if ( 'pick-character' === game.state ) {
-				showPickCharacter( user, game );
-			} else if ( 'ask-question' === game.state ) {
-				switchToView( new View( user, game ) );
-			} else if ( 'give-reply' === game.state ) {
-				showGiveReply( user, game );
-			} else {
-				showSomethingWentWrong();
-			}
-		});
-	};
-
-	/**
-	 * TODO: Should clean up listener
-	 */
-	function showGames( user ) {
-		var game_list_template = loadTemplateById('#game-list');
-		$main.html(loading_el);
-		$.getJSON('/api/games', {token: user.token}, function(games) {
-			log(games);
-			$main.html(game_list_template({ game:games }));
-
-			var itemClick = function(e) {
-				var gameid = $(e.target).closest('.block').data('game');
-				if ( gameid ) {
-					showGame( user, gameid );
-					$main.off('click', 'div.block', itemClick );
-				}
-			};
-
-			$main.on('click', 'div.block', itemClick );
-		});
-	};
-
-	var token1 = '52728ca9954deb0b31000004';
-	var token2 = '52728fbf63a64c904c657ed5';
-	var token3 = '52728fbf63a64c904c657ea6';
-
-	var token = {token:token2};
-	doPost('/api/login', token, function( user ) {
-		var user = _.extend( user, token );
-		log('logged in user ' + JSON.stringify(user));
-		showGames( user );
-	});
+	// $main.html(templates.gamelist(GAMES));
+	// $main.html(templates.board(GAME));
+	$main.html(templates.question(GAME));
 })();
