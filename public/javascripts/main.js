@@ -203,7 +203,6 @@
 					"by":"52728fbf63a64c904c657ea6",
 					"action":"question",
 					"value":"Are you there?",
-					"reply":{"value":"yes"},
 					"modified":"2014-01-15T00:42:42.998Z"
 				},
 				{
@@ -314,9 +313,13 @@
 		gameitem: loadTemplateById('#game-item'),
 		gamelist: loadTemplateById('#game-list'),
 		board: loadTemplateById('#board'),
-		question: loadTemplateById('#question'),
+		question: loadTemplateById('#my-questions'),
 		character_board: loadTemplateById('#character-board'),
-		my_action: loadTemplateById('#my-action')
+		my_action: loadTemplateById('#my-action'),
+		character_select: loadTemplateById('#character-select'),
+		opponent_actions: loadTemplateById('#opponent-actions'),
+		opponent_action: loadTemplateById('#opponent-action'),
+		loading: loadTemplateById('#loading-view')
 	};
 
 	Handlebars.registerHelper('log', function(obj) {
@@ -344,6 +347,29 @@
 		return templates.my_action(data);
 	}
 
+	function renderOpponentQuestionAction( action, model ) {
+		var data = {};
+
+		if ( action && action.action === 'question' ) {
+			data.opponent = {
+				name: model.getOpponentName(),
+				avatar: model.getOpponentAvatar(),
+				value: action.value
+			};
+		}
+
+		if ( action && action.reply ) {
+			data.me = {
+				avatar: model.getAvatar(),
+				value: action.reply.value
+			};
+		} else {
+			data.enableInput = true;
+		}
+
+		return templates.opponent_action(data);
+	}
+
 	Handlebars.registerHelper('my_actions', function(game) {
 		var model = new GameModel(game);
 		var result = '';
@@ -368,11 +394,29 @@
 		return new Handlebars.SafeString(renderQuestionAction(action, model));
 	});
 
+	Handlebars.registerHelper('opponent_actions', function(game) {
+		var model = new GameModel(game);
+		var result = '';
+
+		for ( var i in game.opponent.actions ) {
+			var action = game.opponent.actions[i];
+
+			if ( action.action === 'question' ) {
+				result = result + renderOpponentQuestionAction( action, model );
+			} else if ( action.action === 'guess' ) {
+
+			}
+		}
+
+		return new Handlebars.SafeString( result );		
+	});
+
 	Handlebars.registerHelper('character_board', function(game) {
 		var model = new GameModel( game );
 		var result = templates.character_board({
 			board: model.getBoard()
-		})
+		});
+
 		return new Handlebars.SafeString(result);
 	});
 
@@ -384,11 +428,107 @@
 			turn: model.getTurn(),
 			date: model.getDate()
 		});
+
 		return new Handlebars.SafeString(result);
 	});
 
-	var $main = $('#main');
-	// $main.html(templates.gamelist(GAMES));
-	// $main.html(templates.board(GAME));
-	$main.html(templates.question(GAME));
+	var EventManager = {
+	    subscribe: function(event, fn) {
+	        $(this).bind(event, fn);
+	    },
+	    unsubscribe: function(event, fn) {
+	        $(this).unbind(event, fn);
+	    },
+	    publish: function(event) {
+	        $(this).trigger(event);
+	    }
+	};
+
+	var Application = function( $el ) {
+		this.$el = $el;
+		this.currentView = null;
+		var me = this;
+
+		return {
+			switchViews: function( view ) {
+				if ( me.currentView ) {
+					var c = me.currentView.clicks();
+					for ( i in c ) {
+						$(i).off( 'click', c[i] );
+					}
+				}
+
+				me.$el.html(view.render());
+
+				var c = view.clicks();
+				for ( i in c ) {
+					$(i).on( 'click', c[i] );
+				}
+
+				me.currentView = view;
+			}
+		};
+	};
+
+	var View = function( template, options ) {
+		this.data = null;
+		this.template = template;
+		this.click = _.extend(options.click, {});
+		var me = this;
+
+		return {
+			clicks: function() {
+				return me.click;
+			},
+			set: function( data ) {
+				me.data = data;
+			},
+			get: function() {
+				return me.data;
+			},
+			render: function() {
+				return me.template( this.get() );
+			}
+		}
+	};
+
+	var gamelist = new View(templates.gamelist, {
+		click: {
+			'.character-game-item': function( e ) {
+				console.log(e);
+			}
+		}
+	});
+
+	var board = new View(templates.board, {
+		click: {
+
+		}
+	});
+
+	var questions = new View(templates.question, {
+		click: {
+			
+		}
+	});
+
+	var character_select = new View(templates.character_select, {
+		click: {
+
+		}
+	});
+
+	var opponent_actions = new View(templates.opponent_actions, {
+		click: {
+
+		}
+	});
+
+	var application = new Application($('#main'));
+	EventManager.subscribe('switchView', function( data ) {
+
+	});
+
+	gamelist.set( GAMES );
+	application.switchViews( gamelist );
 })();

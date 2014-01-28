@@ -11,11 +11,11 @@
 </head>
 <body>
 
-	<script id="fullscreen-loading" type="text/x-handlebars-template">
+	<script id="loading-view" type="text/x-handlebars-template">
 		<span>Loading...</span>
 	</script>
 
-	<script id="question" type="text/x-handlebars-template">
+	<script id="my-questions" type="text/x-handlebars-template">
 		<ul class="view-controls l-two-col-list l-clearfix">
 			<li>Board</li>
 			<li>Questions</li>
@@ -41,6 +41,30 @@
 				</div>
 			</div>
 		</div>		
+	</script>
+
+	<script id="opponent-actions" type="text/x-handlebars-template">
+		{{opponent_actions this}}
+	</script>
+
+	<script id="character-select" type="text/x-handlebars-template">
+		<ul class="l-two-col-list l-clearfix">
+			{{#each this.board.characters}}
+			<li>
+				<div class="character-game-item l-fill-parent">
+					<div class="l-fill-parent">
+						<img src="{{img}}" alt="person">
+						<div class="controls l-anchor-bottom">
+							<h2 class="name info">{{name}}</h2>
+							<div class="l-inline-list l-clearfix">
+								<p class="control l-inline l-100p">Select</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</li>
+			{{/each}}
+		</ul>
 	</script>
 
 	<script id="character-board" type="text/x-handlebars-template">
@@ -105,6 +129,47 @@
 		</div>
 	</script>
 
+	<script id="opponent-action" type="text/x-handlebars-template">
+		{{log this}}
+		<div class="comments">
+			{{#with opponent}}
+			<div class="comment-wrapper">
+				<div class="comment l-two-col-list l-clearfix">
+					<img class="l-20p l-inline" src="{{avatar}}" alt="avatar">
+					<div class="l-80p l-inline info">
+						<p><span>{{name}}</span> asked:</p>
+						<p class="text">{{value}}</p>
+					</div>
+				</div>
+			</div>
+			{{/with}}
+			{{#with me}}
+			<div class="comment-wrapper">
+				<div class="my-comment comment l-align-right l-clearfix">
+					<img class="l-20p l-inline" src="{{avatar}}" alt="avatar">
+					<div class="l-80p l-inline info">
+						<p><span>You</span> replied:</p>
+						<p class="text">{{value}}</p>
+					</div>
+				</div>
+			</div>
+			{{/with}}
+			{{#if enableInput}}
+			<div class="comment-wrapper">
+				<div class="my-comment comment l-align-right l-clearfix">
+					<img class="l-20p l-inline" src="http://placehold.it/64x64" alt="avatar">
+					<div class="l-80p l-inline">
+						<div class="input">
+							<input class="l-fill-parent" type="text" placeholder="Ask a question...">
+							<input type="submit" value="Submit" class="l-fill-parent" />
+						</div>
+					</div>
+				</div>
+			</div>			
+			{{/if}}
+		</div>
+	</script>
+
 	<script id="board" type="text/x-handlebars-template">
 		<ul class="view-controls l-two-col-list l-clearfix">
 			<li>Board</li>
@@ -142,7 +207,8 @@
 		</ul>
 	</script>
 
-	<div id='main' class="l-fill-parent l-container t-background"/>
+	<div id="loading" class="loading"></div>
+	<div id="main" class="l-fill-parent l-container t-background"/></div>
 
 	<script src="/javascripts/jquery.js"></script>
 	<script src="/javascripts/underscore.js"></script>
