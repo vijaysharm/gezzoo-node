@@ -10,8 +10,13 @@
 	<title>Gezzo?</title>
 </head>
 <body>
+	<!-- TODO: To be removed once all the pages are complete, and the page are bound to each other -->
 	<script type="text/x-handlebars" data-template-name="application">
-		<p>Add links to the other views here</p>
+		{{#link-to 'index'}}  home  {{/link-to}}
+		{{#link-to 'game.select' model}}  select  {{/link-to}}
+		{{#link-to 'game.board' model}}  board  {{/link-to}}
+		{{#link-to 'game.actions' model}}  actions  {{/link-to}}
+		{{#link-to 'game.reply' model}}  replies  {{/link-to}}
 		{{outlet}}
 	</script>
 
@@ -33,6 +38,185 @@
 				</li>
 			{{/each}}
 		</ul>
+	</script>
+
+	<script type="text/x-handlebars" data-template-name="game/select">
+		<ul class="l-two-col-list l-clearfix">
+			{{#each this.board.characters itemController='characterItem'}}
+			<li>
+				<div class="character-game-item l-fill-parent">
+					<div class="l-fill-parent">
+						<img {{bind-attr src=img}} alt="person">
+						<div class="controls l-anchor-bottom">
+							<h2 class="name info">{{name}}</h2>
+							<div class="l-inline-list l-clearfix">
+								<p class="control l-inline l-100p" {{action "select"}}>Select</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</li>
+			{{/each}}
+		</ul>
+	</script>
+
+	<!-- TODO: You need to disable controls if its not the current user's turn -->
+	<!-- TODO: You need to hide the 'guess' button if the character is flipped -->
+	<script type="text/x-handlebars" data-template-name="game/board">
+		<ul class="view-controls l-two-col-list l-clearfix">
+			<li>Board</li>
+			<li>Questions</li>
+		</ul>
+
+		<ul class="spacer l-two-col-list l-clearfix">
+			<li class="active"></li>
+			<li></li>
+		</ul>
+
+		{{#with lastaction}}
+		<div class="comments">
+			{{#with me}}
+			<div class="comment-wrapper">
+				<div class="my-comment comment l-align-right l-clearfix">
+					<img class="l-20p l-inline" {{bind-attr src=avatar}} alt="avatar">
+					<div class="l-80p l-inline info">
+						<p><span>You</span> asked:</p>
+						<p class="text">{{value}}</p>
+					</div>
+				</div>
+			</div>
+			{{/with}}
+			{{#with opponent}}
+			<div class="comment-wrapper">
+				<div class="comment l-two-col-list l-clearfix">
+					<img class="l-20p l-inline" {{bind-attr src=avatar}} alt="avatar">
+					<div class="l-80p l-inline info">
+						<p><span>{{name}}</span> replied:</p>
+						<p class="text">{{value}}</p>
+					</div>
+				</div>
+			</div>
+			{{/with}}
+		</div>
+		{{/with}}
+
+		<ul class="l-two-col-list l-clearfix">
+			{{#each board itemController='characterItem'}}
+			<li>
+				<div class="character-game-item l-fill-parent">
+					<div class="l-fill-parent">
+						<img {{bind-attr src=img}} alt="person">
+						<div class="controls l-anchor-bottom">
+							<h2 class="name info">{{name}}</h2>
+							<div class="l-inline-list l-clearfix">
+								<p class="control l-inline l-50p" {{action "guess"}}>Guess</p>
+								<p class="control l-inline l-50p" {{action "flip"}}>Flip</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</li>
+			{{/each}}
+		</ul>
+	</script>
+
+	<script type="text/x-handlebars" data-template-name="game/actions">
+		<ul class="view-controls l-two-col-list l-clearfix">
+			<li>Board</li>
+			<li>Questions</li>
+		</ul>
+
+		<ul class="spacer l-two-col-list l-clearfix">
+			<li></li>
+			<li class="active"></li>
+		</ul>
+
+		{{#each allactions itemController='actionItem'}}
+		<div class="comments">
+			{{#if isAction}}
+				{{#with me}}
+				<div class="comment-wrapper">
+					<div class="my-comment comment l-align-right l-clearfix">
+						<img class="l-20p l-inline" {{bind-attr src=avatar}} alt="avatar">
+						<div class="l-80p l-inline info">
+							<p><span>You</span> asked:</p>
+							<p class="text">{{value}}</p>
+						</div>
+					</div>
+				</div>
+				{{/with}}
+
+				{{#with opponent}}
+				<div class="comment-wrapper">
+					<div class="comment l-two-col-list l-clearfix">
+						<img class="l-20p l-inline" {{bind-attr src=avatar}} alt="avatar">
+						<div class="l-80p l-inline info">
+							<p><span>{{name}}</span> replied:</p>
+							<p class="text">{{value}}</p>
+						</div>
+					</div>
+				</div>
+				{{/with}}
+			{{/if}}
+		</div>
+		{{/each}}
+
+		<div class="comments">
+			<div class="comment-wrapper">
+				<div class="my-comment comment l-align-right l-clearfix">
+					<img class="l-20p l-inline" src="http://placehold.it/64x64" alt="avatar">
+					<div class="l-80p l-inline">
+						<div class="input">
+							<input class="l-fill-parent" type="text" placeholder="Ask a question...">
+							<input type="submit" value="Submit" class="l-fill-parent" />
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>			
+	</script>
+
+	<script type="text/x-handlebars" data-template-name="game/reply">
+	{{#each allactions itemController='replyItem'}}
+		{{#if isAction}}
+		<div class="comments">
+			{{#with opponent}}
+			<div class="comment-wrapper">
+				<div class="comment l-two-col-list l-clearfix">
+					<img class="l-20p l-inline" {{bind-attr src=avatar}} alt="avatar">
+					<div class="l-80p l-inline info">
+						<p><span>{{name}}</span> asked:</p>
+						<p class="text">{{value}}</p>
+					</div>
+				</div>
+			</div>
+			{{/with}}
+			{{#with me}}
+			<div class="comment-wrapper">
+				<div class="my-comment comment l-align-right l-clearfix">
+					<img class="l-20p l-inline" {{bind-attr src=avatar}} alt="avatar">
+					<div class="l-80p l-inline info">
+						<p><span>You</span> replied:</p>
+						<p class="text">{{value}}</p>
+					</div>
+				</div>
+			</div>
+			{{else}}
+			<div class="comment-wrapper">
+				<div class="my-comment comment l-align-right l-clearfix">
+					<img class="l-20p l-inline" src="http://placehold.it/64x64" alt="avatar">
+					<div class="l-80p l-inline">
+						<div class="input">
+							<input class="l-fill-parent" type="text" placeholder="Ask a question...">
+							<input type="submit" value="Submit" class="l-fill-parent" />
+						</div>
+					</div>
+				</div>
+			</div>			
+			{{/with}}
+		</div>
+		{{/if}}
+	{{/each}}
 	</script>
 
 	<script src="/javascripts/underscore.js"></script>

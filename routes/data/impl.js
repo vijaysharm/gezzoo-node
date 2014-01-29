@@ -126,11 +126,25 @@ function formatGamesResponse( user, games, boards, users, actions ) {
 		});
 		var gameopponent = gameutil.extractOpponent(user, game);
 		var gameuser = gameutil.extractUser(user, game);
+		var gameactions = _.filter(actions, function(action) {
+			return game._id.equals(action.gameid);
+		});
+
 		var me = _.extend(user,_.pick(gameuser, 'board', 'character'));
-		// me = _.extend(me, {actions: req.user_actions});
+		var myactions = _.filter(gameactions, function(action){
+			return me._id.equals(action.by);
+		});
+		me = _.extend(me, {actions:myactions});
+
 		var opponent = _.find(users, function(user) {
 			return user._id.equals(gameopponent.id);
 		});
+		var opponent_actions = _.filter(gameactions, function(action){
+			return opponent._id.equals(action.by);
+		});
+		opponent = _.extend(opponent, {actions:opponent_actions});
+
+		var state = game.turn.equals(me._id) ? getState(me, opponent) : 'read-only';
 
 		gs.push({
 			_id: game._id,
@@ -139,7 +153,8 @@ function formatGamesResponse( user, games, boards, users, actions ) {
 			board: board,
 			turn: game.turn,
 			ended: game.ended,
-			modified: game.modified
+			modified: game.modified,
+			state: state
 		});
 	});
 
@@ -217,21 +232,21 @@ function getState( user, opponent ) {
 	if ( user.character ) {
 		if ( opponent_action ) {
 			if ( opponent_action.action === 'guess' ) {
-				return 'ask-question';
+				return 'user-action';
 			} else if ( opponent_action.action === 'question' ) {
 				if ( opponent_action.reply ) {
-					return 'ask-question';
+					return 'user-action';
 				} else {
-					return 'give-reply';
+					return 'user-reply';
 				}
 			} else {
 				return 'error: unknown state ' + opponent_action.action;
 			}
 		} else {
-			return 'ask-question';
+			return 'user-action';
 		}
 	} else {
-		return 'pick-character';
+		return 'user-select-character';
 	}
 };
 
