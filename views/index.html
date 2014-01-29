@@ -10,210 +10,36 @@
 	<title>Gezzo?</title>
 </head>
 <body>
-
-	<script id="loading-view" type="text/x-handlebars-template">
-		<span>Loading...</span>
+	<script type="text/x-handlebars" data-template-name="application">
+		<p>Add links to the other views here</p>
+		{{outlet}}
 	</script>
 
-	<script id="my-questions" type="text/x-handlebars-template">
-		<ul class="view-controls l-two-col-list l-clearfix">
-			<li>Board</li>
-			<li>Questions</li>
-		</ul>
-
-		<ul class="spacer l-two-col-list l-clearfix">
-			<li></li>
-			<li class="active"></li>
-		</ul>
-
-		{{my_actions this}}
-
-		<div class="comments">
-			<div class="comment-wrapper">
-				<div class="my-comment comment l-align-right l-clearfix">
-					<img class="l-20p l-inline" src="http://placehold.it/64x64" alt="avatar">
-					<div class="l-80p l-inline">
-						<div class="input">
-							<input class="l-fill-parent" type="text" placeholder="Ask a question...">
-							<input type="submit" value="Submit" class="l-fill-parent" />
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>		
-	</script>
-
-	<script id="opponent-actions" type="text/x-handlebars-template">
-		{{opponent_actions this}}
-	</script>
-
-	<script id="character-select" type="text/x-handlebars-template">
+	<script type="text/x-handlebars" data-template-name="index">
 		<ul class="l-two-col-list l-clearfix">
-			{{#each this.board.characters}}
-			<li>
-				<div class="character-game-item l-fill-parent">
-					<div class="l-fill-parent">
-						<img src="{{img}}" alt="person">
-						<div class="controls l-anchor-bottom">
-							<h2 class="name info">{{name}}</h2>
-							<div class="l-inline-list l-clearfix">
-								<p class="control l-inline l-100p">Select</p>
+			{{#each itemController='gameItem'}}
+				<li>
+					<div class="character-game-item l-fill-parent" {{action "select"}}>
+						<div class="l-fill-parent">
+							<p class="overlay l-fill-parent">Play</p>
+							<img src="http://placehold.it/214x317" alt="person">
+							<div class="info l-anchor-bottom">
+								<h2 class="name">{{username}}</h2>
+								<p class="">{{turn}}</p>
+								<p class="date">{{date}}</p>
 							</div>
 						</div>
 					</div>
-				</div>
-			</li>
+				</li>
 			{{/each}}
 		</ul>
 	</script>
 
-	<script id="character-board" type="text/x-handlebars-template">
-		<ul class="l-two-col-list l-clearfix">
-			{{#each board}}
-			<li>
-				<div class="character-game-item l-fill-parent">
-					<div class="l-fill-parent">
-						<img src="{{img}}" alt="person">
-						<div class="controls l-anchor-bottom">
-							<h2 class="name info">{{name}}</h2>
-							<div class="l-inline-list l-clearfix">
-								<p class="control l-inline l-50p">Guess</p>
-								<p class="control l-inline l-50p">Flip</p>
-							</div>
-						</div>
-					</div>
-				</div>
-			</li>
-			{{/each}}
-		</ul>
-	</script>
-
-	<script id="my-guess" type="text/x-handlebars-template">
-		<div class="comments">
-			<div class="comment-wrapper">
-				<div class="my-comment comment l-align-right l-clearfix">
-					<img class="l-20p l-inline" src="http://placehold.it/64x64" alt="avatar">
-					<div class="l-80p l-inline info guess">
-						<p><span>You</span> guessed</p>
-						<img src="http://placehold.it/214x317" alt="person">
-					</div>
-				</div>
-			</div>
-		</div>	
-	</script>
-
-	<script id="my-action" type="text/x-handlebars-template">
-		<div class="comments">
-			{{#with me}}
-			<div class="comment-wrapper">
-				<div class="my-comment comment l-align-right l-clearfix">
-					<img class="l-20p l-inline" src="{{avatar}}" alt="avatar">
-					<div class="l-80p l-inline info">
-						<p><span>You</span> asked:</p>
-						<p class="text">{{value}}</p>
-					</div>
-				</div>
-			</div>
-			{{/with}}
-			{{#with opponent}}
-			<div class="comment-wrapper">
-				<div class="comment l-two-col-list l-clearfix">
-					<img class="l-20p l-inline" src="{{avatar}}" alt="avatar">
-					<div class="l-80p l-inline info">
-						<p><span>{{name}}</span> replied:</p>
-						<p class="text">{{value}}</p>
-					</div>
-				</div>
-			</div>
-			{{/with}}
-		</div>
-	</script>
-
-	<script id="opponent-action" type="text/x-handlebars-template">
-		{{log this}}
-		<div class="comments">
-			{{#with opponent}}
-			<div class="comment-wrapper">
-				<div class="comment l-two-col-list l-clearfix">
-					<img class="l-20p l-inline" src="{{avatar}}" alt="avatar">
-					<div class="l-80p l-inline info">
-						<p><span>{{name}}</span> asked:</p>
-						<p class="text">{{value}}</p>
-					</div>
-				</div>
-			</div>
-			{{/with}}
-			{{#with me}}
-			<div class="comment-wrapper">
-				<div class="my-comment comment l-align-right l-clearfix">
-					<img class="l-20p l-inline" src="{{avatar}}" alt="avatar">
-					<div class="l-80p l-inline info">
-						<p><span>You</span> replied:</p>
-						<p class="text">{{value}}</p>
-					</div>
-				</div>
-			</div>
-			{{/with}}
-			{{#if enableInput}}
-			<div class="comment-wrapper">
-				<div class="my-comment comment l-align-right l-clearfix">
-					<img class="l-20p l-inline" src="http://placehold.it/64x64" alt="avatar">
-					<div class="l-80p l-inline">
-						<div class="input">
-							<input class="l-fill-parent" type="text" placeholder="Ask a question...">
-							<input type="submit" value="Submit" class="l-fill-parent" />
-						</div>
-					</div>
-				</div>
-			</div>			
-			{{/if}}
-		</div>
-	</script>
-
-	<script id="board" type="text/x-handlebars-template">
-		<ul class="view-controls l-two-col-list l-clearfix">
-			<li>Board</li>
-			<li>Questions</li>
-		</ul>
-
-		<ul class="spacer l-two-col-list l-clearfix">
-			<li class="active"></li>
-			<li></li>
-		</ul>
-
-		{{last_action this}}
-		{{character_board this}}
-	</script>
-
-	<script id="game-item" type="text/x-handlebars-template">
-		<div class="character-game-item l-fill-parent" data-game={{id}}>
-			<div class="l-fill-parent">
-				<p class="overlay l-fill-parent">Play</p>
-				<img src="http://placehold.it/214x317" alt="person">
-				<div class="info l-anchor-bottom">
-					<h2 class="name">{{username}}</h2>
-					<p class="">{{turn}}</p>
-					<p class="date">{{date}}</p>
-				</div>
-			</div>
-		</div>
-	</script>
-	
-	<script id="game-list" type="text/x-handlebars-template">
-		<ul class="l-two-col-list l-clearfix">
-			{{#each this}}
-				<li>{{game_item this}}</li>
-			{{/each}}
-		</ul>
-	</script>
-
-	<div id="loading" class="loading"></div>
-	<div id="main" class="l-fill-parent l-container t-background"/></div>
-
-	<script src="/javascripts/jquery.js"></script>
 	<script src="/javascripts/underscore.js"></script>
-	<script src="/javascripts/handlebars.js"></script>
-	<script src="/javascripts/moment.js"></script>
-	<script src="/javascripts/main.js"></script>
+	<script src="/javascripts/moment.js"></script>	
+	<script src="/javascripts/jquery-1.10.2.js"></script>
+	<script src="/javascripts/handlebars-1.1.2.js"></script>
+	<script src="/javascripts/ember-1.3.1.js"></script>
+	<script src="/javascripts/app.js"></script>
 </body>
 </html>
