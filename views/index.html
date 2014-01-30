@@ -114,7 +114,9 @@
 								<h2 class="name info">{{name}}</h2>
 								{{#if isUserAction}}
 								<div class="l-inline-list l-clearfix">
-									<p {{bind-attr class=":control :l-inline up:l-50p:l-0p"}} {{action "guess"}}>Guess</p>
+									{{#if up}}
+										<p {{bind-attr class=":control :l-inline up:l-50p:l-0p"}} {{action "guess"}}>Guess</p>
+									{{/if}}
 									<p {{bind-attr class=":control :l-inline up:l-50p:l-100p"}} {{action "flip"}}>Flip</p>
 								</div>
 								{{/if}}
