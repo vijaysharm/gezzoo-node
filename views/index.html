@@ -16,7 +16,6 @@
 		{{#link-to 'index'}}  home  {{/link-to}}
 		{{#link-to 'game.select' model}}  select  {{/link-to}}
 		{{#link-to 'game.board' model}}  board  {{/link-to}}
-		{{#link-to 'game.actions' model}}  actions  {{/link-to}}
 		{{#link-to 'game.reply' model}}  replies  {{/link-to}}
 		{{outlet}}
 	</script>
@@ -73,73 +72,13 @@
 		</ul>
 
 		<ul class="spacer l-two-col-list l-clearfix">
-			<li class="active"></li>
-			<li></li>
+			<li {{bind-attr class=viewBoard:active}}></li>
+			<li {{bind-attr class=viewBoard::active}}></li>
 		</ul>
 
-		{{#with lastaction}}
-		<div class="comments">
-			{{#with me}}
-			<div class="comment-wrapper">
-				<div class="my-comment comment l-align-right l-clearfix">
-					<img class="l-20p l-inline" {{bind-attr src=avatar}} alt="avatar">
-					<div class="l-80p l-inline info">
-						<p><span>You</span> asked:</p>
-						<p class="text">{{value}}</p>
-					</div>
-				</div>
-			</div>
-			{{/with}}
-			{{#with opponent}}
-			<div class="comment-wrapper">
-				<div class="comment l-two-col-list l-clearfix">
-					<img class="l-20p l-inline" {{bind-attr src=avatar}} alt="avatar">
-					<div class="l-80p l-inline info">
-						<p><span>{{name}}</span> replied:</p>
-						<p class="text">{{value}}</p>
-					</div>
-				</div>
-			</div>
-			{{/with}}
-		</div>
-		{{/with}}
-
-		<ul class="l-two-col-list l-clearfix">
-			{{#each board itemController='characterItem'}}
-			<li>
-				<div class="character-game-item l-fill-parent">
-					<div class="l-fill-parent">
-						<img {{bind-attr src=img}} alt="person">
-						<div class="controls l-anchor-bottom">
-							<h2 class="name info">{{name}}</h2>
-							{{#if isUserAction}}
-							<div class="l-inline-list l-clearfix">
-								<p {{bind-attr class=":control :l-inline up:l-50p:l-0p"}} {{action "guess"}}>Guess</p>
-								<p {{bind-attr class=":control :l-inline up:l-50p:l-100p"}} {{action "flip"}}>Flip</p>
-							</div>
-							{{/if}}
-						</div>
-					</div>
-				</div>
-			</li>
-			{{/each}}
-		</ul>
-	</script>
-
-	<script type="text/x-handlebars" data-template-name="game/actions">
-		<ul class="view-controls l-two-col-list l-clearfix">
-			<li {{action 'board'}}>Board</li>
-			<li {{action 'question'}}>Questions</li>
-		</ul>
-
-		<ul class="spacer l-two-col-list l-clearfix">
-			<li></li>
-			<li class="active"></li>
-		</ul>
-
-		{{#each allactions itemController='actionItem'}}
-		<div class="comments">
-			{{#if isAction}}
+		{{#if viewBoard}}
+			{{#with lastaction}}
+			<div class="comments">
 				{{#with me}}
 				<div class="comment-wrapper">
 					<div class="my-comment comment l-align-right l-clearfix">
@@ -151,7 +90,6 @@
 					</div>
 				</div>
 				{{/with}}
-
 				{{#with opponent}}
 				<div class="comment-wrapper">
 					<div class="comment l-two-col-list l-clearfix">
@@ -163,30 +101,81 @@
 					</div>
 				</div>
 				{{/with}}
-			{{/if}}
-		</div>
+			</div>
+			{{/with}}
+
+			<ul class="l-two-col-list l-clearfix">
+				{{#each board itemController='characterItem'}}
+				<li>
+					<div class="character-game-item l-fill-parent">
+						<div class="l-fill-parent">
+							<img {{bind-attr src=img}} alt="person">
+							<div class="controls l-anchor-bottom">
+								<h2 class="name info">{{name}}</h2>
+								{{#if isUserAction}}
+								<div class="l-inline-list l-clearfix">
+									<p {{bind-attr class=":control :l-inline up:l-50p:l-0p"}} {{action "guess"}}>Guess</p>
+									<p {{bind-attr class=":control :l-inline up:l-50p:l-100p"}} {{action "flip"}}>Flip</p>
+								</div>
+								{{/if}}
+							</div>
+						</div>
+					</div>
+				</li>
+				{{/each}}
+			</ul>
 		{{else}}
+			{{#each allactions itemController='actionItem'}}
+			<div class="comments">
+				{{#if isAction}}
+					{{#with me}}
+					<div class="comment-wrapper">
+						<div class="my-comment comment l-align-right l-clearfix">
+							<img class="l-20p l-inline" {{bind-attr src=avatar}} alt="avatar">
+							<div class="l-80p l-inline info">
+								<p><span>You</span> asked:</p>
+								<p class="text">{{value}}</p>
+							</div>
+						</div>
+					</div>
+					{{/with}}
+
+					{{#with opponent}}
+					<div class="comment-wrapper">
+						<div class="comment l-two-col-list l-clearfix">
+							<img class="l-20p l-inline" {{bind-attr src=avatar}} alt="avatar">
+							<div class="l-80p l-inline info">
+								<p><span>{{name}}</span> replied:</p>
+								<p class="text">{{value}}</p>
+							</div>
+						</div>
+					</div>
+					{{/with}}
+				{{/if}}
+			</div>
+			{{else}}
+				<div class="comments">
+					<div class="comment-wrapper">
+						<p class='l-text-center empty'>Nothing here yet..</p>
+					</div>
+				</div>
+			{{/each}}
+
+			{{#if isUserAction}}
 			<div class="comments">
 				<div class="comment-wrapper">
-					<p class='l-text-center empty'>Nothing here yet..</p>
-				</div>
-			</div>
-		{{/each}}
-
-		{{#if isUserAction}}
-		<div class="comments">
-			<div class="comment-wrapper">
-				<div class="my-comment comment l-align-right l-clearfix">
-					<img class="l-20p l-inline" src="http://placehold.it/64x64" alt="avatar">
-					<div class="l-80p l-inline">
-						<div class="input">
-							<input class="l-fill-parent" type="text" placeholder="Ask a question...">
-							<input type="submit" value="Submit" class="l-fill-parent" />
+					<div class="my-comment comment l-align-right l-clearfix">
+						<img class="l-20p l-inline" src="http://placehold.it/64x64" alt="avatar">
+						<div class="l-80p l-inline">
+							<div class="input">
+								<input class="l-fill-parent" type="text" placeholder="Ask a question...">
+								<input type="submit" value="Submit" class="l-fill-parent" />
+							</div>
 						</div>
 					</div>
 				</div>
-			</div>
-		</div>	
+			</div>	
+			{{/if}}
 		{{/if}}
 	</script>
 

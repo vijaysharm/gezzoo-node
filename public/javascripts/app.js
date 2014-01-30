@@ -5,7 +5,6 @@ App.Router.map(function() {
 	this.resource('game', { path:'/:id' }, function() {
 		this.route('select');
 		this.route('board');
-		this.route('actions');
 		this.route('reply');
 	});
 });
@@ -171,13 +170,15 @@ App.GameBoardView = Ember.View.extend({
 App.GameBoardController = Ember.Controller.extend({
 	actions: {
 		board: function() {
-			var id = this.get('model._id')
-			this.transitionToRoute('game.board', id);
+			this.set('viewBoard', true);
 		},
 		question: function() {
-			var id = this.get('model._id');
-			this.transitionToRoute('game.actions', id);
+			this.set('viewBoard', false);
 		}
+	},
+	init: function() {
+		this._super();
+		this.set('viewBoard', true);
 	},
 	// TODO: This method needs to look at the modified 
 	//		 time to know which is the most recent
@@ -221,25 +222,7 @@ App.GameBoardController = Ember.Controller.extend({
 		}, {});
 
 		return _.values(b);
-	}.property('model.me.board')
-});
-
-/** Actions **/
-App.GameActionsRoute = App.AuthenticatedGameRoute.extend({});
-App.GameActionsView = Ember.View.extend({
-	classNames: ["l-fill-parent", "l-container", 't-background']
-});
-App.GameActionsController = Ember.Controller.extend({
-	actions: {
-		board: function() {
-			var id = this.get('model._id')
-			this.transitionToRoute('game.board', id);
-		},
-		question: function() {
-			var id = this.get('model._id');
-			this.transitionToRoute('game.actions', id);
-		}
-	},
+	}.property('model.me.board'),
 	convert: function( action ) {
 		var data = {};
 
@@ -281,8 +264,9 @@ App.GameActionsController = Ember.Controller.extend({
 	}.property('model.me.actions'),
 	isUserAction: function() {
 		return this.get('model.state') === 'user-action';
-	}.property('model.state')
+	}.property('model.state')	
 });
+
 App.ActionItemController = Ember.Controller.extend({
 	isAction: function() {
 		return (this.get('model.me.type') === 'question');
