@@ -11,6 +11,7 @@
 </head>
 <body>
 	<!-- TODO: To be removed once all the pages are complete, and the page are bound to each other -->
+	<!-- TODO: There are some inline avatar images shown. They need to come from the controllers -->
 	<script type="text/x-handlebars" data-template-name="application">
 		{{#link-to 'index'}}  home  {{/link-to}}
 		{{#link-to 'game.select' model}}  select  {{/link-to}}
@@ -42,16 +43,20 @@
 
 	<script type="text/x-handlebars" data-template-name="game/select">
 		<ul class="l-two-col-list l-clearfix">
-			{{#each this.board.characters itemController='characterItem'}}
+			{{#each characters itemController='characterItem'}}
 			<li>
 				<div class="character-game-item l-fill-parent">
 					<div class="l-fill-parent">
 						<img {{bind-attr src=img}} alt="person">
 						<div class="controls l-anchor-bottom">
 							<h2 class="name info">{{name}}</h2>
+
+							{{#if isUserSelection}}
 							<div class="l-inline-list l-clearfix">
 								<p class="control l-inline l-100p" {{action "select"}}>Select</p>
 							</div>
+							{{/if}}
+
 						</div>
 					</div>
 				</div>
@@ -60,12 +65,11 @@
 		</ul>
 	</script>
 
-	<!-- TODO: You need to disable controls if its not the current user's turn -->
 	<!-- TODO: You need to hide the 'guess' button if the character is flipped -->
 	<script type="text/x-handlebars" data-template-name="game/board">
 		<ul class="view-controls l-two-col-list l-clearfix">
-			<li>Board</li>
-			<li>Questions</li>
+			<li {{action 'board'}}>Board</li>
+			<li {{action 'question'}}>Questions</li>
 		</ul>
 
 		<ul class="spacer l-two-col-list l-clearfix">
@@ -108,10 +112,12 @@
 						<img {{bind-attr src=img}} alt="person">
 						<div class="controls l-anchor-bottom">
 							<h2 class="name info">{{name}}</h2>
+							{{#if isUserAction}}
 							<div class="l-inline-list l-clearfix">
-								<p class="control l-inline l-50p" {{action "guess"}}>Guess</p>
-								<p class="control l-inline l-50p" {{action "flip"}}>Flip</p>
+								<p {{bind-attr class=":control :l-inline up:l-50p:l-0p"}} {{action "guess"}}>Guess</p>
+								<p {{bind-attr class=":control :l-inline up:l-50p:l-100p"}} {{action "flip"}}>Flip</p>
 							</div>
+							{{/if}}
 						</div>
 					</div>
 				</div>
@@ -122,8 +128,8 @@
 
 	<script type="text/x-handlebars" data-template-name="game/actions">
 		<ul class="view-controls l-two-col-list l-clearfix">
-			<li>Board</li>
-			<li>Questions</li>
+			<li {{action 'board'}}>Board</li>
+			<li {{action 'question'}}>Questions</li>
 		</ul>
 
 		<ul class="spacer l-two-col-list l-clearfix">
@@ -159,8 +165,15 @@
 				{{/with}}
 			{{/if}}
 		</div>
+		{{else}}
+			<div class="comments">
+				<div class="comment-wrapper">
+					<p class='l-text-center empty'>Nothing here yet..</p>
+				</div>
+			</div>
 		{{/each}}
 
+		{{#if isUserAction}}
 		<div class="comments">
 			<div class="comment-wrapper">
 				<div class="my-comment comment l-align-right l-clearfix">
@@ -173,7 +186,8 @@
 					</div>
 				</div>
 			</div>
-		</div>			
+		</div>	
+		{{/if}}
 	</script>
 
 	<script type="text/x-handlebars" data-template-name="game/reply">
@@ -202,6 +216,7 @@
 				</div>
 			</div>
 			{{else}}
+			{{#if }}
 			<div class="comment-wrapper">
 				<div class="my-comment comment l-align-right l-clearfix">
 					<img class="l-20p l-inline" src="http://placehold.it/64x64" alt="avatar">
@@ -212,7 +227,8 @@
 						</div>
 					</div>
 				</div>
-			</div>			
+			</div>
+			{{/if}}		
 			{{/with}}
 		</div>
 		{{/if}}

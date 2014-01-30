@@ -226,6 +226,8 @@ function getMostRecentAction( actions ) {
 //       and if there's something that doesn't make
 // 		 sense, we can set something to have the turn
 //	     updated to the opponent
+// TODO: Must also support forwarding the user to the 
+//       to show them that the game is over.
 function getState( user, opponent ) {
 	var opponent_action = getMostRecentAction(opponent.actions);
 	

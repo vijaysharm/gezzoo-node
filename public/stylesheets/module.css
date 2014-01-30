@@ -191,3 +191,8 @@
 .input input[type="submit"] {
 	padding: 24px;
 }
+
+.empty {
+	background-color: white;
+	padding: 20px 0;
+}
