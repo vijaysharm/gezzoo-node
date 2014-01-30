@@ -33,9 +33,16 @@ App.AuthenticatedGameRoute = App.AuthenticatedRoute.extend({
 });
 
 App.LoginController = Ember.Controller.extend({
+	needs: ['application'],
+	userChanged: function() {
+		this.set('user', null);
+	}.observes('controllers.application.user'),
 	login: function() {
+		var userid = this.get('controllers.application.user');
+		console.log('query ' + userid );
+
 		var self = this;
-		var token = '52728fbf63a64c904c657ed5';
+		var token = userid;
 		var data = {token:token};
 		return Ember.$.post('/api/login', data).then(function(response) {
 			self.set('user', {
@@ -53,10 +60,14 @@ App.LoginController = Ember.Controller.extend({
 /** Application **/
 // TODO: This can be removed. I'm hard coding
 //		 a path to a game.
-App.ApplicationRoute = Ember.Route.extend({
-	model: function() {
-		return '5286e01d9beb41000b00003a';
-	}
+App.ApplicationController = Ember.Controller.extend({
+	users: [
+		'52728fbf63a64c904c657ed5',
+		'52728ca9954deb0b31000004',
+		'52728fbf63a64c904c657ea6',
+		'22728fbf63a64c904c657eaa'
+	],
+	user: '52728fbf63a64c904c657ed5'
 });
 
 App.ApplicationView = Ember.View.extend({
@@ -64,6 +75,7 @@ App.ApplicationView = Ember.View.extend({
 });
 
 /** Game List **/
+// TODO: Missing a 'start new game' button
 App.IndexView = Ember.View.extend({
 	classNames: ["l-fill-parent", "l-container", 't-background']
 });
@@ -117,18 +129,19 @@ App.GameSelectController = Ember.Controller.extend({
 	characters: function() {
 		return this.get('model.board.characters');
 	}.property('model.board.characters'),
+	selectCharacter: function(id) {
+		console.log('selecting id: ' + id);
+	}
 });
 App.CharacterItemController = Ember.Controller.extend({
 	actions: {
 		select: function() {
-			console.log('select');
-			console.log(this.get('model.name'));
-			console.log(this.get('model._id'));
+			var controller = this.get('controllers.gameSelect');
+			controller.selectCharacter(this.get('model._id'));
 		},
 		guess: function() {
-			console.log('guess');
-			console.log(this.get('model.name'));
-			console.log(this.get('model._id'));
+			var controller = this.get('controllers.gameBoard');
+			controller.guess(this.get('model._id'));
 		},
 		flip: function() {
 			var up = this.get('model.up');
@@ -264,7 +277,16 @@ App.GameBoardController = Ember.Controller.extend({
 	}.property('model.me.actions'),
 	isUserAction: function() {
 		return this.get('model.state') === 'user-action';
-	}.property('model.state')	
+	}.property('model.state'),
+	guess: function(id) {
+		var board = [];
+		_.each(this.get('model.me.board'), function(item) {
+			board.push(_.pick(item, '_id', 'up'));
+		});
+
+		console.log('guessing: ' + id);
+		console.log(board);
+	}
 });
 
 App.ActionItemController = Ember.Controller.extend({

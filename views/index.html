@@ -12,11 +12,13 @@
 <body>
 	<!-- TODO: To be removed once all the pages are complete, and the page are bound to each other -->
 	<!-- TODO: There are some inline avatar images shown. They need to come from the controllers -->
+	<!-- TODO: Need a home button design -->
 	<script type="text/x-handlebars" data-template-name="application">
-		{{#link-to 'index'}}  home  {{/link-to}}
-		{{#link-to 'game.select' model}}  select  {{/link-to}}
-		{{#link-to 'game.board' model}}  board  {{/link-to}}
-		{{#link-to 'game.reply' model}}  replies  {{/link-to}}
+		{{view Ember.Select 
+			id="test-users-select"
+			content=users
+			value=user
+			class="l-fill-width"}}
 		{{outlet}}
 	</script>
 
@@ -181,6 +183,7 @@
 		{{/if}}
 	</script>
 
+	<!-- TODO: Missing 'start new game with this person' -->
 	<script type="text/x-handlebars" data-template-name="game/reply">
 	{{#each allactions itemController='replyItem'}}
 		{{#if isAction}}
