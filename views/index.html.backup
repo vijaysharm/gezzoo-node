@@ -10,91 +10,230 @@
 	<title>Gezzo?</title>
 </head>
 <body>
-
-	<script id="fullscreen-loading" type="text/x-handlebars-template">
-		<span>Loading...</span>
+	<!-- TODO: To be removed once all the pages are complete, and the page are bound to each other -->
+	<!-- TODO: There are some inline avatar images shown. They need to come from the controllers -->
+	<!-- TODO: Need a home button design -->
+	<script type="text/x-handlebars" data-template-name="application">
+		{{view Ember.Select 
+			id="test-users-select"
+			content=users
+			value=user
+			class="l-fill-width"}}
+		{{outlet}}
 	</script>
 
-	<script id="game-list" type="text/x-handlebars-template">
-		<div class="game-list">
-			<div class="block new-game">
-				<div>+New Game</div>
+	<script type="text/x-handlebars" data-template-name="index">
+		<ul class="l-two-col-list l-clearfix">
+			{{#each itemController='gameItem'}}
+				<li>
+					<div class="character-game-item l-fill-parent" {{action "select"}}>
+						<div class="l-fill-parent">
+							<p class="overlay l-fill-parent">Play</p>
+							<img src="http://placehold.it/214x317" alt="person">
+							<div class="info l-anchor-bottom">
+								<h2 class="name">{{username}}</h2>
+								<p class="">{{turn}}</p>
+								<p class="date">{{date}}</p>
+							</div>
+						</div>
+					</div>
+				</li>
+			{{/each}}
+		</ul>
+	</script>
+
+	<script type="text/x-handlebars" data-template-name="game/select">
+		<ul class="l-two-col-list l-clearfix">
+			{{#each characters itemController='characterItem'}}
+			<li>
+				<div class="character-game-item l-fill-parent">
+					<div class="l-fill-parent">
+						<img {{bind-attr src=img}} alt="person">
+						<div class="controls l-anchor-bottom">
+							<h2 class="name info">{{name}}</h2>
+
+							{{#if isUserSelection}}
+							<div class="l-inline-list l-clearfix">
+								<p class="control l-inline l-100p" {{action "select"}}>Select</p>
+							</div>
+							{{/if}}
+
+						</div>
+					</div>
+				</div>
+			</li>
+			{{/each}}
+		</ul>
+	</script>
+
+	<!-- TODO: You need to hide the 'guess' button if the character is flipped -->
+	<script type="text/x-handlebars" data-template-name="game/board">
+		<ul class="view-controls l-two-col-list l-clearfix">
+			<li {{action 'board'}}>Board</li>
+			<li {{action 'question'}}>Questions</li>
+		</ul>
+
+		<ul class="spacer l-two-col-list l-clearfix">
+			<li {{bind-attr class=viewBoard:active}}></li>
+			<li {{bind-attr class=viewBoard::active}}></li>
+		</ul>
+
+		{{#if viewBoard}}
+			{{#with lastaction}}
+			<div class="comments">
+				{{#with me}}
+				<div class="comment-wrapper">
+					<div class="my-comment comment l-align-right l-clearfix">
+						<img class="l-20p l-inline" {{bind-attr src=avatar}} alt="avatar">
+						<div class="l-80p l-inline info">
+							<p><span>You</span> asked:</p>
+							<p class="text">{{value}}</p>
+						</div>
+					</div>
+				</div>
+				{{/with}}
+				{{#with opponent}}
+				<div class="comment-wrapper">
+					<div class="comment l-two-col-list l-clearfix">
+						<img class="l-20p l-inline" {{bind-attr src=avatar}} alt="avatar">
+						<div class="l-80p l-inline info">
+							<p><span>{{name}}</span> replied:</p>
+							<p class="text">{{value}}</p>
+						</div>
+					</div>
+				</div>
+				{{/with}}
 			</div>
-			{{#each game}}
-				<div class="block {{turn_class}}" data-game={{_id}}>
-					<div class="avatar">
-	    				<img src="http://placehold.it/100x100"/>
-	    			</div>
-	    			<div class="game-info">
-		        		<div class="username">{{opponent.username}}</div>
-		        		<div class="state">{{turn_print}}</div>
-		        		<div class='time'>{{game_date}}</div>
-	    			</div>
+			{{/with}}
+
+			<ul class="l-two-col-list l-clearfix">
+				{{#each board itemController='characterItem'}}
+				<li>
+					<div class="character-game-item l-fill-parent">
+						<div class="l-fill-parent">
+							<img {{bind-attr src=img}} alt="person">
+							<div class="controls l-anchor-bottom">
+								<h2 class="name info">{{name}}</h2>
+								{{#if isUserAction}}
+								<div class="l-inline-list l-clearfix">
+									{{#if up}}
+										<p {{bind-attr class=":control :l-inline up:l-50p:l-0p"}} {{action "guess"}}>Guess</p>
+									{{/if}}
+									<p {{bind-attr class=":control :l-inline up:l-50p:l-100p"}} {{action "flip"}}>Flip</p>
+								</div>
+								{{/if}}
+							</div>
+						</div>
+					</div>
+				</li>
+				{{/each}}
+			</ul>
+		{{else}}
+			{{#each allactions itemController='actionItem'}}
+			<div class="comments">
+				{{#if isAction}}
+					{{#with me}}
+					<div class="comment-wrapper">
+						<div class="my-comment comment l-align-right l-clearfix">
+							<img class="l-20p l-inline" {{bind-attr src=avatar}} alt="avatar">
+							<div class="l-80p l-inline info">
+								<p><span>You</span> asked:</p>
+								<p class="text">{{value}}</p>
+							</div>
+						</div>
+					</div>
+					{{/with}}
+
+					{{#with opponent}}
+					<div class="comment-wrapper">
+						<div class="comment l-two-col-list l-clearfix">
+							<img class="l-20p l-inline" {{bind-attr src=avatar}} alt="avatar">
+							<div class="l-80p l-inline info">
+								<p><span>{{name}}</span> replied:</p>
+								<p class="text">{{value}}</p>
+							</div>
+						</div>
+					</div>
+					{{/with}}
+				{{/if}}
+			</div>
+			{{else}}
+				<div class="comments">
+					<div class="comment-wrapper">
+						<p class='l-text-center empty'>Nothing here yet..</p>
+					</div>
 				</div>
 			{{/each}}
-		</div>
-	</script>
 
-	<script id="user_answer_item" type="text/x-handlebars-template">
-		<div>Answer</div>
-	</script>
-
-	<script id="user_question_item" type="text/x-handlebars-template">
-		<div class="action">
-			<div>{{question.by}}</div>
-			<div>{{question.value}}</div>
-			<div>{{reply.by}}</div>
-			<div>{{reply.value}}</div>
-		</div>
-	</script>
-
-	<script id="ask_question_item" type="text/x-handlebars-template">
-		<div class="action">
-			<input><button>Ask</button>
-		</div>
-	</script>
-
-	<script id="player_board_item" type="text/x-handlebars-template">
-		<div data-character={{id}} class="character {{up}}">
-			<div class="character-img">
-				<div class="character-cover"></div>
-				<img src="{{img}}" alt="{{name}}"/>
-				<div class="character-name">{{name}}</div>
-			</div>
-			<div class="flip-button">Flip</div>
-			<div class="guess-button">Guess</div>
-		</div>
-	</script>
-	
-	<script id="user_turn" type="text/x-handlebars-template">
-		<div class='ask-question'>
-			<div class="banner">
-				<div class="small-avatar">
-					<img src="http://placehold.it/48x48"/>
+			{{#if isUserAction}}
+			<div class="comments">
+				<div class="comment-wrapper">
+					<div class="my-comment comment l-align-right l-clearfix">
+						<img class="l-20p l-inline" src="http://placehold.it/64x64" alt="avatar">
+						<div class="l-80p l-inline">
+							<div class="input">
+								<input class="l-fill-parent" type="text" placeholder="Ask a question...">
+								<input type="submit" value="Submit" class="l-fill-parent" />
+							</div>
+						</div>
+					</div>
 				</div>
-				<span>{{opponent.username}}</span>
-			</div>
-			<div class="controls">
-				<div class="board-button control">Board</div>	
-				<div class="question-button control">Questions</div>
-			</div>
-
-			<div class="characters">
-				{{{characters this}}}
-			</div>
-
-			<div class="actions">
-				{{{user_actions this}}}
-			</div>			
-		</div>
+			</div>	
+			{{/if}}
+		{{/if}}
 	</script>
 
-	<div id='main'/>
+	<!-- TODO: Missing 'start new game with this person' -->
+	<script type="text/x-handlebars" data-template-name="game/reply">
+	{{#each allactions itemController='replyItem'}}
+		{{#if isAction}}
+		<div class="comments">
+			{{#with opponent}}
+			<div class="comment-wrapper">
+				<div class="comment l-two-col-list l-clearfix">
+					<img class="l-20p l-inline" {{bind-attr src=avatar}} alt="avatar">
+					<div class="l-80p l-inline info">
+						<p><span>{{name}}</span> asked:</p>
+						<p class="text">{{value}}</p>
+					</div>
+				</div>
+			</div>
+			{{/with}}
+			{{#with me}}
+			<div class="comment-wrapper">
+				<div class="my-comment comment l-align-right l-clearfix">
+					<img class="l-20p l-inline" {{bind-attr src=avatar}} alt="avatar">
+					<div class="l-80p l-inline info">
+						<p><span>You</span> replied:</p>
+						<p class="text">{{value}}</p>
+					</div>
+				</div>
+			</div>
+			{{else}}
+			{{#if }}
+			<div class="comment-wrapper">
+				<div class="my-comment comment l-align-right l-clearfix">
+					<img class="l-20p l-inline" src="http://placehold.it/64x64" alt="avatar">
+					<div class="l-80p l-inline">
+						<div class="input">
+							<input class="l-fill-parent" type="text" placeholder="Ask a question...">
+							<input type="submit" value="Submit" class="l-fill-parent" />
+						</div>
+					</div>
+				</div>
+			</div>
+			{{/if}}		
+			{{/with}}
+		</div>
+		{{/if}}
+	{{/each}}
+	</script>
 
-	<script src="/javascripts/jquery.js"></script>
 	<script src="/javascripts/underscore.js"></script>
-	<script src="/javascripts/handlebars.js"></script>
-	<script src="/javascripts/moment.js"></script>
-	<script src="/javascripts/main.js"></script>
+	<script src="/javascripts/moment.js"></script>	
+	<script src="/javascripts/jquery-1.10.2.js"></script>
+	<script src="/javascripts/handlebars-1.1.2.js"></script>
+	<script src="/javascripts/ember-1.3.1.js"></script>
+	<script src="/javascripts/app.js"></script>
 </body>
 </html>

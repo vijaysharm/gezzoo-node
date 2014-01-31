@@ -16,13 +16,13 @@
 	<script type="text/x-handlebars" data-template-name="application">
 		{{view Ember.Select 
 			id="test-users-select"
-			content=users
-			value=user
+			content=usertokens
+			value=token
 			class="l-fill-width"}}
 		{{outlet}}
 	</script>
 
-	<script type="text/x-handlebars" data-template-name="index">
+	<script type="text/x-handlebars" data-template-name="user/view">
 		<ul class="l-two-col-list l-clearfix">
 			{{#each itemController='gameItem'}}
 				<li>

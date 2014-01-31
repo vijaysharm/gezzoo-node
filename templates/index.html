@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Gezzo?</title>
+</head>
+<body>
+
+<script type="text/x-handlebars" data-template-name="application">
+	<h1>Application</h1>
+	{{outlet}}
+</script>
+
+<script type="text/x-handlebars" data-template-name="index">
+	<h2>index</h2>
+</script>
+
+<script type="text/x-handlebars" data-template-name="user/view">
+	<div>
+		<span>User View</span>
+		{{#link-to 'game.select' '123' '456'}}game.select{{/link-to}}
+	</div>
+</script>
+
+<script type="text/x-handlebars" data-template-name="game/select">
+	<div>
+		<span>Game Select</span>
+		{{#link-to 'user.view' '123'}}game.select{{/link-to}}
+	</div>
+</script>
+
+
+<script src="jquery-1.10.2.js"></script>
+<script src="handlebars-1.1.2.js"></script>
+<script src="ember-1.3.1.js"></script>
+<script type="text/javascript">
+
+App = Ember.Application.create({
+	LOG_TRANSITIONS: true,
+});
+App.Router.map(function() {
+	this.resource('user', {path:':user'}, function() {
+		this.route('view');
+		this.resource('game', {path:':game'}, function() {
+			this.route('select');
+		});
+	});
+});
+
+App.UserRoute = Ember.Route.extend({
+	beforeModel: function() {
+		console.log('user#beforeModel');
+	},
+	model: function(params, transition) {
+		console.log('user#model: ' + JSON.stringify(params));
+		return 1;
+	}	
+});
+
+App.UserViewRoute = Ember.Route.extend({
+	beforeModel: function() {
+		console.log('user.view#beforeModel');
+	},
+	model: function(params, transition) {
+		console.log('user.view#model: ' + JSON.stringify(params));
+		var model = this.modelFor('user');
+		console.log('user.view#model ' + model);
+		return model;
+	}	
+});
+	
+// });
+
+// App.NewRoute = Ember.Route.extend({
+// 	model: function(params, transition) {
+// 		console.log('new ' + JSON.stringify(params));
+// 		return 2;
+// 	}	
+// });
+
+// App.NewTimeRoute = Ember.Route.extend({
+// 	model: function(params, transition) {
+// 		console.log('new.time ' + JSON.stringify(params));
+// 		return 3;
+// 	}	
+// });
+
+</script>
+</body>

@@ -1,55 +1,48 @@
-App = Ember.Application.create();
+App = Ember.Application.create({
+	LOG_TRANSITIONS: true,
+});
 
 App.Router.map(function() {
 	this.route('/');
-	this.resource('game', { path:'/:id' }, function() {
-		this.route('select');
-		this.route('board');
-		this.route('reply');
+	this.resource('user', { path: ':user' }, function() {
+		this.route('view');
+		this.resource('game', { path:':game' }, function() {
+			this.route('select');
+			this.route('board');
+			this.route('reply');
+		});
 	});
 });
 
-App.AuthenticatedRoute = Ember.Route.extend({
-	beforeModel: function(transition) {
-		var loginController = this.controllerFor('login');
-		if (! loginController.get('user')) {
-			return loginController.login();
-		}
-	},
-	getJSONWithToken: function(url) {
-    	var user = this.controllerFor('login').get('user');
-    	var token = user.token;
-    	return $.getJSON(url, { token: token });
-  	},
-});
-
-App.AuthenticatedGameRoute = App.AuthenticatedRoute.extend({
-	// TODO: Not sure why the id isn't in the params object?
-	model: function(params, transition) {
-		var gameid = transition.params.id;
-		var url = '/api/games/' + gameid;
-		return this.getJSONWithToken(url);
-	}
-});
-
-App.LoginController = Ember.Controller.extend({
-	needs: ['application'],
-	userChanged: function() {
+/** Application **/
+// TODO: This can be removed. I'm hard coding
+//		 a path to a game.
+App.ApplicationController = Ember.Controller.extend({
+	usertokens: [
+		'52728fbf63a64c904c657ed5',
+		'52728ca9954deb0b31000004',
+		'52728fbf63a64c904c657ea6',
+		'22728fbf63a64c904c657eaa'
+	],
+	token: '52728fbf63a64c904c657ed5',
+	user: null,
+	tokenChanged: function() {
+		console.log('token changed: ' + this.get('token'));
 		this.set('user', null);
-	}.observes('controllers.application.user'),
+		this.transitionToRoute('index');
+	}.observes('token'),
 	login: function() {
-		var userid = this.get('controllers.application.user');
-		console.log('query ' + userid );
-
+		var token = this.get('token');
+		console.log('login: ' + token);
 		var self = this;
-		var token = userid;
-		var data = {token:token};
+		var data = token ? {token:token} : {};
 		return Ember.$.post('/api/login', data).then(function(response) {
 			self.set('user', {
 				id: response.id,
 				name: response.name,
 				token: response.token
 			});
+			self.set('token', response.token);
 		}, function(err) {
 			console.log('login fail:');
 			console.log(JSON.stringify(err));
@@ -57,48 +50,62 @@ App.LoginController = Ember.Controller.extend({
 	}
 });
 
-/** Application **/
-// TODO: This can be removed. I'm hard coding
-//		 a path to a game.
-App.ApplicationController = Ember.Controller.extend({
-	users: [
-		'52728fbf63a64c904c657ed5',
-		'52728ca9954deb0b31000004',
-		'52728fbf63a64c904c657ea6',
-		'22728fbf63a64c904c657eaa'
-	],
-	user: '52728fbf63a64c904c657ed5'
-});
-
 App.ApplicationView = Ember.View.extend({
 	classNames: ["l-fill-parent"]
 });
 
-/** Game List **/
-// TODO: Missing a 'start new game' button
-App.IndexView = Ember.View.extend({
-	classNames: ["l-fill-parent", "l-container", 't-background']
+App.IndexRoute = Ember.Route.extend({
+	beforeModel: function() {
+		var app = this.controllerFor('application');
+		if ( ! app.get('user') ) {
+			return app.login();
+		}
+	},
+	afterModel: function() {
+		var app = this.controllerFor('application');
+		var token = app.get('token');
+		this.transitionTo('user.view', token);
+	}
 });
 
-App.IndexRoute = App.AuthenticatedRoute.extend({
+/////////////
+// GAME LIST
+/////////////
+App.UserRoute = Ember.Route.extend({
+	beforeModel: function() {
+		var app = this.controllerFor('application');
+		if ( ! app.get('user') ) {
+			return app.login();
+		}
+	},
 	model: function() {
-		return this.getJSONWithToken('/api/games');
-	}	
+		var user = this.controllerFor('application').get('user');
+    	var data = {token:user.token};
+    	return $.getJSON('/api/games', data);
+	}
+});
+
+App.UserViewRoute = Ember.Route.extend({
+	model: function() {
+		return this.modelFor('user');
+	}
 });
 
 App.GameItemController = Ember.Controller.extend({
+	needs: ['application'],
 	actions: {
 		select: function() {
+			var token = this.get('controllers.application.token');
+			var gameid = this.get('model._id');
 			var state = this.get('model.state');
-			var id = this.get('model._id');
 			if ( 'user-action' === state ) {
-				this.transitionToRoute('game.board', id);
+				this.transitionToRoute('game.board', token, gameid);
 			} else if ( 'user-reply' === state ) {
-				this.transitionToRoute('game.reply', id);
+				this.transitionToRoute('game.reply', token, gameid);
 			} else if ( 'user-select-action' === state ) {
-				this.transitionToRoute('game.select', id);
+				this.transitionToRoute('game.select', token, gameid);
 			} else if ( 'read-only' === state ) {
-				this.transitionToRoute('game.board', id);
+				this.transitionToRoute('game.board', token, gameid);
 			}
 		}
 	},
@@ -120,63 +127,100 @@ App.GameItemController = Ember.Controller.extend({
 	}.property('model.opponent.username')
 });
 
-/** Select Character **/
-App.GameSelectRoute = App.AuthenticatedGameRoute.extend({});
-App.GameSelectView = Ember.View.extend({
-	classNames: ["l-fill-parent", "l-container", 't-background']
-});
-App.GameSelectController = Ember.Controller.extend({
-	characters: function() {
-		return this.get('model.board.characters');
-	}.property('model.board.characters'),
-	selectCharacter: function(id) {
-		console.log('selecting id: ' + id);
-	}
-});
-App.CharacterItemController = Ember.Controller.extend({
-	actions: {
-		select: function() {
-			var controller = this.get('controllers.gameSelect');
-			controller.selectCharacter(this.get('model._id'));
-		},
-		guess: function() {
-			var controller = this.get('controllers.gameBoard');
-			controller.guess(this.get('model._id'));
-		},
-		flip: function() {
-			var up = this.get('model.up');
-			this.set('model.up', !up);
+App.GameRoute = Ember.Route.extend({
+	beforeModel: function() {
+		var app = this.controllerFor('application');
+		if ( ! app.get('user') ) {
+			return app.login();
 		}
 	},
-	needs: ['gameSelect', 'gameBoard'],
-	img: function() {
-		var character = this.get('model');
-		return character.img;
-	}.property('model.img'),
-	name: function() {
-		var character = this.get('model');
-		return character.name;
-	}.property('model.name'),
-	isUserSelection: function() {
-		var state = this.get('controllers.gameSelect.model.state');
-		return state === 'user-select-action';
-	}.property('controllers.gameSelect.model.state'),
-	isUserAction: function() {
-		var state = this.get('controllers.gameBoard.model.state');
-		return state === 'user-action';
-	}.property('controllers.gameBoard.model.state'),
-	up: function(key, value) {
-	    if (value === undefined) {
-	      return this.get('model.up');
-	    } else {
-	      model.set('up', value);
-	      return value;
-	    }
-	}.property('model.up')
+	model: function( params ) {
+		var url = '/api/games/' + params.game;
+		var user = this.controllerFor('application').get('user');
+    	var data = {token:user.token};
+    	return $.getJSON(url, data);
+	}
 });
 
-/** board **/
-App.GameBoardRoute = App.AuthenticatedGameRoute.extend({});
+///////////////////
+// OPPONENT REPLY
+///////////////////
+App.GameReplyRoute = Ember.Route.extend({
+	model: function() {
+		return this.modelFor('game');
+	}
+});
+
+App.GameReplyView = Ember.View.extend({
+	classNames: ["l-fill-parent", "l-container", 't-background']
+});
+App.GameReplyController = Ember.Controller.extend({
+	convert: function( action ) {
+		var data = {};
+
+		if ( action ) {
+			if ( action.action === 'question' ) {
+				data.opponent = {
+					name: this.get('model.opponent.username'),
+					avatar: 'http://placehold.it/64x64',
+					value: action.value,
+					type: action.action
+				};
+
+				if ( action.reply ) {
+					data.me = {
+						avatar: 'http://placehold.it/64x64',
+						value: action.reply.value,
+					};
+				}
+			} else if ( action.action === 'guess' ) {
+				// TODO: Add the guessed character and the outcome
+				data.opponent = {
+					name: this.get('model.opponent.username'),
+					avatar: 'http://placehold.it/64x64',
+					type: action.action,
+				}
+			}
+		}
+
+		return data;
+	},
+	allactions: function() {
+		var results = [];
+		var actions = this.get('model.opponent.actions');
+		for ( var i = 0; i < actions.length; i++ ) {
+			var action = actions[i];
+			results.push(this.convert(action));
+		}
+
+		return results;
+	}.property('model.opponent.actions')
+});
+
+App.ReplyItemController = Ember.Controller.extend({
+	needs: ['gameReply'],
+	isAction: function() {
+		return (this.get('model.opponent.type') === 'question');
+	}.property('model.opponent.type'),
+	me: function() {
+		return this.get('model.me');
+	}.property('model.me'),
+	opponent: function() {
+		return this.get('model.opponent');
+	}.property('model.opponent'),
+	isUserReply: function() {
+		return this.get('controllers.gameReply.model.state') === 'user-reply';
+	}.property('controllers.gameReply.model.state')
+});
+
+////////////////
+// PLAYER BOARD
+////////////////
+App.GameBoardRoute = Ember.Route.extend({
+	model: function() {
+		return this.modelFor('game');
+	}
+});
 App.GameBoardView = Ember.View.extend({
 	classNames: ["l-fill-parent", "l-container", 't-background']
 });
@@ -301,66 +345,63 @@ App.ActionItemController = Ember.Controller.extend({
 	}.property('model.opponent'),
 });
 
-/** Opponent Reply **/
-App.GameReplyRoute = App.AuthenticatedGameRoute.extend({});
-App.GameReplyView = Ember.View.extend({
+/////////////////////
+// CHARACTER SELECT 
+/////////////////////
+App.GameSelectRoute = Ember.Route.extend({
+	model: function( params, transition ) {
+		return this.modelFor('game');
+	}
+});
+App.GameSelectView = Ember.View.extend({
 	classNames: ["l-fill-parent", "l-container", 't-background']
 });
-App.GameReplyController = Ember.Controller.extend({
-	convert: function( action ) {
-		var data = {};
-
-		if ( action ) {
-			if ( action.action === 'question' ) {
-				data.opponent = {
-					name: this.get('model.opponent.username'),
-					avatar: 'http://placehold.it/64x64',
-					value: action.value,
-					type: action.action
-				};
-
-				if ( action.reply ) {
-					data.me = {
-						avatar: 'http://placehold.it/64x64',
-						value: action.reply.value,
-					};
-				}
-			} else if ( action.action === 'guess' ) {
-				// TODO: Add the guessed character and the outcome
-				data.opponent = {
-					name: this.get('model.opponent.username'),
-					avatar: 'http://placehold.it/64x64',
-					type: action.action,
-				}
-			}
-		}
-
-		return data;
-	},
-	allactions: function() {
-		var results = [];
-		var actions = this.get('model.opponent.actions');
-		for ( var i = 0; i < actions.length; i++ ) {
-			var action = actions[i];
-			results.push(this.convert(action));
-		}
-
-		return results;
-	}.property('model.opponent.actions')
+App.GameSelectController = Ember.Controller.extend({
+	characters: function() {
+		return this.get('model.board.characters');
+	}.property('model.board.characters'),
+	selectCharacter: function(id) {
+		console.log('selecting id: ' + id);
+	}
 });
-
-App.ReplyItemController = Ember.Controller.extend({
-	needs: ['gameReply'],
-	isAction: function() {
-		return (this.get('model.opponent.type') === 'question');
-	}.property('model.opponent.type'),
-	me: function() {
-		return this.get('model.me');
-	}.property('model.me'),
-	opponent: function() {
-		return this.get('model.opponent');
-	}.property('model.opponent'),
-	isUserReply: function() {
-		return this.get('controllers.gameReply.model.state') === 'user-reply';
-	}.property('controllers.gameReply.model.state')
+App.CharacterItemController = Ember.Controller.extend({
+	needs: ['gameSelect', 'gameBoard', 'game'],
+	actions: {
+		select: function() {
+			var controller = this.get('controllers.gameSelect');
+			controller.selectCharacter(this.get('model._id'));
+		},
+		guess: function() {
+			var controller = this.get('controllers.gameBoard');
+			controller.guess(this.get('model._id'));
+		},
+		flip: function() {
+			var up = this.get('model.up');
+			this.set('model.up', !up);
+		}
+	},
+	img: function() {
+		var character = this.get('model');
+		return character.img;
+	}.property('model.img'),
+	name: function() {
+		var character = this.get('model');
+		return character.name;
+	}.property('model.name'),
+	isUserSelection: function() {
+		var state = this.get('controllers.game.model.state');
+		return state === 'user-select-action';
+	}.property('controllers.game.model.state'),
+	isUserAction: function() {
+		var state = this.get('controllers.game.model.state');
+		return state === 'user-action';
+	}.property('controllers.game.model.state'),
+	up: function(key, value) {
+	    if (value === undefined) {
+	      return this.get('model.up');
+	    } else {
+	      model.set('up', value);
+	      return value;
+	    }
+	}.property('model.up')
 });

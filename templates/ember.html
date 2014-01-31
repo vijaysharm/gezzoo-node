@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Gezzo?</title>
+</head>
+<body>
+
+<script type="text/x-handlebars" data-template-name="application">
+	<h1>Application</h1>
+	{{outlet}}
+</script>
+
+<script type="text/x-handlebars" data-template-name="index">
+	<h2>index</h2>
+</script>
+
+<script type="text/x-handlebars" data-template-name="games">
+	<p>games</p>
+</script>
+
+<script type="text/x-handlebars" data-template-name="games/new">
+	<p>games/new</p>
+</script>
+
+<script type="text/x-handlebars" data-template-name="games/new/play">
+	<p>games/new/play</p>
+</script>
+
+<script src="jquery-1.10.2.js"></script>
+<script src="handlebars-1.1.2.js"></script>
+<script src="ember-1.3.1.js"></script>
+<script type="text/javascript">
+
+App = Ember.Application.create();
+App.Router.map(function() {
+	this.resource('games', {path:':games'} function(){
+		this.resource('games.new', {path:':new'}, function() {
+			this.route('play');
+		});
+	});
+});
+
+App.GamesRoute = Ember.Route.extend({
+	model: function(params, transition) {
+		{{debugger}}
+		return [1,2,3,5];
+	}	
+});
+
+App.GamesNewRoute = Ember.Route.extend({
+	model: function(params, transition) {
+		{{debugger}}
+		return [1,2,3,5];
+	}	
+});
+
+App.GamesNewPlayRoute = Ember.Route.extend({
+	model: function(params, transition) {
+		{{debugger}}
+		return [1,2,3,5];
+	}	
+});
+</script>
+</body>
