@@ -54,13 +54,16 @@ App.ApplicationView = Ember.View.extend({
 	classNames: ["l-fill-parent"]
 });
 
-App.IndexRoute = Ember.Route.extend({
+App.AuthenticatedRoute = Ember.Route.extend({
 	beforeModel: function() {
 		var app = this.controllerFor('application');
 		if ( ! app.get('user') ) {
 			return app.login();
 		}
 	},
+});
+
+App.IndexRoute = App.AuthenticatedRoute.extend({
 	afterModel: function() {
 		var app = this.controllerFor('application');
 		var token = app.get('token');
@@ -71,13 +74,7 @@ App.IndexRoute = Ember.Route.extend({
 /////////////
 // GAME LIST
 /////////////
-App.UserRoute = Ember.Route.extend({
-	beforeModel: function() {
-		var app = this.controllerFor('application');
-		if ( ! app.get('user') ) {
-			return app.login();
-		}
-	},
+App.UserRoute = App.AuthenticatedRoute.extend({
 	model: function() {
 		var user = this.controllerFor('application').get('user');
     	var data = {token:user.token};
@@ -127,13 +124,7 @@ App.GameItemController = Ember.Controller.extend({
 	}.property('model.opponent.username')
 });
 
-App.GameRoute = Ember.Route.extend({
-	beforeModel: function() {
-		var app = this.controllerFor('application');
-		if ( ! app.get('user') ) {
-			return app.login();
-		}
-	},
+App.GameRoute = App.AuthenticatedRoute.extend({
 	model: function( params ) {
 		var url = '/api/games/' + params.game;
 		var user = this.controllerFor('application').get('user');
