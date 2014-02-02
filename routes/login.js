@@ -47,6 +47,9 @@ function getDb( req, res, next ) {
  *       cannot be found? -- should you just create a new user and
  *       return that user? Note that you should also probably support
  *       logging in by the gezzoo id, and by facebook id.
+ * 
+ * TODO: Don't use the user id as the token ID. Maybe create a new
+ * 		 Session table which will store a reference back to the user.
  */
 var login = function( req, res ) {
 	var token = util.extractToken( req );

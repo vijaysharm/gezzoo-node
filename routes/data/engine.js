@@ -208,11 +208,6 @@ exports.verifyGetGames = function( req, res, next ) {
 	});
 };
 
-/**
- * TODO: Should we to determine what the 'next expected action'
- * 		 will be? i.e. opponent needs to select a character, or 
- * 		 opponent needs to reply, or user needs to reply, etc..
- */
 exports.verifyGameById = function( req, res, next ) {
 	checkUser( req, res, function() {
 		next();
@@ -239,6 +234,9 @@ exports.verifySetCharacter = function( req, res, next ) {
 	});
 };
 
+/**
+ * TODO: Remove requirement that the opponent character is set
+ */
 exports.verifyAskQuestion = function( req, res, next ) {
 	checkUser( req, res, function() {
 		checkGame( req, res, function() {

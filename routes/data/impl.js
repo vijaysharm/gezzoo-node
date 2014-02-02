@@ -171,9 +171,6 @@ function formatGamesResponse( user, games, boards, users, actions ) {
  * TODO: We shouldn't return all the games that a user has ongoing
  *		 with the same opponent. Only the latest game.
  *
- * TODO: Currently, we do not return the action information per user
- *		 should we improve that?
- *
  * TODO: Need to return the characters from the board. Currently doing
  *		 empty query, and not adding to response.
  */
@@ -256,10 +253,6 @@ function getState( user, opponent ) {
  * TODO: Get fancy and modify any of the guess 
  * 		 actions and add whether the guess was 
  *  	 right or wrong
- *
- * TODO: Do we want to send back the state that 
- * 		 the UI show? Like 'needs reply', or 
- * 		 'needs character'
  */
 exports.getGameById = function( req, res ) {
 	var game = req.game;
@@ -427,6 +420,7 @@ exports.setCharacter = function( req, res ) {
 	var character = req.character;
 	var db = req.db;
 
+	log( game );
 	var nextturn = gameutil.extractOpponent(user, game);
 	var gamesdb = db.games();
 	var query = {

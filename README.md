@@ -24,40 +24,24 @@ This is a two player game, where each player takes turn trying to guess the oppo
     1. The opponent has guessed right. This means the game is over, and the user has the choice to either start a new game, or end further games with the current user.
     1. The opponent has guessed wrong. This means that the game continues, and the current user can proceed to either guess, or ask questions of their own.
 
-## TODOs
-* Design the Login page
-* Design the Home page with game select and start buttons
-* Design the 'ask question' page
-* Design the 'answer question' page
-* Design the select character page
-* Design the guess character page
-* Design the guess wrong page
-* Design the guess right page
-* Design the 'opponent guessed right' page
-* Design the 'opponent guessed wrong' page
-* Design the 'game over' page
-* Filter out multiple games for a single user. Say I have 3 games on going with a user, then make sure I only return the 'latest' game. Maybe if the user starts a new game with an opponent, we can set the last game as "deprecated" or delete it.
-* Have a way to clean up in-active users and games
-* Track when a user 'touches' a game, that is, update the last updated time.
-* When the opponent selects their character, do not change turns, let the opponent ask a question.
+## Instaling
+npm install
+npm start
 
-# GAME SCHEMA
-  {
-    "players":[
-      {
-        id: "52728ca9954deb0b31000004",
-        actions:[],
-        selected_character: "djfsjfhsdjhfsjhfds"
-        board:[
-          {"_id":"5286e01d8b587b0000000001","up":true},
-          {"_id":"5286e01d8b587b0000000002","up":true},
-          {"_id":"5286e01d8b587b0000000003","up":true},
-          {"_id":"5286e01d8b587b0000000004","up":true}        
-        ]
-      }
-      "52728fbf63a64c904c657ed5"
-    ],
-    "turn":"52728ca9954deb0b31000004",
-    "_id":"5286e01d9beb41000000001c",
-    "board":"kfsjfkdsgjjsfghjkfdhgjkd"
-  }
+Note that this project uses nodemon, and will restart automatically when a file is modified. This includes blowing away the contents of the db.
+
+## TODOs
+Login
++ Don't use userid as the token
++ Support receiving an invalid/unknown token
+Impl
++ Better error handling
++ Don't return all games for a user. Only return ongoing games and games that have just ended (allowing users to restart the game with the same user)
++ Have a state that shows when a game is done but requires the opponent to acknowlege it.
++ Store that a user guessed a character in the board.
+UI
++ Display the current user's character in the reply page
++ Add a home button to leave a game and go to the game list
+Unit Tests
++ Fix the server unit tests to pass without always failing
++ Create client side tests
