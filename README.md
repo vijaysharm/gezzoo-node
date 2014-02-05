@@ -1,4 +1,4 @@
-# README
+# README.md
 ## Summary
 This is a two player game, where each player takes turn trying to guess the opponents selected character.
 
@@ -31,20 +31,28 @@ npm start
 Note that this project uses nodemon, and will restart automatically when a file is modified. This includes blowing away the contents of the db.
 
 ## TODOs
-Login
-+ Don't use userid as the token
-+ Support receiving an invalid/unknown token
-Impl
+###Login
+
+* Don't use userid as the token
+* Support receiving an invalid/unknown token
+
+###Impl
+
 + Better error handling
 + Don't return all games for a user. Only return ongoing games and games that have just ended (allowing users to restart the game with the same user)
 + Have a state that shows when a game is done but requires the opponent to acknowlege it.
 + Store that a user guessed a character in the board.
-UI
-+ Display the current user's character in the reply page
+
+###UI
+
++ Display the current user's character in the reply page.
+  + Maybe the 
 + Add a home button to leave a game and go to the game list
 + Need a 'start new game' button
 + Need a modal dialog for POST actions (setting characters, guessing, questions, etc...)
 + Disable Submit button on action/reply screens
-Unit Tests
+
+###Unit Tests
+
 + Fix the server unit tests to pass without always failing
 + Create client side tests

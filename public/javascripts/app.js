@@ -14,9 +14,58 @@ App.Router.map(function() {
 	});
 });
 
-/** Application **/
-// TODO: This can be removed. I'm hard coding
-//		 a path to a game.
+////////////////
+// MODAL DIALOG
+////////////////
+App.ModalController = Ember.ObjectController.extend({
+	actions: {
+		close: function() {
+			this.send('closeDialog')
+		}
+	}
+});
+
+App.NewGameModalController = App..ModalController.extend({
+
+});
+
+App.SelectModalController = App.ModalController.extend({
+
+});
+
+App.AskModalController = App.ModalController.extend({
+
+});
+
+App.GuessModalController = App.ModalController.extend({
+
+});
+
+App.ReplyModalController = App.ModalController.extend({
+
+});
+
+////////////////
+// APPLICATION
+////////////////
+App.ApplicationRoute = Ember.Route.extend({
+	actions: {
+		openDialog: function(id, data) {
+			this.controllerFor(id).set('model', data);
+			return this.render(id, {
+				into: 'application',
+				outlet: 'modal'
+			});
+		},
+		closeDialog: function() {
+			return this.disconnectOutlet({
+		        outlet: 'modal',
+		        parentView: 'application'
+		    });
+		}
+	}
+});
+
 // TODO: Handle replies.
 App.ApplicationController = Ember.Controller.extend({
 	usertokens: [
@@ -57,6 +106,7 @@ App.ApplicationController = Ember.Controller.extend({
 		};
 		console.log('ask data: ');
 		console.log(JSON.stringify(data));
+		this.send('openDialog', 'ask.modal', data);
 	},
 	guess: function( characterid, board, callback ) {
 		var data = {
@@ -67,6 +117,7 @@ App.ApplicationController = Ember.Controller.extend({
 
 		console.log('guess data: ');
 		console.log(JSON.stringify(data));
+		this.send('openDialog', 'guess.modal', data);
 	},
 	select: function( characterid, callback ) {
 		var data = { 
@@ -76,6 +127,7 @@ App.ApplicationController = Ember.Controller.extend({
 
 		console.log('set character data: ');
 		console.log(JSON.stringify(data));
+		this.send('openDialog', 'select.modal', data);
 	}
 });
 

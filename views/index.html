@@ -10,9 +10,9 @@
 	<title>Gezzo?</title>
 </head>
 <body>
-	<!-- TODO: To be removed once all the pages are complete, and the page are bound to each other -->
+	<!-- TODO: Remove Ember.Select once all the pages are complete, and the page are bound to each other -->
 	<!-- TODO: There are some inline avatar images shown. They need to come from the controllers -->
-	<!-- TODO: Need a home button design -->
+	<!-- TODO: Need a home button in design -->
 	<script type="text/x-handlebars" data-template-name="application">
 		{{view Ember.Select 
 			id="test-users-select"
@@ -20,6 +20,7 @@
 			value=token
 			class="l-fill-width"}}
 		{{outlet}}
+		{{outlet modal}}
 	</script>
 
 	<script type="text/x-handlebars" data-template-name="user/view">
@@ -231,6 +232,42 @@
 		</div>
 		{{/if}}
 	{{/each}}
+	</script>
+
+	<script type="text/x-handlebars" id="components/modal-dialog">
+		<div class="overlay">
+			{{yield}}
+		</div>
+	</script>
+
+	<script type="text/x-handlebars" data-template-name="new/game/modal">
+		{{#modal-dialog}}
+			<h3 {{action close}}>New Game Modal</h5>
+		{{/modal-dialog}}
+	</script>
+
+	<script type="text/x-handlebars" data-template-name="guess/modal">
+		{{#modal-dialog}}
+			<h3 {{action close}}>Guess Modal</h5>
+		{{/modal-dialog}}
+	</script>
+
+	<script type="text/x-handlebars" data-template-name="ask/modal">
+		{{#modal-dialog}}
+			<h3 {{action close}}>Ask Modal</h5>
+		{{/modal-dialog}}
+	</script>
+
+	<script type="text/x-handlebars" data-template-name="reply/modal">
+		{{#modal-dialog}}
+			<h3 {{action close}}>Reply Modal</h5>
+		{{/modal-dialog}}
+	</script>
+
+	<script type="text/x-handlebars" data-template-name="select/modal">
+		{{#modal-dialog}}
+			<h3 {{action close}}>Select Modal</h5>
+		{{/modal-dialog}}
 	</script>
 
 	<script src="/javascripts/underscore.js"></script>
