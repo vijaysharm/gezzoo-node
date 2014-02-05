@@ -172,8 +172,10 @@
 						<img class="l-20p l-inline" src="http://placehold.it/64x64" alt="avatar">
 						<div class="l-80p l-inline">
 							<div class="input">
-								<input class="l-fill-parent" type="text" placeholder="Ask a question...">
-								<input type="submit" value="Submit" class="l-fill-parent" />
+								<form class="" {{action ask on="submit"}}>
+									{{input class="l-fill-parent" type="text" placeholder="Ask a question..." value=userquestion}}
+									{{input class="l-fill-parent" type="submit" value="Submit"}}
+								</form>
 							</div>
 						</div>
 					</div>
@@ -216,8 +218,10 @@
 					<img class="l-20p l-inline" src="http://placehold.it/64x64" alt="avatar">
 					<div class="l-80p l-inline">
 						<div class="input">
-							<input class="l-fill-parent" type="text" placeholder="Ask a question...">
-							<input type="submit" value="Submit" class="l-fill-parent" />
+							<form class="" {{action reply on="submit"}}>
+								{{input class="l-fill-parent" type="text" placeholder="Reply..." value=userreply}}
+								{{input class="l-fill-parent" type="submit" value="Submit"}}
+							</form>
 						</div>
 					</div>
 				</div>

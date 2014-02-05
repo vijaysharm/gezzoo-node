@@ -17,6 +17,7 @@ App.Router.map(function() {
 /** Application **/
 // TODO: This can be removed. I'm hard coding
 //		 a path to a game.
+// TODO: Handle replies.
 App.ApplicationController = Ember.Controller.extend({
 	usertokens: [
 		'52728fbf63a64c904c657ed5',
@@ -47,6 +48,34 @@ App.ApplicationController = Ember.Controller.extend({
 			console.log('login fail:');
 			console.log(JSON.stringify(err));
 		});
+	},
+	ask: function( question, board, callback ) {
+		var data = {
+			token: this.get('token'),
+			question: question,
+			player_board: board
+		};
+		console.log('ask data: ');
+		console.log(JSON.stringify(data));
+	},
+	guess: function( characterid, board, callback ) {
+		var data = {
+			token: this.get('token'),
+			character: characterid,
+			player_board: board
+		};
+
+		console.log('guess data: ');
+		console.log(JSON.stringify(data));
+	},
+	select: function( characterid, callback ) {
+		var data = { 
+			token: this.get('token'),
+			character: characterid
+		};
+
+		console.log('set character data: ');
+		console.log(JSON.stringify(data));
 	}
 });
 
@@ -190,6 +219,15 @@ App.GameReplyController = Ember.Controller.extend({
 
 App.ReplyItemController = Ember.Controller.extend({
 	needs: ['gameReply'],
+	actions: {
+		reply: function() {
+			var value = $.trim(this.get('userreply'));
+			if ( value && value.length !== 0 ) {
+				// TODO: Need to get the action id you're replying to.
+				console.log('reply: ' + value);
+			}			
+		}
+	},
 	isAction: function() {
 		return (this.get('model.opponent.type') === 'question');
 	}.property('model.opponent.type'),
@@ -216,12 +254,19 @@ App.GameBoardView = Ember.View.extend({
 	classNames: ["l-fill-parent", "l-container", 't-background']
 });
 App.GameBoardController = Ember.Controller.extend({
+	needs: ['application'],
 	actions: {
 		board: function() {
 			this.set('viewBoard', true);
 		},
 		question: function() {
 			this.set('viewBoard', false);
+		},
+		ask: function() {
+			var value = $.trim(this.get('userquestion'));
+			if ( value && value.length !== 0 ) {
+				this.postQuestion( value );
+			}
 		}
 	},
 	init: function() {
@@ -313,14 +358,27 @@ App.GameBoardController = Ember.Controller.extend({
 	isUserAction: function() {
 		return this.get('model.state') === 'user-action';
 	}.property('model.state'),
-	guess: function(id) {
+	getUserBoard: function() {
 		var board = [];
 		_.each(this.get('model.me.board'), function(item) {
 			board.push(_.pick(item, '_id', 'up'));
 		});
 
-		console.log('guessing: ' + id);
-		console.log(board);
+		return board;
+	},
+	guess: function( id ) {
+		var board = this.getUserBoard();
+		var application = this.get('controllers.application');
+		application.guess( id, board, function() {
+			// ??	
+		} );
+	},
+	postQuestion: function( question ) {
+		var board = this.getUserBoard();
+		var application = this.get('controllers.application');
+		application.ask( question, board, function() {
+			// ??	
+		} );
 	}
 });
 
@@ -348,11 +406,15 @@ App.GameSelectView = Ember.View.extend({
 	classNames: ["l-fill-parent", "l-container", 't-background']
 });
 App.GameSelectController = Ember.Controller.extend({
+	needs: ['application'],
 	characters: function() {
 		return this.get('model.board.characters');
 	}.property('model.board.characters'),
 	selectCharacter: function(id) {
-		console.log('selecting id: ' + id);
+		var application = this.get('controllers.application');
+		application.select( id, function() {
+			// ??
+		} );
 	}
 });
 App.CharacterItemController = Ember.Controller.extend({

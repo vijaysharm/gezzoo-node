@@ -42,6 +42,9 @@ Impl
 UI
 + Display the current user's character in the reply page
 + Add a home button to leave a game and go to the game list
++ Need a 'start new game' button
++ Need a modal dialog for POST actions (setting characters, guessing, questions, etc...)
++ Disable Submit button on action/reply screens
 Unit Tests
 + Fix the server unit tests to pass without always failing
 + Create client side tests

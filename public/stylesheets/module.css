@@ -108,6 +108,7 @@
 	opacity: 0.5;
 	padding: 16px 0px;
 	display: none;
+	cursor: pointer;
 }
 
 .character-game-item:hover .control {
@@ -183,13 +184,19 @@
 	padding: 8px;	
 }
 
-.input input[type="text"] {
+.input input[type="text"], .input input[type="submit"] {
 	padding: 24px;
 	font-size: 20px;
 }
 
 .input input[type="submit"] {
-	padding: 24px;
+	cursor: pointer;
+}
+
+.input input[type="submit"]:hover {
+	background-color: #CCC;
+	font-size: 22px;
+	padding: 23px;
 }
 
 .empty {
