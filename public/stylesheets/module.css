@@ -36,15 +36,21 @@
   	top: 0;
   	left: 0;
 
-	opacity: 0.5;
-	background-color: black;
+	background-color: rgba(0, 0, 0, 0.5);
 	z-index: 2;
 	text-align: center;
 }
 
-.overlay h3 {
-	color: white;
-	font-size: 24px;
+.new-game-item {
+	font-size: 2em;
+	padding: 24px 0;
+	background-color: tomato;
+	cursor: pointer;
+	opacity: 1;
+}
+
+.new-game-item:hover {
+	opacity: 0.9;
 }
 
 .character-game-item {
@@ -205,4 +211,22 @@
 
 #test-users-select {
 	font-size: 20px;
+}
+
+.dialog {
+	color: white;
+	background-color: black;
+	margin: 0px auto;
+	width: 90%;
+	position: relative;
+	top: 30%;
+}
+
+.dialog h2 {
+	padding: 12px 0;
+}
+
+.dialog p {
+	padding: 12px 4px;
+	line-height: 1.6em;
 }

@@ -120,6 +120,7 @@ exports.getActions = function( db, user, callback ) {
 function formatGamesResponse( user, games, boards, users, actions ) {
 	var gs = [];
 	_.each(games, function(game) {
+
 		// process game to be formatted properly
 		var board = _.find(boards, function(board) {
 			return board._id.equals(game.board);
@@ -130,11 +131,11 @@ function formatGamesResponse( user, games, boards, users, actions ) {
 			return game._id.equals(action.gameid);
 		});
 
-		var me = _.extend(user,_.pick(gameuser, 'board', 'character'));
+		var me = _.extend({}, user, _.pick(gameuser, 'board', 'character'));
 		var myactions = _.filter(gameactions, function(action){
 			return me._id.equals(action.by);
 		});
-		me = _.extend(me, {actions:myactions});
+		_.extend(me, {actions:myactions});
 
 		var opponent = _.find(users, function(user) {
 			return user._id.equals(gameopponent.id);
@@ -142,7 +143,7 @@ function formatGamesResponse( user, games, boards, users, actions ) {
 		var opponent_actions = _.filter(gameactions, function(action){
 			return opponent._id.equals(action.by);
 		});
-		opponent = _.extend(opponent, {actions:opponent_actions});
+		_.extend(opponent, {actions:opponent_actions});
 
 		var state = game.turn.equals(me._id) ? getState(me, opponent) : 'read-only';
 
@@ -227,7 +228,7 @@ function getMostRecentAction( actions ) {
 //       to show them that the game is over.
 function getState( user, opponent ) {
 	var opponent_action = getMostRecentAction(opponent.actions);
-	
+
 	if ( user.character ) {
 		if ( opponent_action ) {
 			if ( opponent_action.action === 'guess' ) {
@@ -261,10 +262,10 @@ exports.getGameById = function( req, res ) {
 
 	delete req.board._id;
 
-	var me = _.extend(user,_.pick(gameuser, 'board', 'character'));
-	me = _.extend(me, {actions: req.user_actions});
+	var me = _.extend({}, user, _.pick(gameuser, 'board', 'character'));
+	_.extend(me, {actions: req.user_actions});
 
-	var opponent = _.extend(req.opponent, {
+	var opponent = _.extend({}, req.opponent, {
 		actions: req.opponent_actions
 	});
 
@@ -306,7 +307,7 @@ function createNewGame( db, user, res ) {
 		// 	  include the user himself.
 		var users;
 		if ( matches && matches.length > 0 ) {
-			users = _.chain(games)
+			users = _.chain(matches)
 						.pluck('players')
 						.flatten()
 						.uniq(function(obj){ return obj.id.toString(); })
@@ -390,7 +391,8 @@ function createNewGameWithUser( db, user, opponent, res ) {
 					_id: insertedgame._id,
 					board: board,
 					ended: insertedgame.ended,
-					modified: insertedgame.modified
+					modified: insertedgame.modified,
+					state: 'user-select-character'
 				});
 			});
 		});

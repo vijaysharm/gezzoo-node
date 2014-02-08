@@ -20,12 +20,12 @@ App.Router.map(function() {
 App.ModalController = Ember.ObjectController.extend({
 	actions: {
 		close: function() {
-			this.send('closeDialog')
+			this.send('hideModalDialog')
 		}
 	}
 });
 
-App.NewGameModalController = App..ModalController.extend({
+App.NewGameModalController = App.ModalController.extend({
 
 });
 
@@ -50,14 +50,14 @@ App.ReplyModalController = App.ModalController.extend({
 ////////////////
 App.ApplicationRoute = Ember.Route.extend({
 	actions: {
-		openDialog: function(id, data) {
+		showModalDialog: function(id, data) {
 			this.controllerFor(id).set('model', data);
 			return this.render(id, {
 				into: 'application',
 				outlet: 'modal'
 			});
 		},
-		closeDialog: function() {
+		hideModalDialog: function() {
 			return this.disconnectOutlet({
 		        outlet: 'modal',
 		        parentView: 'application'
@@ -98,6 +98,20 @@ App.ApplicationController = Ember.Controller.extend({
 			console.log(JSON.stringify(err));
 		});
 	},
+	newgame: function() {
+			var data = { token: this.get('token') };
+			var self = this;
+			self.send('showModalDialog', 'new.game.modal', data);
+			Ember.$.post('/api/games', data).then(function(response) {
+				console.log('new game created')
+				console.log(response);
+				self.send('hideModalDialog');
+			}, function(err) {
+				console.log('new game fail:');
+				console.log(JSON.stringify(err));
+				// TODO: Hide the dialog and show an error.
+			});
+	},
 	ask: function( question, board, callback ) {
 		var data = {
 			token: this.get('token'),
@@ -106,7 +120,7 @@ App.ApplicationController = Ember.Controller.extend({
 		};
 		console.log('ask data: ');
 		console.log(JSON.stringify(data));
-		this.send('openDialog', 'ask.modal', data);
+		this.send('showModalDialog', 'ask.modal', data);
 	},
 	guess: function( characterid, board, callback ) {
 		var data = {
@@ -117,7 +131,7 @@ App.ApplicationController = Ember.Controller.extend({
 
 		console.log('guess data: ');
 		console.log(JSON.stringify(data));
-		this.send('openDialog', 'guess.modal', data);
+		this.send('showModalDialog', 'guess.modal', data);
 	},
 	select: function( characterid, callback ) {
 		var data = { 
@@ -127,7 +141,7 @@ App.ApplicationController = Ember.Controller.extend({
 
 		console.log('set character data: ');
 		console.log(JSON.stringify(data));
-		this.send('openDialog', 'select.modal', data);
+		this.send('showModalDialog', 'select.modal', data);
 	}
 });
 
@@ -169,6 +183,16 @@ App.UserViewRoute = Ember.Route.extend({
 	}
 });
 
+App.UserViewController = Ember.ArrayController.extend({
+	needs: ['application'],
+	actions: {
+		newgame: function() {
+			var controller = this.get('controllers.application');
+			controller.newgame();
+		}
+	}
+});
+
 App.GameItemController = Ember.Controller.extend({
 	needs: ['application'],
 	actions: {
@@ -180,7 +204,7 @@ App.GameItemController = Ember.Controller.extend({
 				this.transitionToRoute('game.board', token, gameid);
 			} else if ( 'user-reply' === state ) {
 				this.transitionToRoute('game.reply', token, gameid);
-			} else if ( 'user-select-action' === state ) {
+			} else if ( 'user-select-character' === state ) {
 				this.transitionToRoute('game.select', token, gameid);
 			} else if ( 'read-only' === state ) {
 				this.transitionToRoute('game.board', token, gameid);
@@ -495,7 +519,7 @@ App.CharacterItemController = Ember.Controller.extend({
 	}.property('model.name'),
 	isUserSelection: function() {
 		var state = this.get('controllers.game.model.state');
-		return state === 'user-select-action';
+		return state === 'user-select-character';
 	}.property('controllers.game.model.state'),
 	isUserAction: function() {
 		var state = this.get('controllers.game.model.state');
