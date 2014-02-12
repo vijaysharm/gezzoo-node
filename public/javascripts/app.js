@@ -113,7 +113,7 @@ App.ApplicationController = Ember.Controller.extend({
 				// TODO: Hide the dialog and show an error.
 			});
 	},
-	select: function( characterid, gameid ) {
+	select: function( gameid, characterid ) {
 		var data = { 
 			token: this.get('token'),
 			character: characterid
@@ -130,26 +130,40 @@ App.ApplicationController = Ember.Controller.extend({
 				// TODO: Hide the dialog and show an error.
 			});
 	},
-	ask: function( question, board, callback ) {
+	ask: function( gameid, question, board ) {
 		var data = {
 			token: this.get('token'),
 			question: question,
 			player_board: board
 		};
-		console.log('ask data: ');
-		console.log(JSON.stringify(data));
 		this.send('showModalDialog', 'ask.modal', data);
+		Ember.$.post('/api/games/' + gameid + '/question', data)
+			.then(function(response) {
+				self.send('hideModalDialog');
+			}, function(err) {
+				console.log('ask question fail:');
+				console.log(JSON.stringify(err));
+				// TODO: Hide the dialog and show an error.
+			});
 	},
-	guess: function( characterid, board, callback ) {
+	guess: function( gameid, characterid, board ) {
 		var data = {
 			token: this.get('token'),
 			character: characterid,
 			player_board: board
 		};
-
-		console.log('guess data: ');
-		console.log(JSON.stringify(data));
 		this.send('showModalDialog', 'guess.modal', data);
+		Ember.$.post('/api/games/' + gameid + '/guess', data)
+			.then(function(response) {
+				self.send('hideModalDialog');
+			}, function(err) {
+				console.log('ask question fail:');
+				console.log(JSON.stringify(err));
+				// TODO: Hide the dialog and show an error.
+			});
+	},
+	reply: function( gameid, questionid, reply ) {
+		console.log('REPLY GDAMMIT!!!');
 	}
 });
 
@@ -450,19 +464,17 @@ App.GameBoardController = Ember.Controller.extend({
 
 		return board;
 	},
-	guess: function( id ) {
+	guess: function( characterid ) {
+		var gameid = this.get('model._id');
 		var board = this.getUserBoard();
 		var application = this.get('controllers.application');
-		application.guess( id, board, function() {
-			// ??	
-		} );
+		application.guess( gameid, characterid, board );
 	},
 	postQuestion: function( question ) {
+		var gameid = this.get('model._id');
 		var board = this.getUserBoard();
 		var application = this.get('controllers.application');
-		application.ask( question, board, function() {
-			// ??	
-		} );
+		application.ask( gameid, question, board );
 	}
 });
 
@@ -494,10 +506,10 @@ App.GameSelectController = Ember.Controller.extend({
 	characters: function() {
 		return this.get('model.board.characters');
 	}.property('model.board.characters'),
-	selectCharacter: function(id) {
+	selectCharacter: function(characterid) {
 		var application = this.get('controllers.application');
-		var gameid = this.get('model._id')
-		application.select( id, gameid );
+		var gameid = this.get('model._id');
+		application.select( gameid, characterid );
 	}
 });
 App.CharacterItemController = Ember.Controller.extend({

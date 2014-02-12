@@ -45,12 +45,15 @@ Note that this project uses nodemon, and will restart automatically when a file 
 
 ###UI
 
-+ Display the current user's character in the reply page.
-  + Maybe the 
++ Display the current user's character on the reply page.
 + Add a home button to leave a game and go to the game list
-+ Need a 'start new game' button
 + Need a modal dialog for POST actions (setting characters, guessing, questions, etc...)
+  + The dialog should be displayed for a given amount of time.
+  + The dialog should also be able to display results from a user action (i.e. YOU GUESSED RIGHT!!!)
++ Add a 'user guessed x' type in the action screen
 + Disable Submit button on action/reply screens
++ Have the API return you an object with localized strings. You can also have different messages in the text box to make the experience a little more fun.
++ Implement the 'flip' button to show that the user has already flipped this character.
 
 ###Unit Tests
 

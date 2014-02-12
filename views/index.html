@@ -267,13 +267,19 @@
 
 	<script type="text/x-handlebars" data-template-name="guess/modal">
 		{{#modal-dialog}}
-			<h3 {{action close}}>Guess Modal</h5>
+			<div class="dialog">
+				<h2>Checking...</h2>
+				<p>Verifying if your guess is the right one... Just gimme a sec</p>
+			</div>
 		{{/modal-dialog}}
 	</script>
 
 	<script type="text/x-handlebars" data-template-name="ask/modal">
 		{{#modal-dialog}}
-			<h3 {{action close}}>Ask Modal</h5>
+			<div class="dialog">
+				<h2>Asking...</h2>
+				<p>Alright, Ill ask your friend your question. Hopefully they give you an answer that will help.</p>
+			</div>
 		{{/modal-dialog}}
 	</script>
 
