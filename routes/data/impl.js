@@ -483,13 +483,8 @@ exports.guess = function( req, res ) {
 	};
 
 	db.actions().insert(guessitem, function(err, guessitem) {
-		var query = {
-			_id: game._id,
-			'players.id': user._id,
-		};
-
 		var fields = {
-			turn: opponent,
+			turn: opponent.id,
 			ended: userguess,
 			modified: new Date(),
 		};
@@ -504,6 +499,10 @@ exports.guess = function( req, res ) {
 			$set: fields
 		};
 
+		var query = {
+			_id: game._id,
+			'players.id': user._id,
+		};
 		pushAction( db, query, update, function(result) {
 			res.json({
 				gameid: game._id,
@@ -529,12 +528,7 @@ exports.askQuestion = function( req, res ) {
 		modified: new Date()
 	};
 
-	db.actions().insert(questionitem, function(err, questionitem) {
-		var query = {
-			_id: game._id,
-			'players.id': user._id,
-		};
-		
+	db.actions().insert(questionitem, function(err, questionitem) {		
 		var fields = { 
 			turn: nextturn.id,
 			modified: new Date()
@@ -550,6 +544,10 @@ exports.askQuestion = function( req, res ) {
 			$set: fields
 		};
 
+		var query = {
+			_id: game._id,
+			'players.id': user._id,
+		};
 		pushAction( db, query, update, function(result) {
 			res.json({
 				gameid: game._id

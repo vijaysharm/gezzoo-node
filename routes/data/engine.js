@@ -34,6 +34,10 @@ function validateCharacterExistence( game, user, expected, res, callback ) {
 	}
 };
 
+/**
+ * Go through the player's board and compare it 
+ * against the known board  in the game.
+ */
 function validatePlayerBoard( board, player_board ) {
 	if ( board.length === player_board.length ) {
 		var copy = board.slice(0);
@@ -42,7 +46,7 @@ function validatePlayerBoard( board, player_board ) {
 			var id = toObjectId(character._id);
 			for ( var i = 0; i < copy.length; i++ ) {
 				var c = copy[i];
-				if ( id.equals(c) ) {
+				if ( id.equals(c._id) ) {
 					copy.splice(i, 1);
 					break;
 				}

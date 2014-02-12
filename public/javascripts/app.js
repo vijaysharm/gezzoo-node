@@ -136,7 +136,9 @@ App.ApplicationController = Ember.Controller.extend({
 			question: question,
 			player_board: board
 		};
+		var self = this;
 		this.send('showModalDialog', 'ask.modal', data);
+
 		Ember.$.post('/api/games/' + gameid + '/question', data)
 			.then(function(response) {
 				self.send('hideModalDialog');
@@ -152,7 +154,9 @@ App.ApplicationController = Ember.Controller.extend({
 			character: characterid,
 			player_board: board
 		};
+		var self = this;
 		this.send('showModalDialog', 'guess.modal', data);
+		
 		Ember.$.post('/api/games/' + gameid + '/guess', data)
 			.then(function(response) {
 				self.send('hideModalDialog');
