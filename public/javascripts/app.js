@@ -103,11 +103,29 @@ App.ApplicationController = Ember.Controller.extend({
 			var self = this;
 			self.send('showModalDialog', 'new.game.modal', data);
 			Ember.$.post('/api/games', data).then(function(response) {
-				console.log('new game created')
-				console.log(response);
 				self.send('hideModalDialog');
+				var token = self.get('token');
+				var gameid = response._id;
+				self.transitionToRoute('game.select', token, gameid);
 			}, function(err) {
 				console.log('new game fail:');
+				console.log(JSON.stringify(err));
+				// TODO: Hide the dialog and show an error.
+			});
+	},
+	select: function( characterid, gameid ) {
+		var data = { 
+			token: this.get('token'),
+			character: characterid
+		};
+		var self = this;
+		this.send('showModalDialog', 'select.modal', data);
+		Ember.$.post('/api/games/' + gameid + '/character', data)
+			.then(function(response) {
+				self.send('hideModalDialog');
+				self.transitionToRoute('index');
+			}, function( err ) {
+				console.log('set character fail:');
 				console.log(JSON.stringify(err));
 				// TODO: Hide the dialog and show an error.
 			});
@@ -132,16 +150,6 @@ App.ApplicationController = Ember.Controller.extend({
 		console.log('guess data: ');
 		console.log(JSON.stringify(data));
 		this.send('showModalDialog', 'guess.modal', data);
-	},
-	select: function( characterid, callback ) {
-		var data = { 
-			token: this.get('token'),
-			character: characterid
-		};
-
-		console.log('set character data: ');
-		console.log(JSON.stringify(data));
-		this.send('showModalDialog', 'select.modal', data);
 	}
 });
 
@@ -488,9 +496,8 @@ App.GameSelectController = Ember.Controller.extend({
 	}.property('model.board.characters'),
 	selectCharacter: function(id) {
 		var application = this.get('controllers.application');
-		application.select( id, function() {
-			// ??
-		} );
+		var gameid = this.get('model._id')
+		application.select( id, gameid );
 	}
 });
 App.CharacterItemController = Ember.Controller.extend({

@@ -422,21 +422,25 @@ exports.setCharacter = function( req, res ) {
 	var character = req.character;
 	var db = req.db;
 
-	log( game );
 	var nextturn = gameutil.extractOpponent(user, game);
 	var gamesdb = db.games();
 	var query = {
 		_id: game._id,
 		'players.id': user._id
 	};
+
 	var update = {
-		$set: { 'players.$.character': character._id },
-		$set: { turn: nextturn },
-		$set: { modified: new Date() }
+		$set: { 
+			'players.$.character': character._id,
+			turn: nextturn.id,
+			modified: new Date()
+		}
 	};
+
 	var options = { upsert:false, 'new':true };
 	var sort = [['_id','1']];
 	gamesdb.findAndModify(query, sort, update, options, function(err, insertedgame) {
+		if ( err ) throw err;
 		res.json(200);
 	});
 };
@@ -484,18 +488,21 @@ exports.guess = function( req, res ) {
 			'players.id': user._id,
 		};
 
-		var update = {
-			$push: { 'players.$.actions': guessitem._id },
-			$set: { turn: opponent },
-			$set: { ended: userguess },
-			$set: { modified: new Date() }
+		var fields = {
+			turn: opponent,
+			ended: userguess,
+			modified: new Date(),
 		};
-
 		if ( req.player_board ) {
-			_.extend( update, {
-				$set: { 'players.$.board': player_board }
+			_.extend( fields, {
+				'players.$.board': player_board
 			});
 		}
+
+		var update = {
+			$push: { 'players.$.actions': guessitem._id },
+			$set: fields
+		};
 
 		pushAction( db, query, update, function(result) {
 			res.json({
@@ -528,17 +535,20 @@ exports.askQuestion = function( req, res ) {
 			'players.id': user._id,
 		};
 		
-		var update = {
-			$push: { 'players.$.actions': questionitem._id },
-			$set: { turn: nextturn.id },
-			$set: { modified: new Date() }
+		var fields = { 
+			turn: nextturn.id,
+			modified: new Date()
 		};
-
 		if ( req.player_board ) {
-			_.extend( update, {
-				$set: { 'players.$.board': player_board }
+			_.extend( fields, {
+				'players.$.board': player_board
 			});
 		}
+
+		var update = {
+			$push: { 'players.$.actions': questionitem._id },
+			$set: fields
+		};
 
 		pushAction( db, query, update, function(result) {
 			res.json({
@@ -560,8 +570,10 @@ exports.postReply = function( req, res ) {
 		_id: questionid
 	};
 	var update = {
-		$set: {reply: { value: reply, date: new Date() }},
-		$set: {modified: new Date()}
+		$set: {
+			reply: { value: reply, date: new Date() },
+			modified: new Date()
+		},
 	};
 	var options = { upsert:false, 'new':true };
 	var sort = [['_id','1']];
