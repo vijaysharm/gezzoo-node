@@ -19,7 +19,10 @@ exports.random = function( max ) {
 };
 
 exports.toObjectId = function( id ) {
-	return new BSON.ObjectID(id);
+	if ( id )
+		return new BSON.ObjectID(id);
+	else
+		throw new Error("Uhmmm... id is not defined?");
 };
 
 exports.isObjectId = function( id ) {

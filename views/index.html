@@ -220,7 +220,6 @@
 				</div>
 			</div>
 			{{else}}
-			{{#if }}
 			<div class="comment-wrapper">
 				<div class="my-comment comment l-align-right l-clearfix">
 					<img class="l-20p l-inline" src="http://placehold.it/64x64" alt="avatar">
@@ -233,11 +232,18 @@
 						</div>
 					</div>
 				</div>
-			</div>
-			{{/if}}		
+			</div>	
 			{{/with}}
 		</div>
+		{{else}}
+			<div>guess</div>
 		{{/if}}
+	{{else}}
+		<div class="comments">
+			<div class="comment-wrapper">
+				<p class='l-text-center empty'>Nothing here yet..</p>
+			</div>
+		</div>
 	{{/each}}
 	</script>
 

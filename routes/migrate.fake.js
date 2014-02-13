@@ -85,7 +85,7 @@ function createActions( gameid, by, actions, modified ) {
 		var id = new ObjectID();
 		var action_data = {
 			_id: id,
-			gameid: gameid,
+			gameid: toObjectId(gameid),
 			by: toObjectId(by),
 		};
 		var full_action = _.extend( action_data, action );

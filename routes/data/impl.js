@@ -450,6 +450,7 @@ function pushAction( db, query, update, callback ) {
 
 	var options = { upsert:false, 'new':true };
 	var sort = [['_id','1']];
+
 	gamesdb.findAndModify(query, sort, update, options, function(err, game) {
 		if ( err ) throw err;
 		callback(game);
@@ -482,7 +483,9 @@ exports.guess = function( req, res ) {
 		modified: new Date()
 	};
 
-	db.actions().insert(guessitem, function(err, guessitem) {
+	db.actions().insert(guessitem, function(err, guessitems) {
+		var guessitem = guessitems[0];
+
 		var fields = {
 			turn: opponent.id,
 			ended: userguess,
@@ -503,6 +506,7 @@ exports.guess = function( req, res ) {
 			_id: game._id,
 			'players.id': user._id,
 		};
+
 		pushAction( db, query, update, function(result) {
 			res.json({
 				gameid: game._id,
@@ -528,7 +532,8 @@ exports.askQuestion = function( req, res ) {
 		modified: new Date()
 	};
 
-	db.actions().insert(questionitem, function(err, questionitem) {		
+	db.actions().insert(questionitem, function(err, questionitems) {
+		var questionitem = questionitems[0];
 		var fields = { 
 			turn: nextturn.id,
 			modified: new Date()
