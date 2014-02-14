@@ -26,27 +26,27 @@
 	<script type="text/x-handlebars" data-template-name="user/view">
 		<ul class="l-two-col-list l-clearfix">
 			{{#each itemController='gameItem'}}
-				<li>
-					<div class="character-game-item l-fill-parent" {{action "select"}}>
-						<div class="l-fill-parent">
-							<p class="overlay l-fill-parent">Play</p>
-							<img src="http://placehold.it/214x317" alt="person">
-							<div class="info l-anchor-bottom">
-								<h2 class="name">{{username}}</h2>
-								<p class="">{{turn}}</p>
-								<p class="date">{{date}}</p>
-							</div>
+			<li>
+				<div class="character-game-item l-fill-parent" {{action "select"}}>
+					<div class="l-fill-parent">
+						<p class="overlay l-fill-parent">Play</p>
+						<img src="http://placehold.it/214x317" alt="person">
+						<div class="info l-anchor-bottom">
+							<h2 class="name">{{username}}</h2>
+							<p class="">{{turn}}</p>
+							<p class="date">{{date}}</p>
 						</div>
 					</div>
-				</li>
+				</div>
+			</li>
 			{{/each}}
-				<li>
-					<div class="character-game-item l-fill-parent" {{action "newgame"}}>
-						<div class="l-fill-parent new-game-item">
-							<p>+</p>
-						</div>
+			<li>
+				<div class="character-game-item l-fill-parent" {{action "newgame"}}>
+					<div class="l-fill-parent new-game-item">
+						<p>+</p>
 					</div>
-				</li>
+				</div>
+			</li>
 		</ul>
 	</script>
 
@@ -163,6 +163,18 @@
 						</div>
 					</div>
 					{{/with}}
+				{{else}}
+				{{#with me}}
+				<div class="comment-wrapper">
+					<div class="my-comment comment l-align-right l-clearfix">
+						<img class="l-20p l-inline" src="http://placehold.it/64x64" alt="avatar">
+						<div class="l-80p l-inline info guess">
+							<p><span>You</span> guessed {{character.name}}</p>
+							<img {{bind-attr src=character.img}} alt="person">
+						</div>
+					</div>
+				</div>
+				{{/with}}
 				{{/if}}
 			</div>
 			{{else}}
@@ -236,7 +248,17 @@
 			{{/with}}
 		</div>
 		{{else}}
-			<div>guess</div>
+		{{#with opponent}}
+		<div class="comment-wrapper">
+			<div class="my-comment comment l-align-right l-clearfix">
+				<img class="l-20p l-inline" src="http://placehold.it/64x64" alt="avatar">
+				<div class="l-80p l-inline info guess">
+					<p><span>{{name}}</span> guessed {{character.name}}</p>
+					<img {{bind-attr src=character.img}} alt="person">
+				</div>
+			</div>
+		</div>
+		{{/with}}
 		{{/if}}
 	{{else}}
 		<div class="comments">

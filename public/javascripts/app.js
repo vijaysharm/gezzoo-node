@@ -277,6 +277,12 @@ App.GameReplyView = Ember.View.extend({
 	classNames: ["l-fill-parent", "l-container", 't-background']
 });
 App.GameReplyController = Ember.Controller.extend({
+	findCharacterById: function( id ) {
+		var characters = this.get('model.board.characters');
+		return _.find( characters, function( character ) {
+			return id === character._id;
+		});
+	},
 	convert: function( action ) {
 		var data = {};
 
@@ -297,10 +303,12 @@ App.GameReplyController = Ember.Controller.extend({
 				}
 			} else if ( action.action === 'guess' ) {
 				// TODO: Add the guessed character and the outcome
+				var character = this.findCharacterById( action.value );
 				data.opponent = {
 					name: this.get('model.opponent.username'),
 					avatar: 'http://placehold.it/64x64',
 					type: action.action,
+					character: character
 				}
 			}
 		}
@@ -330,6 +338,12 @@ App.ReplyItemController = Ember.Controller.extend({
 			}			
 		}
 	},
+	onUserReplyChange: function() {
+		console.log('userreply' + this.get('userreply'));
+	}.property('userreply'),
+	avatar: function() {
+		return 'http://placehold.it/214x317';
+	}.property('model'),
 	isAction: function() {
 		return (this.get('model.opponent.type') === 'question');
 	}.property('model.opponent.type'),
@@ -418,6 +432,12 @@ App.GameBoardController = Ember.Controller.extend({
 
 		return _.values(b);
 	}.property('model.me.board'),
+	findCharacterById: function( id ) {
+		var characters = this.get('model.board.characters');
+		return _.find( characters, function( character ) {
+			return id === character._id;
+		});
+	},
 	convert: function( action ) {
 		var data = {};
 
@@ -438,8 +458,9 @@ App.GameBoardController = Ember.Controller.extend({
 				}
 			} else if ( action.action === 'guess' ) {
 				// TODO: Add the guessed character and the outcome
+				var character = this.findCharacterById( action.value );
 				data.me	= {
-					avatar: 'http://placehold.it/64x64',
+					character: character,
 					type: action.action,
 				}
 			}
@@ -491,7 +512,7 @@ App.ActionItemController = Ember.Controller.extend({
 	}.property('model.me'),
 	opponent: function() {
 		return this.get('model.opponent');
-	}.property('model.opponent'),
+	}.property('model.opponent')
 });
 
 /////////////////////
