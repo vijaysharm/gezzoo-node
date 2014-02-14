@@ -59,7 +59,8 @@ Note that this project uses nodemon, and will restart automatically when a file 
   + Good guess -> ?
   + reply -> user board
   + etc...
-+ Implement replying
++ Take out all the hardcoded placeit images for avatars and replace them with something from the server
++ Make action dialog boxes look better
 
 ###Unit Tests
 

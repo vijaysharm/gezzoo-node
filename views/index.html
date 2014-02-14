@@ -221,13 +221,13 @@
 				</div>
 			</div>
 			{{/with}}
-			{{#with me}}
+			{{#if me}}
 			<div class="comment-wrapper">
 				<div class="my-comment comment l-align-right l-clearfix">
-					<img class="l-20p l-inline" {{bind-attr src=avatar}} alt="avatar">
+					<img class="l-20p l-inline" {{bind-attr src=me.avatar}} alt="avatar">
 					<div class="l-80p l-inline info">
 						<p><span>You</span> replied:</p>
-						<p class="text">{{value}}</p>
+						<p class="text">{{me.value}}</p>
 					</div>
 				</div>
 			</div>
@@ -245,12 +245,12 @@
 					</div>
 				</div>
 			</div>	
-			{{/with}}
+			{{/if}}
 		</div>
 		{{else}}
 		{{#with opponent}}
 		<div class="comment-wrapper">
-			<div class="my-comment comment l-align-right l-clearfix">
+			<div class="comment l-two-col-list l-clearfix">
 				<img class="l-20p l-inline" src="http://placehold.it/64x64" alt="avatar">
 				<div class="l-80p l-inline info guess">
 					<p><span>{{name}}</span> guessed {{character.name}}</p>

@@ -167,7 +167,23 @@ App.ApplicationController = Ember.Controller.extend({
 			});
 	},
 	reply: function( gameid, questionid, reply ) {
-		console.log('REPLY GDAMMIT!!!');
+		var data = { 
+			token: this.get('token'),
+			question: questionid,
+			reply: reply
+		};
+
+		var self = this;
+		this.send('showModalDialog', 'reply.modal', data);
+
+		Ember.$.post('/api/games/' + gameid + '/reply', data)
+			.then(function(response) {
+				self.send('hideModalDialog');
+			}, function(err) {
+				console.log('reply to question fail:');
+				console.log(JSON.stringify(err));
+				// TODO: Hide the dialog and show an error.
+			});
 	}
 });
 
@@ -289,6 +305,7 @@ App.GameReplyController = Ember.Controller.extend({
 		if ( action ) {
 			if ( action.action === 'question' ) {
 				data.opponent = {
+					id: action._id,
 					name: this.get('model.opponent.username'),
 					avatar: 'http://placehold.it/64x64',
 					value: action.value,
@@ -328,19 +345,22 @@ App.GameReplyController = Ember.Controller.extend({
 });
 
 App.ReplyItemController = Ember.Controller.extend({
-	needs: ['gameReply'],
+	needs: ['gameReply', 'application'],
 	actions: {
 		reply: function() {
 			var value = $.trim(this.get('userreply'));
 			if ( value && value.length !== 0 ) {
-				// TODO: Need to get the action id you're replying to.
-				console.log('reply: ' + value);
+				this.postReply( value );
 			}			
 		}
 	},
-	onUserReplyChange: function() {
-		console.log('userreply' + this.get('userreply'));
-	}.property('userreply'),
+	postReply: function( reply ) {
+		var gameid = this.get('controllers.gameReply.model._id');
+		var application = this.get('controllers.application');
+		var questionid = this.get('model.opponent.id');
+
+		application.reply( gameid, questionid, reply );
+	},
 	avatar: function() {
 		return 'http://placehold.it/214x317';
 	}.property('model'),
