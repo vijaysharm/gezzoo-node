@@ -45,6 +45,33 @@ App.ReplyModalController = App.ModalController.extend({
 
 });
 
+App.AbstractCharacterItemController = Ember.Controller.extend({
+	img: function() {
+		var character = this.get('model');
+		return character.img;
+	}.property('model.img'),
+	name: function() {
+		var character = this.get('model');
+		return character.name;
+	}.property('model.name'),
+	isUserSelection: function() {
+		var state = this.get('controllers.game.model.state');
+		return state === 'user-select-character';
+	}.property('controllers.game.model.state'),
+	isUserAction: function() {
+		var state = this.get('controllers.game.model.state');
+		return state === 'user-action';
+	}.property('controllers.game.model.state'),
+	up: function(key, value) {
+	    if (value === undefined) {
+	      return this.get('model.up');
+	    } else {
+	      this.set('model.up', value);
+	      return value;
+	    }
+	}.property('model.up')
+});
+
 ////////////////
 // APPLICATION
 ////////////////
@@ -405,6 +432,15 @@ App.GameBoardController = Ember.Controller.extend({
 			}
 		}
 	},
+	current_selection: '',
+	selection: function(key, value) {
+	    if (value === undefined) {
+	      return this.get('current_selection');
+	    } else {
+	      this.set('current_selection', value);
+	      return value;
+	    }
+	}.property('current_selection'),
 	init: function() {
 		this._super();
 		this.set('viewBoard', true);
@@ -523,6 +559,31 @@ App.GameBoardController = Ember.Controller.extend({
 	}
 });
 
+App.GameBoardCharacterItemController = App.AbstractCharacterItemController.extend({
+	needs: ['gameBoard', 'game'],
+	actions: {
+		guess: function() {
+			var controller = this.get('controllers.gameBoard');
+			controller.guess(this.get('model._id'));
+		},
+		flip: function() {
+			var up = this.get('model.up');
+			this.set('model.up', !up);
+		},
+		clicked: function() {
+			var controller = this.get('controllers.gameBoard');
+			if ( controller ) {
+				console.log('clicked: ' + this.get('model._id'));
+				controller.set('selection', this.get('model._id'));
+			}
+		}
+	},
+	isselected: function() {
+		var selected = this.get('controllers.gameBoard.selection');
+		return selected === this.get('model._id');
+	}.property('controllers.gameBoard.selection'),
+});
+
 App.ActionItemController = Ember.Controller.extend({
 	isAction: function() {
 		return (this.get('model.me.type') === 'question');
@@ -548,6 +609,15 @@ App.GameSelectView = Ember.View.extend({
 });
 App.GameSelectController = Ember.Controller.extend({
 	needs: ['application'],
+	current_selection: '',
+	selection: function(key, value) {
+	    if (value === undefined) {
+	      return this.get('current_selection');
+	    } else {
+	      this.set('current_selection', value);
+	      return value;
+	    }
+	}.property('current_selection'),
 	characters: function() {
 		return this.get('model.board.characters');
 	}.property('model.board.characters'),
@@ -557,44 +627,24 @@ App.GameSelectController = Ember.Controller.extend({
 		application.select( gameid, characterid );
 	}
 });
-App.CharacterItemController = Ember.Controller.extend({
-	needs: ['gameSelect', 'gameBoard', 'game'],
+
+App.GameSelectCharacterItemController = App.AbstractCharacterItemController.extend({
+	needs: ['gameSelect', 'game'],
 	actions: {
 		select: function() {
 			var controller = this.get('controllers.gameSelect');
 			controller.selectCharacter(this.get('model._id'));
 		},
-		guess: function() {
-			var controller = this.get('controllers.gameBoard');
-			controller.guess(this.get('model._id'));
-		},
-		flip: function() {
-			var up = this.get('model.up');
-			this.set('model.up', !up);
+		clicked: function() {
+			var controller = this.get('controllers.gameSelect');
+			if ( controller ) {
+				console.log('clicked: ' + this.get('model._id'));
+				controller.set('selection', this.get('model._id'));
+			}
 		}
 	},
-	img: function() {
-		var character = this.get('model');
-		return character.img;
-	}.property('model.img'),
-	name: function() {
-		var character = this.get('model');
-		return character.name;
-	}.property('model.name'),
-	isUserSelection: function() {
-		var state = this.get('controllers.game.model.state');
-		return state === 'user-select-character';
-	}.property('controllers.game.model.state'),
-	isUserAction: function() {
-		var state = this.get('controllers.game.model.state');
-		return state === 'user-action';
-	}.property('controllers.game.model.state'),
-	up: function(key, value) {
-	    if (value === undefined) {
-	      return this.get('model.up');
-	    } else {
-	      model.set('up', value);
-	      return value;
-	    }
-	}.property('model.up')
+	isselected: function() {
+		var selected = this.get('controllers.gameBoard.selection');
+		return selected === this.get('model._id');
+	}.property('controllers.gameBoard.selection'),
 });

@@ -42,6 +42,7 @@ Note that this project uses nodemon, and will restart automatically when a file 
 + Don't return all games for a user. Only return ongoing games and games that have just ended (allowing users to restart the game with the same user)
 + Have a state that shows when a game is done but requires the opponent to acknowlege it.
 + Store that a user guessed a character in the board.
++ Make sure that you can't skip your turn to reply by sending a guess/question action without replying first
 
 ###UI
 
@@ -51,6 +52,7 @@ Note that this project uses nodemon, and will restart automatically when a file 
   + The dialog should be displayed for a given amount of time.
   + The dialog should also be able to display results from a user action (i.e. YOU GUESSED RIGHT!!!)
 + Add a 'user guessed x' type in the action screen
+  + Make this item look better and add that they were wrong/right
 + Disable Submit button on action/reply screens
 + Have the API return you an object with localized strings. You can also have different messages in the text box to make the experience a little more fun.
 + Implement the 'flip' button to show that the user has already flipped this character.
@@ -61,6 +63,7 @@ Note that this project uses nodemon, and will restart automatically when a file 
   + etc...
 + Take out all the hardcoded placeit images for avatars and replace them with something from the server
 + Make action dialog boxes look better
++ Validate the state of the game. If the state says 'reply', and the user enters the URL for 'board'. forward them to the right page.
 
 ###Unit Tests
 

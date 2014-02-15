@@ -52,7 +52,7 @@
 
 	<script type="text/x-handlebars" data-template-name="game/select">
 		<ul class="l-two-col-list l-clearfix">
-			{{#each characters itemController='characterItem'}}
+			{{#each characters itemController='gameSelectCharacterItem'}}
 			<li>
 				<div class="character-game-item l-fill-parent">
 					<div class="l-fill-parent">
@@ -62,7 +62,7 @@
 
 							{{#if isUserSelection}}
 							<div class="l-inline-list l-clearfix">
-								<p class="control l-inline l-100p" {{action "select"}}>Select</p>
+								<p {{bind-attr class=":control :l-inline :l-100p isselected:show-control"}} {{action "select"}}>Select</p>
 							</div>
 							{{/if}}
 
@@ -115,19 +115,20 @@
 			{{/with}}
 
 			<ul class="l-two-col-list l-clearfix">
-				{{#each board itemController='characterItem'}}
+				{{#each board itemController='gameBoardCharacterItem'}}
 				<li>
 					<div class="character-game-item l-fill-parent">
 						<div class="l-fill-parent">
-							<img {{bind-attr src=img}} alt="person">
-							<div class="controls l-anchor-bottom">
+							<p {{bind-attr class="up::flipped"}} {{action clicked}}><p>
+							<img {{bind-attr src=img}} alt="person" {{action clicked}}>
+							<div {{bind-attr class=":controls :l-anchor-bottom"}}>
 								<h2 class="name info">{{name}}</h2>
 								{{#if isUserAction}}
 								<div class="l-inline-list l-clearfix">
 									{{#if up}}
-										<p {{bind-attr class=":control :l-inline up:l-50p:l-0p"}} {{action "guess"}}>Guess</p>
+										<p {{bind-attr class=":control :l-inline up:l-50p:l-0p isselected:show-control"}} {{action "guess"}}>Guess</p>
 									{{/if}}
-									<p {{bind-attr class=":control :l-inline up:l-50p:l-100p"}} {{action "flip"}}>Flip</p>
+									<p {{bind-attr class=":control :l-inline up:l-50p:l-100p isselected:show-control"}} {{action "flip"}}>Flip</p>
 								</div>
 								{{/if}}
 							</div>
