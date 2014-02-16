@@ -47,6 +47,8 @@ Note that this project uses nodemon, and will restart automatically when a file 
 ###UI
 
 + Display the current user's character on the reply page.
++ Check if pressing 'back' on the browser allows the state to be refreshed.
+  + maybe forward to the right state if that's the case.
 + Add a home button to leave a game and go to the game list
 + Need a modal dialog for POST actions (setting characters, guessing, questions, etc...)
   + The dialog should be displayed for a given amount of time.

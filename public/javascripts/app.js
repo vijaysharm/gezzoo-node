@@ -451,7 +451,7 @@ App.GameBoardController = Ember.Controller.extend({
 	getLastAction: function() {
 		var actions = this.get('model.me.actions');
 		if ( actions && actions.length > 0 ) {
-			return actions[0];
+			return actions[actions.length-1];
 		}
 
 		return null;
