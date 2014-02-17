@@ -91,6 +91,10 @@ App.ApplicationRoute = Ember.Route.extend({
 		    });
 		}
 	}
+ // , goBack: function() {
+ //        Ember.AnimatedContainerView.enqueueAnimations({main: 'slideRight'});
+ //        history.go(-1);
+ //    }
 });
 
 // TODO: Handle replies.
@@ -149,8 +153,9 @@ App.ApplicationController = Ember.Controller.extend({
 		this.send('showModalDialog', 'select.modal', data);
 		Ember.$.post('/api/games/' + gameid + '/character', data)
 			.then(function(response) {
+
 				self.send('hideModalDialog');
-				self.transitionToRoute('index');
+				self.transitionToRouteAnimated('index', {main: 'slideRight'});
 			}, function( err ) {
 				console.log('set character fail:');
 				console.log(JSON.stringify(err));
@@ -169,6 +174,7 @@ App.ApplicationController = Ember.Controller.extend({
 		Ember.$.post('/api/games/' + gameid + '/question', data)
 			.then(function(response) {
 				self.send('hideModalDialog');
+				self.transitionToRouteAnimated('index', {main: 'slideRight'});
 			}, function(err) {
 				console.log('ask question fail:');
 				console.log(JSON.stringify(err));
@@ -187,6 +193,7 @@ App.ApplicationController = Ember.Controller.extend({
 		Ember.$.post('/api/games/' + gameid + '/guess', data)
 			.then(function(response) {
 				self.send('hideModalDialog');
+				self.transitionToRouteAnimated('index', {main: 'slideRight'});
 			}, function(err) {
 				console.log('ask question fail:');
 				console.log(JSON.stringify(err));
@@ -269,14 +276,16 @@ App.GameItemController = Ember.Controller.extend({
 			var token = this.get('controllers.application.token');
 			var gameid = this.get('model._id');
 			var state = this.get('model.state');
+			var transition = {main: 'slideLeft'};
+
 			if ( 'user-action' === state ) {
-				this.transitionToRoute('game.board', token, gameid);
+				this.transitionToRouteAnimated('game.board', transition, token, gameid);
 			} else if ( 'user-reply' === state ) {
-				this.transitionToRoute('game.reply', token, gameid);
+				this.transitionToRouteAnimated('game.reply', transition, token, gameid);
 			} else if ( 'user-select-character' === state ) {
-				this.transitionToRoute('game.select', token, gameid);
+				this.transitionToRouteAnimated('game.select', transition, token, gameid);
 			} else if ( 'read-only' === state ) {
-				this.transitionToRoute('game.board', token, gameid);
+				this.transitionToRouteAnimated('game.board', transition, token, gameid);
 			}
 		}
 	},
