@@ -1,3 +1,13 @@
+function wait( delay ) {
+	var deferred = $.Deferred();
+
+	setTimeout(function() {
+		deferred.resolve();
+	}, delay);
+
+	return deferred.promise();
+}
+
 App = Ember.Application.create({
 	LOG_TRANSITIONS: true,
 });
@@ -130,19 +140,23 @@ App.ApplicationController = Ember.Controller.extend({
 		});
 	},
 	newgame: function() {
-			var data = { token: this.get('token') };
-			var self = this;
-			self.send('showModalDialog', 'new.game.modal', data);
-			Ember.$.post('/api/games', data).then(function(response) {
-				self.send('hideModalDialog');
-				var token = self.get('token');
-				var gameid = response._id;
-				self.transitionToRoute('game.select', token, gameid);
-			}, function(err) {
-				console.log('new game fail:');
-				console.log(JSON.stringify(err));
-				// TODO: Hide the dialog and show an error.
-			});
+		var data = { token: this.get('token') };
+		var self = this;
+		self.send('showModalDialog', 'new.game.modal', data);
+
+		var post = Ember.$.post('/api/games', data);
+		var delay = wait( 2000 );
+
+		$.when( post, delay ).then(function(response) {
+			self.send('hideModalDialog');
+			var token = self.get('token');
+			var gameid = response._id;
+			self.transitionToRoute('game.select', token, gameid);
+		}, function(err) {
+			console.log('new game fail:');
+			console.log(JSON.stringify(err));
+			// TODO: Hide the dialog and show an error.
+		});
 	},
 	select: function( gameid, characterid ) {
 		var data = { 
@@ -151,16 +165,17 @@ App.ApplicationController = Ember.Controller.extend({
 		};
 		var self = this;
 		this.send('showModalDialog', 'select.modal', data);
-		Ember.$.post('/api/games/' + gameid + '/character', data)
-			.then(function(response) {
+		var post = Ember.$.post('/api/games/' + gameid + '/character', data)
+		var delay = wait( 2000 );
 
-				self.send('hideModalDialog');
-				self.transitionToRouteAnimated('index', {main: 'slideRight'});
-			}, function( err ) {
-				console.log('set character fail:');
-				console.log(JSON.stringify(err));
-				// TODO: Hide the dialog and show an error.
-			});
+		$.when( post, delay ).then(function(response) {
+			self.send('hideModalDialog');
+			self.transitionToRouteAnimated('index', {main: 'slideRight'});
+		}, function( err ) {
+			console.log('set character fail:');
+			console.log(JSON.stringify(err));
+			// TODO: Hide the dialog and show an error.
+		});
 	},
 	ask: function( gameid, question, board ) {
 		var data = {
@@ -171,15 +186,16 @@ App.ApplicationController = Ember.Controller.extend({
 		var self = this;
 		this.send('showModalDialog', 'ask.modal', data);
 
-		Ember.$.post('/api/games/' + gameid + '/question', data)
-			.then(function(response) {
-				self.send('hideModalDialog');
-				self.transitionToRouteAnimated('index', {main: 'slideRight'});
-			}, function(err) {
-				console.log('ask question fail:');
-				console.log(JSON.stringify(err));
-				// TODO: Hide the dialog and show an error.
-			});
+		var post = Ember.$.post('/api/games/' + gameid + '/question', data)
+		var delay = wait( 2000 );
+		$.when( post, delay ).then(function(response) {
+			self.send('hideModalDialog');
+			self.transitionToRouteAnimated('index', {main: 'slideRight'});
+		}, function(err) {
+			console.log('ask question fail:');
+			console.log(JSON.stringify(err));
+			// TODO: Hide the dialog and show an error.
+		});
 	},
 	guess: function( gameid, characterid, board ) {
 		var data = {
@@ -190,15 +206,16 @@ App.ApplicationController = Ember.Controller.extend({
 		var self = this;
 		this.send('showModalDialog', 'guess.modal', data);
 		
-		Ember.$.post('/api/games/' + gameid + '/guess', data)
-			.then(function(response) {
-				self.send('hideModalDialog');
-				self.transitionToRouteAnimated('index', {main: 'slideRight'});
-			}, function(err) {
-				console.log('ask question fail:');
-				console.log(JSON.stringify(err));
-				// TODO: Hide the dialog and show an error.
-			});
+		var post = Ember.$.post('/api/games/' + gameid + '/guess', data)
+		var delay = wait( 2000 );
+		$.when( post, delay ).then(function(response) {
+			self.send('hideModalDialog');
+			self.transitionToRouteAnimated('index', {main: 'slideRight'});
+		}, function(err) {
+			console.log('ask question fail:');
+			console.log(JSON.stringify(err));
+			// TODO: Hide the dialog and show an error.
+		});
 	},
 	reply: function( gameid, questionid, reply ) {
 		var data = { 
@@ -210,14 +227,17 @@ App.ApplicationController = Ember.Controller.extend({
 		var self = this;
 		this.send('showModalDialog', 'reply.modal', data);
 
-		Ember.$.post('/api/games/' + gameid + '/reply', data)
-			.then(function(response) {
-				self.send('hideModalDialog');
-			}, function(err) {
-				console.log('reply to question fail:');
-				console.log(JSON.stringify(err));
-				// TODO: Hide the dialog and show an error.
-			});
+		var post = Ember.$.post('/api/games/' + gameid + '/reply', data)
+		var delay = wait( 2000 );
+
+		$.when( post, delay ).then(function(response) {
+			self.send('hideModalDialog');
+			self.transitionToRouteAnimated('game.board', {main: 'slideLeft'}, self.get('token'), gameid);
+		}, function(err) {
+			console.log('reply to question fail:');
+			console.log(JSON.stringify(err));
+			// TODO: Hide the dialog and show an error.
+		});
 	}
 });
 
@@ -564,6 +584,7 @@ App.GameBoardController = Ember.Controller.extend({
 		var gameid = this.get('model._id');
 		var board = this.getUserBoard();
 		var application = this.get('controllers.application');
+		this.set('current_selection', '');
 		application.ask( gameid, question, board );
 	}
 });
@@ -582,7 +603,6 @@ App.GameBoardCharacterItemController = App.AbstractCharacterItemController.exten
 		clicked: function() {
 			var controller = this.get('controllers.gameBoard');
 			if ( controller ) {
-				console.log('clicked: ' + this.get('model._id'));
 				controller.set('selection', this.get('model._id'));
 			}
 		}
@@ -633,6 +653,7 @@ App.GameSelectController = Ember.Controller.extend({
 	selectCharacter: function(characterid) {
 		var application = this.get('controllers.application');
 		var gameid = this.get('model._id');
+		this.set('current_selection', '');
 		application.select( gameid, characterid );
 	}
 });
