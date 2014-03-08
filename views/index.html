@@ -56,7 +56,7 @@
 			{{#each characters itemController='gameSelectCharacterItem'}}
 			<li>
 				<div class="character-game-item l-fill-parent">
-					<div class="l-fill-parent">
+					<div class="l-fill-parent" {{action clicked}}>
 						<img {{bind-attr src=img}} alt="person">
 						<div class="controls l-anchor-bottom">
 							<h2 class="name info">{{name}}</h2>

@@ -25,6 +25,8 @@ This is a two player game, where each player takes turn trying to guess the oppo
     1. The opponent has guessed wrong. This means that the game continues, and the current user can proceed to either guess, or ask questions of their own.
 
 ## Instaling
+brew install mongodb
+mongod
 npm install
 npm start
 

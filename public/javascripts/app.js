@@ -150,8 +150,8 @@ App.ApplicationController = Ember.Controller.extend({
 		$.when( post, delay ).then(function(response) {
 			self.send('hideModalDialog');
 			var token = self.get('token');
-			var gameid = response._id;
-			self.transitionToRoute('game.select', token, gameid);
+			var gameid = response[0]._id;
+			self.transitionToRouteAnimated('game.select', {main: 'slideLeft'}, token, gameid);
 		}, function(err) {
 			console.log('new game fail:');
 			console.log(JSON.stringify(err));
@@ -674,7 +674,7 @@ App.GameSelectCharacterItemController = App.AbstractCharacterItemController.exte
 		}
 	},
 	isselected: function() {
-		var selected = this.get('controllers.gameBoard.selection');
+		var selected = this.get('controllers.gameSelect.selection');
 		return selected === this.get('model._id');
-	}.property('controllers.gameBoard.selection'),
+	}.property('controllers.gameSelect.selection'),
 });
