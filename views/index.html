@@ -52,6 +52,16 @@
 	</script>
 
 	<script type="text/x-handlebars" data-template-name="game/select">
+		<div class="comments">
+			<div class="comment-wrapper">
+				<div class="comment">
+					<p class="l-text-center info">
+						Select your character from the choices below! {{opponent}} will have to guess who you chose.				
+					</p>
+				</div>
+			</div>
+		</div>
+
 		<ul class="l-two-col-list l-clearfix">
 			{{#each characters itemController='gameSelectCharacterItem'}}
 			<li>
@@ -86,6 +96,20 @@
 			<li {{bind-attr class=viewBoard:active}}></li>
 			<li {{bind-attr class=viewBoard::active}}></li>
 		</ul>
+
+		<div class="comments">
+			<div class="comment-wrapper">
+				<div class="comment">
+					<p class="l-text-center info">
+					{{#if isUserAction}}
+						Try to guess who you think {{opponent}} has. Or hit the 'Questions' tab, and ask them a question!
+					{{else}}
+						Its not your turn right now, maybe taking a look at the past questions might help you figure out who {{opponent}} might have!
+					{{/if}}
+					</p>
+				</div>
+			</div>
+		</div>
 
 		{{#if viewBoard}}
 			{{#with lastaction}}
@@ -182,7 +206,13 @@
 			{{else}}
 				<div class="comments">
 					<div class="comment-wrapper">
-						<p class='l-text-center empty'>Nothing here yet..</p>
+						<p class='l-text-center empty'>
+							{{#if isUserAction}}
+								No activity yet! Why not ask {{opponent}} a question to help you guess their character.
+							{{else}}
+								No activity yet!
+							{{/if}}
+						</p>
 					</div>
 				</div>
 			{{/each}}
@@ -209,6 +239,16 @@
 
 	<!-- TODO: Missing 'start new game with this person' -->
 	<script type="text/x-handlebars" data-template-name="game/reply">
+	<div class="comments">
+		<div class="comment-wrapper">
+			<div class="comment">
+				<p class="l-text-center info">
+					Below is a list of questions that {{opponent}} has asked you. You have to reply to their question before you have a chance to guess theirs.
+				</p>
+			</div>
+		</div>
+	</div>
+
 	{{#each allactions itemController='replyItem'}}
 		{{#if isAction}}
 		<div class="comments">
@@ -238,6 +278,7 @@
 				<div class="my-comment comment l-align-right l-clearfix">
 					<img class="l-20p l-inline" src="http://placehold.it/64x64" alt="avatar">
 					<div class="l-80p l-inline">
+						<img {{bind-attr src=selectedCharacter}} alt="person">
 						<div class="input">
 							<form class="" {{action reply on="submit"}}>
 								{{input class="l-fill-parent" type="text" placeholder="Reply..." value=userreply}}

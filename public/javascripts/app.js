@@ -1,3 +1,11 @@
+var en = {
+
+};
+
+function lang( key ) {
+	return en[key];
+};
+
 function wait( delay ) {
 	var deferred = $.Deferred();
 
@@ -397,7 +405,10 @@ App.GameReplyController = Ember.Controller.extend({
 		}
 
 		return results;
-	}.property('model.opponent.actions')
+	}.property('model.opponent.actions'),
+	opponent: function() {
+		return this.get('model.opponent.username');
+	}.property('model.opponent.username')
 });
 
 App.ReplyItemController = Ember.Controller.extend({
@@ -431,7 +442,12 @@ App.ReplyItemController = Ember.Controller.extend({
 	}.property('model.opponent'),
 	isUserReply: function() {
 		return this.get('controllers.gameReply.model.state') === 'user-reply';
-	}.property('controllers.gameReply.model.state')
+	}.property('controllers.gameReply.model.state'),
+	selectedCharacter: function() {
+		var controller = this.get('controllers.gameReply');
+		var mycharacter = this.get('controllers.gameReply.model.me.character');
+		return controller.findCharacterById( mycharacter );
+	}.property('controllers.gameReply.model.me.character')
 });
 
 ////////////////
@@ -566,6 +582,9 @@ App.GameBoardController = Ember.Controller.extend({
 	isUserAction: function() {
 		return this.get('model.state') === 'user-action';
 	}.property('model.state'),
+	opponent: function() {
+		return this.get('model.opponent.username');
+	}.property('model.opponent.username'),
 	getUserBoard: function() {
 		var board = [];
 		_.each(this.get('model.me.board'), function(item) {
@@ -593,6 +612,7 @@ App.GameBoardCharacterItemController = App.AbstractCharacterItemController.exten
 	needs: ['gameBoard', 'game'],
 	actions: {
 		guess: function() {
+			this.get('controllers.gameBoard').set('selection', '');
 			var controller = this.get('controllers.gameBoard');
 			controller.guess(this.get('model._id'));
 		},
@@ -639,6 +659,9 @@ App.GameSelectView = Ember.View.extend({
 App.GameSelectController = Ember.Controller.extend({
 	needs: ['application'],
 	current_selection: '',
+	opponent: function() {
+		return this.get('model.opponent.username');
+	}.property('model.opponent.username'),
 	selection: function(key, value) {
 	    if (value === undefined) {
 	      return this.get('current_selection');
@@ -662,13 +685,13 @@ App.GameSelectCharacterItemController = App.AbstractCharacterItemController.exte
 	needs: ['gameSelect', 'game'],
 	actions: {
 		select: function() {
+			this.get('controllers.gameSelect').set('selection', '');
 			var controller = this.get('controllers.gameSelect');
 			controller.selectCharacter(this.get('model._id'));
 		},
 		clicked: function() {
 			var controller = this.get('controllers.gameSelect');
 			if ( controller ) {
-				console.log('clicked: ' + this.get('model._id'));
 				controller.set('selection', this.get('model._id'));
 			}
 		}

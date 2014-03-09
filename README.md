@@ -68,6 +68,7 @@ Note that this project uses nodemon, and will restart automatically when a file 
 + Take out all the hardcoded placeit images for avatars and replace them with something from the server
 + Make action dialog boxes look better
 + Validate the state of the game. If the state says 'reply', and the user enters the URL for 'board'. forward them to the right page.
++ Unset the controller selection for character select and board
 
 ###Unit Tests
 
