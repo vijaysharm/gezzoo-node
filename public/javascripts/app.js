@@ -29,11 +29,35 @@ App.en = {
 		instructions: "Below is a list of questions that {{opponent}} has asked you. You have to reply to their question before you have a chance to guess theirs."
 	},
 	'new.game.modal': {
-		title: 'Creating a new game',
+		title: 'Creating...',
 		loading: 'Hang in there... we just gotta find you someone to play with. Then youll get to pick your character.',
 		success: 'Done!',
 		fail: 'Fail :('
-	}
+	},
+	'select.modal': {
+		title: 'Saving...',
+		loading: 'Ok, just saving your selection to the cloud! After this, you will have to wait for your friend to play',
+		success: 'Done!',
+		fail: 'Fail :('
+	},
+	'guess.modal': {
+		title: 'Checking...',
+		loading: 'Verifying if your guess is the right one... Just gimme a sec',
+		success: 'Done!',
+		fail: 'Fail :('
+	},
+	'ask.modal': {
+		title: 'Asking...',
+		loading: "Alright, I'll ask your friend your question. Hopefully they give you an answer that will help.",
+		success: 'Done!',
+		fail: 'Fail :('
+	},
+	'reply.modal': {
+		title: 'Replying...',
+		loading: "Gimme a sec, need to talk to the internet server thingy, just sending your reply out.",
+		success: 'Done!',
+		fail: 'Fail :('
+	},
 };
 App.lang = function( category, key ) {
 	return App.en[category][key];
@@ -66,11 +90,6 @@ App.ModalController = Ember.ObjectController.extend({
 		}
 	}
 });
-
-App.SelectModalController = App.ModalController.extend({});
-App.AskModalController = App.ModalController.extend({});
-App.GuessModalController = App.ModalController.extend({});
-App.ReplyModalController = App.ModalController.extend({});
 
 App.AbstractCharacterItemController = Ember.Controller.extend({
 	img: function() {
@@ -159,38 +178,45 @@ App.ApplicationController = Ember.Controller.extend({
 			console.log(JSON.stringify(err));
 		});
 	},
-	newgame: function() {
-		var data = { token: this.get('token') };
+	doDialog: function(url, data, category, success) {
 		var self = this;
 		self.send('showModalDialog', 'modal', {
-			title: App.lang('new.game.modal', 'title'),
-			text: App.lang('new.game.modal', 'loading')
+			title: App.lang(category, 'title'),
+			text: App.lang(category, 'loading')
 		});
 
-		var post = Ember.$.post('/api/games', data);
+		var post = Ember.$.post(url, data);
 
 		$.when( post, wait( 2000 ) ).then(function(response) {
-			var token = self.get('token');
-			var gameid = response[0]._id;
-
 			self.send('updateDialog', 'modal', {
-				title: App.lang('new.game.modal', 'title'),
-				text: App.lang('new.game.modal', 'success'),
+				title: App.lang(category, 'title'),
+				text: App.lang(category, 'success'),
 			});
 
 			$.when( wait( 1000 ) ).then(function() {
 				self.send('hideModalDialog');
-				self.transitionToRouteAnimated('game.select', {main: 'slideLeft'}, token, gameid);
+				success(response);
 			});
 		}, function(err) {
+			// TODO: Maybe on failures, you want the user to acknowledge that
+			//		 they've seen the error by showing a confirm button?
 			self.send('updateDialog', 'modal', {
-				title: App.lang('new.game.modal', 'title'),
-				text: App.lang('new.game.modal', 'fail'),
+				title: App.lang(category, 'title'),
+				text: App.lang(category, 'fail'),
 			});
 
 			$.when( wait( 1000 ) ).then(function() {
 				self.send('hideModalDialog');
 			});
+		});
+	},
+	newgame: function() {
+		var self = this;
+		var data = { token: this.get('token') };
+		this.doDialog( '/api/games', data, 'new.game.modal', function( response ) {
+			var token = self.get('token');
+			var gameid = response[0]._id;
+			self.transitionToRouteAnimated('game.select', {main: 'slideLeft'}, token, gameid);
 		});
 	},
 	select: function( gameid, characterid ) {
@@ -199,17 +225,8 @@ App.ApplicationController = Ember.Controller.extend({
 			character: characterid
 		};
 		var self = this;
-		this.send('showModalDialog', 'select.modal', data);
-		var post = Ember.$.post('/api/games/' + gameid + '/character', data)
-		var delay = wait( 2000 );
-
-		$.when( post, delay ).then(function(response) {
-			self.send('hideModalDialog');
+		this.doDialog( '/api/games/' + gameid + '/character', data, 'select.modal', function() {
 			self.transitionToRouteAnimated('index', {main: 'slideRight'});
-		}, function( err ) {
-			console.log('set character fail:');
-			console.log(JSON.stringify(err));
-			// TODO: Hide the dialog and show an error.
 		});
 	},
 	ask: function( gameid, question, board ) {
@@ -219,17 +236,8 @@ App.ApplicationController = Ember.Controller.extend({
 			player_board: board
 		};
 		var self = this;
-		this.send('showModalDialog', 'ask.modal', data);
-
-		var post = Ember.$.post('/api/games/' + gameid + '/question', data)
-		var delay = wait( 2000 );
-		$.when( post, delay ).then(function(response) {
-			self.send('hideModalDialog');
+		this.doDialog('/api/games/' + gameid + '/question', data, 'ask.modal', function() {
 			self.transitionToRouteAnimated('index', {main: 'slideRight'});
-		}, function(err) {
-			console.log('ask question fail:');
-			console.log(JSON.stringify(err));
-			// TODO: Hide the dialog and show an error.
 		});
 	},
 	guess: function( gameid, characterid, board ) {
@@ -239,17 +247,8 @@ App.ApplicationController = Ember.Controller.extend({
 			player_board: board
 		};
 		var self = this;
-		this.send('showModalDialog', 'guess.modal', data);
-		
-		var post = Ember.$.post('/api/games/' + gameid + '/guess', data)
-		var delay = wait( 2000 );
-		$.when( post, delay ).then(function(response) {
-			self.send('hideModalDialog');
+		this.doDialog('/api/games/' + gameid + '/guess', data, 'guess.modal', function() {
 			self.transitionToRouteAnimated('index', {main: 'slideRight'});
-		}, function(err) {
-			console.log('ask question fail:');
-			console.log(JSON.stringify(err));
-			// TODO: Hide the dialog and show an error.
 		});
 	},
 	reply: function( gameid, questionid, reply ) {
@@ -260,18 +259,8 @@ App.ApplicationController = Ember.Controller.extend({
 		};
 
 		var self = this;
-		this.send('showModalDialog', 'reply.modal', data);
-
-		var post = Ember.$.post('/api/games/' + gameid + '/reply', data)
-		var delay = wait( 2000 );
-
-		$.when( post, delay ).then(function(response) {
-			self.send('hideModalDialog');
+		this.doDialog('/api/games/' + gameid + '/reply', data, 'reply.modal', function() {
 			self.transitionToRouteAnimated('game.board', {main: 'slideLeft'}, self.get('token'), gameid);
-		}, function(err) {
-			console.log('reply to question fail:');
-			console.log(JSON.stringify(err));
-			// TODO: Hide the dialog and show an error.
 		});
 	}
 });
