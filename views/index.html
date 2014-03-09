@@ -278,7 +278,10 @@
 				<div class="my-comment comment l-align-right l-clearfix">
 					<img class="l-20p l-inline" src="http://placehold.it/64x64" alt="avatar">
 					<div class="l-80p l-inline">
-						<img {{bind-attr src=selectedCharacter}} alt="person">
+						<div class="my-character">
+							<p>Your character is <span>{{selectedCharacter.name}}<span></p>
+							<img {{bind-attr src=selectedCharacter.img}} alt="person">
+						</div>
 						<div class="input">
 							<form class="" {{action reply on="submit"}}>
 								{{input class="l-fill-parent" type="text" placeholder="Reply..." value=userreply}}
@@ -291,17 +294,17 @@
 			{{/if}}
 		</div>
 		{{else}}
-		{{#with opponent}}
-		<div class="comment-wrapper">
-			<div class="comment l-two-col-list l-clearfix">
-				<img class="l-20p l-inline" src="http://placehold.it/64x64" alt="avatar">
-				<div class="l-80p l-inline info guess">
-					<p><span>{{name}}</span> guessed {{character.name}}</p>
-					<img {{bind-attr src=character.img}} alt="person">
+			{{#with opponent}}
+			<div class="comment-wrapper">
+				<div class="comment l-two-col-list l-clearfix">
+					<img class="l-20p l-inline" src="http://placehold.it/64x64" alt="avatar">
+					<div class="l-80p l-inline info guess">
+						<p><span>{{name}}</span> guessed {{character.name}}</p>
+						<img {{bind-attr src=character.img}} alt="person">
+					</div>
 				</div>
 			</div>
-		</div>
-		{{/with}}
+			{{/with}}
 		{{/if}}
 	{{else}}
 		<div class="comments">

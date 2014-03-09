@@ -180,13 +180,19 @@
 	padding: 1px 0;	
 }
 
+.comment .my-character,
 .comment .guess {
 	text-align: center;
 }
 
+.comment .my-character img,
 .comment .guess img {
 	height: auto;
 	width: 100%;
+}
+
+.comment .my-character {
+	padding: 0 10%;
 }
 
 .input {
