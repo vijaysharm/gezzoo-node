@@ -17,7 +17,7 @@ App.USER_AVATAR = 'http://placehold.it/64x64';
 App.OPPONENT_AVATAR = 'http://placehold.it/64x64';
 App.en = {
 	'user.view': {
-		instructions: "Start a new game by pressing the '+' button, or press any of the games in progress."
+		instructions: "Start a new game by pressing the + button, or press any of the games in progress."
 	},
 	'game.select': {
 		instructions: "Select your character from the choices below! {{opponent}} will have to guess who you chose."
@@ -27,6 +27,12 @@ App.en = {
 	},
 	'game.reply': {
 		instructions: "Below is a list of questions that {{opponent}} has asked you. You have to reply to their question before you have a chance to guess theirs."
+	},
+	'new.game.modal': {
+		title: 'Creating a new game',
+		loading: 'Hang in there... we just gotta find you someone to play with. Then youll get to pick your character.',
+		success: 'Done!',
+		fail: 'Fail :('
 	}
 };
 App.lang = function( category, key ) {
@@ -50,31 +56,21 @@ App.Router.map(function() {
 ////////////////
 App.ModalController = Ember.ObjectController.extend({
 	actions: {
-		close: function() {
-			this.send('hideModalDialog')
+		confirm: function() {
+			var confirm = this.get('model.confirm');
+			if ( confirm && confirm.callback ) {
+				confirm.callback();
+			} else {
+				this.send('hideModalDialog');
+			}
 		}
 	}
 });
 
-App.NewGameModalController = App.ModalController.extend({
-
-});
-
-App.SelectModalController = App.ModalController.extend({
-
-});
-
-App.AskModalController = App.ModalController.extend({
-
-});
-
-App.GuessModalController = App.ModalController.extend({
-
-});
-
-App.ReplyModalController = App.ModalController.extend({
-
-});
+App.SelectModalController = App.ModalController.extend({});
+App.AskModalController = App.ModalController.extend({});
+App.GuessModalController = App.ModalController.extend({});
+App.ReplyModalController = App.ModalController.extend({});
 
 App.AbstractCharacterItemController = Ember.Controller.extend({
 	img: function() {
@@ -114,6 +110,9 @@ App.ApplicationRoute = Ember.Route.extend({
 				into: 'application',
 				outlet: 'modal'
 			});
+		},
+		updateDialog: function(id, data) {
+			this.controllerFor(id).set('model', data);
 		},
 		hideModalDialog: function() {
 			return this.disconnectOutlet({
@@ -163,20 +162,35 @@ App.ApplicationController = Ember.Controller.extend({
 	newgame: function() {
 		var data = { token: this.get('token') };
 		var self = this;
-		self.send('showModalDialog', 'new.game.modal', data);
+		self.send('showModalDialog', 'modal', {
+			title: App.lang('new.game.modal', 'title'),
+			text: App.lang('new.game.modal', 'loading')
+		});
 
 		var post = Ember.$.post('/api/games', data);
-		var delay = wait( 2000 );
 
-		$.when( post, delay ).then(function(response) {
-			self.send('hideModalDialog');
+		$.when( post, wait( 2000 ) ).then(function(response) {
 			var token = self.get('token');
 			var gameid = response[0]._id;
-			self.transitionToRouteAnimated('game.select', {main: 'slideLeft'}, token, gameid);
+
+			self.send('updateDialog', 'modal', {
+				title: App.lang('new.game.modal', 'title'),
+				text: App.lang('new.game.modal', 'success'),
+			});
+
+			$.when( wait( 1000 ) ).then(function() {
+				self.send('hideModalDialog');
+				self.transitionToRouteAnimated('game.select', {main: 'slideLeft'}, token, gameid);
+			});
 		}, function(err) {
-			console.log('new game fail:');
-			console.log(JSON.stringify(err));
-			// TODO: Hide the dialog and show an error.
+			self.send('updateDialog', 'modal', {
+				title: App.lang('new.game.modal', 'title'),
+				text: App.lang('new.game.modal', 'fail'),
+			});
+
+			$.when( wait( 1000 ) ).then(function() {
+				self.send('hideModalDialog');
+			});
 		});
 	},
 	select: function( gameid, characterid ) {

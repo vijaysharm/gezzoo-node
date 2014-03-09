@@ -332,11 +332,14 @@
 		</div>
 	</script>
 
-	<script type="text/x-handlebars" data-template-name="new/game/modal">
+	<script type="text/x-handlebars" data-template-name="modal">
 		{{#modal-dialog}}
 			<div class="dialog">
-				<h2>Creating a new game</h2>
-				<p>Hang in there... we just gotta find you someone to play with. Then youll get to pick your character.</p>
+				<h2>{{title}}</h2>
+				<p>{{text}}</p>
+				{{#with confirm}}
+					<p {{action "confirm"}}>{{text}}</p>
+				{{/with}}
 			</div>
 		{{/modal-dialog}}
 	</script>

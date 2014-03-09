@@ -50,7 +50,6 @@ Note that this project uses nodemon, and will restart automatically when a file 
 
 + Check if pressing 'back' on the browser allows the state to be refreshed.
   + maybe forward to the right state if that's the case.
-+ Add a home button to leave a game and go to the game list
 + Need a modal dialog for POST actions (setting characters, guessing, questions, etc...)
   + The dialog should also be able to display results from a user action (i.e. YOU GUESSED RIGHT!!!)
 + Add a 'user guessed x' type in the action screen
@@ -63,6 +62,10 @@ Note that this project uses nodemon, and will restart automatically when a file 
 + Validate the state of the game. If the state says 'reply', and the user enters the URL for 'board'. forward them to the right page.
 + Unset the controller selection for character select and board
 + Make the guess action character item image look more like the one from the board on the question tab and the reply page.
++ Use local storage for the user id.
++ Need better avatar icons.
++ Improve theming
++ A better 'new game' animation might be to have the + button turn into an indefinite progress bar. When the creation is complete, the box can 'poop' out a new game item, and then slide to the 'next spot' on the page, turning into a + sign again.
 
 ###Unit Tests
 
