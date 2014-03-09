@@ -492,7 +492,6 @@ App.GameBoardController = Ember.Controller.extend({
 	},
 	// TODO: This method needs to look at the modified 
 	//		 time to know which is the most recent
-	//		 Also, what if the last action was a guess?
 	getLastAction: function() {
 		var actions = this.get('model.me.actions');
 		if ( actions && actions.length > 0 ) {
@@ -501,6 +500,7 @@ App.GameBoardController = Ember.Controller.extend({
 
 		return null;
 	},
+	// TODO: What if the last action was a guess?
 	lastaction: function() {
 		var action = this.getLastAction();
 		var data = {};
@@ -604,6 +604,7 @@ App.GameBoardController = Ember.Controller.extend({
 		var board = this.getUserBoard();
 		var application = this.get('controllers.application');
 		this.set('current_selection', '');
+		this.set('userquestion', '');
 		application.ask( gameid, question, board );
 	}
 });

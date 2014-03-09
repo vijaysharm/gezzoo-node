@@ -62,6 +62,7 @@ Note that this project uses nodemon, and will restart automatically when a file 
 + Make action dialog boxes look better
 + Validate the state of the game. If the state says 'reply', and the user enters the URL for 'board'. forward them to the right page.
 + Unset the controller selection for character select and board
++ Make the guess action character item image look more like the one from the board on the question tab and the reply page.
 
 ###Unit Tests
 
