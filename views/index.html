@@ -25,13 +25,23 @@
 	</script>
 
 	<script type="text/x-handlebars" data-template-name="user/view">
+		<div class="comments">
+			<div class="comment-wrapper">
+				<div class="comment">
+					<p class="l-text-center info">
+						{{instructions}}
+					</p>
+				</div>
+			</div>
+		</div>
+
 		<ul class="l-two-col-list l-clearfix">
 			{{#each itemController='gameItem'}}
 			<li>
 				<div class="character-game-item l-fill-parent" {{action "select"}}>
 					<div class="l-fill-parent">
 						<p class="overlay l-fill-parent">Play</p>
-						<img src="http://placehold.it/214x317" alt="person">
+						<img {{bind-attr src=useravatar}} alt="person">
 						<div class="info l-anchor-bottom">
 							<h2 class="name">{{username}}</h2>
 							<p class="">{{turn}}</p>
@@ -56,7 +66,7 @@
 			<div class="comment-wrapper">
 				<div class="comment">
 					<p class="l-text-center info">
-						Select your character from the choices below! {{opponent}} will have to guess who you chose.				
+						{{instructions}}
 					</p>
 				</div>
 			</div>
@@ -193,7 +203,7 @@
 				{{#with me}}
 				<div class="comment-wrapper">
 					<div class="my-comment comment l-align-right l-clearfix">
-						<img class="l-20p l-inline" src="http://placehold.it/64x64" alt="avatar">
+						<img class="l-20p l-inline" {{bind-attr src=avatar}} alt="avatar">
 						<div class="l-80p l-inline info guess">
 							<p><span>You</span> guessed {{character.name}}</p>
 							<img {{bind-attr src=character.img}} alt="person">
@@ -221,7 +231,7 @@
 			<div class="comments">
 				<div class="comment-wrapper">
 					<div class="my-comment comment l-align-right l-clearfix">
-						<img class="l-20p l-inline" src="http://placehold.it/64x64" alt="avatar">
+						<img class="l-20p l-inline" {{bind-attr src=avatar}} alt="avatar">
 						<div class="l-80p l-inline">
 							<div class="input">
 								<form class="" {{action ask on="submit"}}>
@@ -255,7 +265,7 @@
 			{{#with opponent}}
 			<div class="comment-wrapper">
 				<div class="comment l-two-col-list l-clearfix">
-					<img class="l-20p l-inline" {{bind-attr src=avatar}} alt="avatar">
+					<img class="l-20p l-inline" {{bind-attr src=opponent.avatar}} alt="avatar">
 					<div class="l-80p l-inline info">
 						<p><span>{{name}}</span> asked:</p>
 						<p class="text">{{value}}</p>
@@ -276,7 +286,7 @@
 			{{else}}
 			<div class="comment-wrapper">
 				<div class="my-comment comment l-align-right l-clearfix">
-					<img class="l-20p l-inline" src="http://placehold.it/64x64" alt="avatar">
+					<img class="l-20p l-inline" {{bind-attr src=me.avatar}} alt="avatar">
 					<div class="l-80p l-inline">
 						<div class="my-character">
 							<p>Your character is <span>{{selectedCharacter.name}}<span></p>
@@ -297,7 +307,7 @@
 			{{#with opponent}}
 			<div class="comment-wrapper">
 				<div class="comment l-two-col-list l-clearfix">
-					<img class="l-20p l-inline" src="http://placehold.it/64x64" alt="avatar">
+					<img class="l-20p l-inline" {{bind-attr src=avatar}} alt="avatar">
 					<div class="l-80p l-inline info guess">
 						<p><span>{{name}}</span> guessed {{character.name}}</p>
 						<img {{bind-attr src=character.img}} alt="person">

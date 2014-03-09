@@ -1,11 +1,3 @@
-var en = {
-
-};
-
-function lang( key ) {
-	return en[key];
-};
-
 function wait( delay ) {
 	var deferred = $.Deferred();
 
@@ -19,6 +11,27 @@ function wait( delay ) {
 App = Ember.Application.create({
 	LOG_TRANSITIONS: true,
 });
+
+// 'http://placehold.it/214x317';
+App.USER_AVATAR = 'http://placehold.it/64x64';
+App.OPPONENT_AVATAR = 'http://placehold.it/64x64';
+App.en = {
+	'user.view': {
+		instructions: "Start a new game by pressing the '+' button, or press any of the games in progress."
+	},
+	'game.select': {
+		instructions: "Select your character from the choices below! {{opponent}} will have to guess who you chose."
+	},
+	'game.board': {
+
+	},
+	'game.reply': {
+		instructions: "Below is a list of questions that {{opponent}} has asked you. You have to reply to their question before you have a chance to guess theirs.";
+	}
+};
+App.lang = function( category, key ) {
+	return App.en[category][key];
+};
 
 App.Router.map(function() {
 	this.route('/');
@@ -294,7 +307,8 @@ App.UserViewController = Ember.ArrayController.extend({
 			var controller = this.get('controllers.application');
 			controller.newgame();
 		}
-	}
+	},
+	instructions: App.lang('user.view', 'instructions')
 });
 
 App.GameItemController = Ember.Controller.extend({
@@ -332,6 +346,10 @@ App.GameItemController = Ember.Controller.extend({
 	username: function(key, value) {
 		var game = this.get('model');
 		return game.opponent.username;
+	}.property('model.opponent.username'),
+
+	useravatar: function() {
+		return App.USER_AVATAR;
 	}.property('model.opponent.username')
 });
 
@@ -371,14 +389,14 @@ App.GameReplyController = Ember.Controller.extend({
 				data.opponent = {
 					id: action._id,
 					name: this.get('model.opponent.username'),
-					avatar: 'http://placehold.it/64x64',
+					avatar: App.OPPONENT_AVATAR,
 					value: action.value,
 					type: action.action
 				};
 
 				if ( action.reply ) {
 					data.me = {
-						avatar: 'http://placehold.it/64x64',
+						avatar: App.USER_AVATAR,
 						value: action.reply.value,
 					};
 				}
@@ -387,7 +405,7 @@ App.GameReplyController = Ember.Controller.extend({
 				var character = this.findCharacterById( action.value );
 				data.opponent = {
 					name: this.get('model.opponent.username'),
-					avatar: 'http://placehold.it/64x64',
+					avatar: App.OPPONENT_AVATAR,
 					type: action.action,
 					character: character
 				}
@@ -428,9 +446,6 @@ App.ReplyItemController = Ember.Controller.extend({
 
 		application.reply( gameid, questionid, reply );
 	},
-	avatar: function() {
-		return 'http://placehold.it/214x317';
-	}.property('model'),
 	isAction: function() {
 		return (this.get('model.opponent.type') === 'question');
 	}.property('model.opponent.type'),
@@ -507,14 +522,14 @@ App.GameBoardController = Ember.Controller.extend({
 
 		if ( action && action.action === 'question' ) {
 			data.me = {
-				avatar: 'http://placehold.it/64x64',
+				avatar: App.USER_AVATAR,
 				value: action.value
 			};
 
 			if ( action.reply ) {
 				data.opponent = {
 					name: this.get('model.opponent.username'),
-					avatar: 'http://placehold.it/64x64',
+					avatar: App.OPPONENT_AVATAR,
 					value: action.reply.value
 				};
 			}
@@ -545,7 +560,7 @@ App.GameBoardController = Ember.Controller.extend({
 		if ( action ) {
 			if ( action.action === 'question' ) {
 				data.me = {
-					avatar: 'http://placehold.it/64x64',
+					avatar: App.USER_AVATAR,
 					value: action.value,
 					type: action.action
 				};
@@ -553,7 +568,7 @@ App.GameBoardController = Ember.Controller.extend({
 				if ( action.reply ) {
 					data.opponent = {
 						name: this.get('model.opponent.username'),
-						avatar: 'http://placehold.it/64x64',
+						avatar: App.OPPONENT_AVATAR,
 						value: action.reply.value
 					};
 				}
@@ -563,6 +578,7 @@ App.GameBoardController = Ember.Controller.extend({
 				data.me	= {
 					character: character,
 					type: action.action,
+					avatar: App.USER_AVATAR,
 				}
 			}
 		}
@@ -582,6 +598,9 @@ App.GameBoardController = Ember.Controller.extend({
 	isUserAction: function() {
 		return this.get('model.state') === 'user-action';
 	}.property('model.state'),
+	avatar: function() {
+		return App.USER_AVATAR;
+	}.property('model.me'),
 	opponent: function() {
 		return this.get('model.opponent.username');
 	}.property('model.opponent.username'),
@@ -643,7 +662,10 @@ App.ActionItemController = Ember.Controller.extend({
 	}.property('model.me'),
 	opponent: function() {
 		return this.get('model.opponent');
-	}.property('model.opponent')
+	}.property('model.opponent'),
+	avatar: function() {
+		return this.get('model.me.avatar');
+	}.property('model.me.avatar')
 });
 
 /////////////////////
@@ -660,6 +682,7 @@ App.GameSelectView = Ember.View.extend({
 App.GameSelectController = Ember.Controller.extend({
 	needs: ['application'],
 	current_selection: '',
+	instructions: App.lang('game.select', 'instructions'),
 	opponent: function() {
 		return this.get('model.opponent.username');
 	}.property('model.opponent.username'),
