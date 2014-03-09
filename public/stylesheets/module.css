@@ -240,3 +240,11 @@
 	padding: 12px 4px;
 	line-height: 1.6em;
 }
+
+.title {
+	text-align: center;
+	text-transform: uppercase;
+	display: block;
+	padding: 8px;
+	font-weight: bold;
+}

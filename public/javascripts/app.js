@@ -26,7 +26,7 @@ App.en = {
 
 	},
 	'game.reply': {
-		instructions: "Below is a list of questions that {{opponent}} has asked you. You have to reply to their question before you have a chance to guess theirs.";
+		instructions: "Below is a list of questions that {{opponent}} has asked you. You have to reply to their question before you have a chance to guess theirs."
 	}
 };
 App.lang = function( category, key ) {
