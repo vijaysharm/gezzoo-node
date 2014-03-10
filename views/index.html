@@ -266,7 +266,7 @@
 			{{#with opponent}}
 			<div class="comment-wrapper">
 				<div class="comment l-two-col-list l-clearfix">
-					<img class="l-20p l-inline" {{bind-attr src=opponent.avatar}} alt="avatar">
+					<img class="l-20p l-inline" {{bind-attr src=avatar}} alt="avatar">
 					<div class="l-80p l-inline info">
 						<p><span>{{name}}</span> asked:</p>
 						<p class="text">{{value}}</p>
@@ -274,7 +274,7 @@
 				</div>
 			</div>
 			{{/with}}
-			{{#if me}}
+			{{#if me.value}}
 			<div class="comment-wrapper">
 				<div class="my-comment comment l-align-right l-clearfix">
 					<img class="l-20p l-inline" {{bind-attr src=me.avatar}} alt="avatar">

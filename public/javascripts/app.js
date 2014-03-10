@@ -178,7 +178,7 @@ App.ApplicationController = Ember.Controller.extend({
 			console.log(JSON.stringify(err));
 		});
 	},
-	doDialog: function(url, data, category, success) {
+	doDialog: function(url, data, category, success, fail) {
 		var self = this;
 		self.send('showModalDialog', 'modal', {
 			title: App.lang(category, 'title'),
@@ -195,7 +195,7 @@ App.ApplicationController = Ember.Controller.extend({
 
 			$.when( wait( 1000 ) ).then(function() {
 				self.send('hideModalDialog');
-				success(response);
+				if (success) success(response);
 			});
 		}, function(err) {
 			// TODO: Maybe on failures, you want the user to acknowledge that
@@ -207,6 +207,7 @@ App.ApplicationController = Ember.Controller.extend({
 
 			$.when( wait( 1000 ) ).then(function() {
 				self.send('hideModalDialog');
+				if (fail) fail();
 			});
 		});
 	},
@@ -397,11 +398,12 @@ App.GameReplyController = Ember.Controller.extend({
 					type: action.action
 				};
 
+				data.me = {
+					avatar: App.USER_AVATAR,
+				};
+
 				if ( action.reply ) {
-					data.me = {
-						avatar: App.USER_AVATAR,
-						value: action.reply.value,
-					};
+					data.me.value = action.reply.value;
 				}
 			} else if ( action.action === 'guess' ) {
 				// TODO: Add the guessed character and the outcome
