@@ -154,10 +154,10 @@ App.ApplicationRoute = Ember.Route.extend({
 // TODO: Handle replies.
 App.ApplicationController = Ember.Controller.extend({
 	usertokens: [
-		'52728fbf63a64c904c657ed5',
-		'52728ca9954deb0b31000004',
-		'52728fbf63a64c904c657ea6',
-		'22728fbf63a64c904c657eaa'
+		{ name:'gezzo_1', id:'52728fbf63a64c904c657ed5' },
+		{ name:'gezzo_0', id:'52728ca9954deb0b31000004' },
+		{ name:'gezzo_2', id:'52728fbf63a64c904c657ea6' },
+		{ name:'gezzo_3', id:'22728fbf63a64c904c657eaa' }
 	],
 	token: '52728fbf63a64c904c657ed5',
 	user: null,

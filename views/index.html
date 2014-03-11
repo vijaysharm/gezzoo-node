@@ -11,6 +11,12 @@
 	<title>Gezzo?</title>
 </head>
 <body>
+<!-- {{view Ember.Select
+       content=programmers
+       optionValuePath="content.id"
+       optionLabelPath="content.firstName"
+       value=currentProgrammer.id}}
+        -->
 	<!-- TODO: Remove Ember.Select once all the pages are complete, and the page are bound to each other -->
 	<!-- TODO: There are some inline avatar images shown. They need to come from the controllers -->
 	<!-- TODO: Need a home button in design -->
@@ -18,6 +24,8 @@
 		{{view Ember.Select 
 			id="test-users-select"
 			content=usertokens
+			optionValuePath="content.id"
+			optionLabelPath="content.name"
 			value=token
 			class="l-fill-width"}}
 		{{#link-to 'index' classNames="title"}}Gezzoo?{{/link-to}}
