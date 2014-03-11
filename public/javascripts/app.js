@@ -32,31 +32,36 @@ App.en = {
 		title: 'Creating...',
 		loading: 'Hang in there... we just gotta find you someone to play with. Then youll get to pick your character.',
 		success: 'Done!',
-		fail: 'Fail :('
+		fail: "D'oh! Failed to create a new game for you :( ... Maybe you can try again a little later?",
+		fail_button: "Fineahh!"
 	},
 	'select.modal': {
 		title: 'Saving...',
 		loading: 'Ok, just saving your selection to the cloud! After this, you will have to wait for your friend to play',
 		success: 'Done!',
-		fail: 'Fail :('
+		fail: "ARGGHHH! I failed to save your choice. Wanna go back home and try another game?",
+		fail_button: "Whatever.."
 	},
 	'guess.modal': {
 		title: 'Checking...',
 		loading: 'Verifying if your guess is the right one... Just gimme a sec',
 		success: 'Done!',
-		fail: 'Fail :('
+		fail: "Hmmm, looks like something isn't right. I can't save your guess. Mind trying again later?",
+		fail_button: "OK?"
 	},
 	'ask.modal': {
 		title: 'Asking...',
 		loading: "Alright, I'll ask your friend your question. Hopefully they give you an answer that will help.",
 		success: 'Done!',
-		fail: 'Fail :('
+		fail: "Ooops! There's a bit of a problem. Go out, have a coffee, come back in a bit and hopefully I'll have fixed things.",
+		fail_button: "Boo-urns"
 	},
 	'reply.modal': {
 		title: 'Replying...',
 		loading: "Gimme a sec, need to talk to the internet server thingy, just sending your reply out.",
 		success: 'Done!',
-		fail: 'Fail :('
+		fail: "Dammit! There was some kinda problem. I couldn't save your reply. You can try again, or maybe you can come back and try again later.",
+		fail_button: "Sure..."
 	},
 };
 App.lang = function( category, key ) {
@@ -193,7 +198,7 @@ App.ApplicationController = Ember.Controller.extend({
 				text: App.lang(category, 'success'),
 			});
 
-			$.when( wait( 1000 ) ).then(function() {
+			$.when( wait( 500 ) ).then(function() {
 				self.send('hideModalDialog');
 				if (success) success(response);
 			});
@@ -203,11 +208,13 @@ App.ApplicationController = Ember.Controller.extend({
 			self.send('updateDialog', 'modal', {
 				title: App.lang(category, 'title'),
 				text: App.lang(category, 'fail'),
-			});
-
-			$.when( wait( 1000 ) ).then(function() {
-				self.send('hideModalDialog');
-				if (fail) fail();
+				confirm: {
+					text: App.lang(category, 'fail_button'),
+					callback: function() {
+						self.send('hideModalDialog');
+						if (fail) fail();
+					}
+				}
 			});
 		});
 	},

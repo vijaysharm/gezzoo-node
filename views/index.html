@@ -41,7 +41,7 @@
 			<li>
 				<div class="character-game-item l-fill-parent" {{action "select"}}>
 					<div class="l-fill-parent">
-						<p class="overlay l-fill-parent">Play</p>
+						<p class="overlay l-fill-parent"></p>
 						<img {{bind-attr src=useravatar}} alt="person">
 						<div class="info l-anchor-bottom">
 							<h2 class="name">{{username}}</h2>
@@ -338,7 +338,7 @@
 				<h2>{{title}}</h2>
 				<p>{{text}}</p>
 				{{#with confirm}}
-					<p {{action "confirm"}}>{{text}}</p>
+					<p class="confirm" {{action "confirm"}}>{{text}}</p>
 				{{/with}}
 			</div>
 		{{/modal-dialog}}
