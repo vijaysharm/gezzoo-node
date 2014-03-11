@@ -11,15 +11,7 @@
 	<title>Gezzo?</title>
 </head>
 <body>
-<!-- {{view Ember.Select
-       content=programmers
-       optionValuePath="content.id"
-       optionLabelPath="content.firstName"
-       value=currentProgrammer.id}}
-        -->
 	<!-- TODO: Remove Ember.Select once all the pages are complete, and the page are bound to each other -->
-	<!-- TODO: There are some inline avatar images shown. They need to come from the controllers -->
-	<!-- TODO: Need a home button in design -->
 	<script type="text/x-handlebars" data-template-name="application">
 		{{view Ember.Select 
 			id="test-users-select"
@@ -104,7 +96,6 @@
 		</ul>
 	</script>
 
-	<!-- TODO: You need to hide the 'guess' button if the character is flipped -->
 	<script type="text/x-handlebars" data-template-name="game/board">
 		<ul class="view-controls l-two-col-list l-clearfix">
 			<li {{action 'board'}}>Board</li>
