@@ -146,6 +146,7 @@ function formatGamesResponse( user, games, boards, users, actions ) {
 		_.extend(opponent, {actions:opponent_actions});
 
 		var state = game.turn.equals(me._id) ? getState(me, opponent) : 'read-only';
+		state = game.ended ? 'read-only' : state;
 
 		gs.push({
 			_id: game._id,
@@ -155,7 +156,8 @@ function formatGamesResponse( user, games, boards, users, actions ) {
 			turn: game.turn,
 			ended: game.ended,
 			modified: game.modified,
-			state: state
+			state: state,
+			winner: game.winner
 		});
 	});
 
@@ -270,7 +272,8 @@ exports.getGameById = function( req, res ) {
 	});
 
 	var state = game.turn.equals(me._id) ? getState(me, opponent) : 'read-only';
-
+	state = game.ended ? 'read-only' : state;
+	
 	var result = {
 		_id : game._id,
 		me: me,
@@ -279,7 +282,8 @@ exports.getGameById = function( req, res ) {
 		ended: game.ended,
 		turn: game.turn,
 		state: state,
-		modified: game.modified
+		modified: game.modified,
+		winner: game.winner
 	};
 
 	res.json(result);
@@ -495,6 +499,12 @@ exports.guess = function( req, res ) {
 			_.extend( fields, {
 				'players.$.board': player_board
 			});
+		}
+		if ( userguess ) {
+			fields.winner = {
+				by: user._id,
+				actionid: guessitem._id
+			}
 		}
 
 		var update = {

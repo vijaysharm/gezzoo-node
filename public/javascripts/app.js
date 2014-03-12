@@ -17,7 +17,10 @@ App.USER_AVATAR = 'http://placehold.it/64x64';
 App.OPPONENT_AVATAR = 'http://placehold.it/64x64';
 App.en = {
 	'user.view': {
-		instructions: "Start a new game by pressing the + button, or press any of the games in progress."
+		instructions: "Start a new game by pressing the + button, or press any of the games in progress.",
+		your_turn: "It's your turn",
+		their_turn: "It's their turn",
+		game_over: 'Game over :('
 	},
 	'game.select': {
 		instructions: "Select your character from the choices below! {{opponent}} will have to guess who you chose."
@@ -350,8 +353,12 @@ App.GameItemController = Ember.Controller.extend({
 
 	turn: function(key, value) {
 		var game = this.get('model');
-		var turn = game.turn === game.me._id;
-		return turn ? "It's your turn" : "It's their turn";
+		if ( game.ended ) {
+			return App.lang('user.view', 'game_over');
+		} else  {
+			var turn = game.turn === game.me._id;
+			return turn ? App.lang('user.view', 'your_turn') : App.lang('user.view', 'their_turn');
+		}
 	}.property('model.turn'),
 
 	username: function(key, value) {
@@ -413,13 +420,20 @@ App.GameReplyController = Ember.Controller.extend({
 					data.me.value = action.reply.value;
 				}
 			} else if ( action.action === 'guess' ) {
-				// TODO: Add the guessed character and the outcome
+				var isWinner = false;
+				var winner = this.get('model.winner');
+				if ( winner ) {
+					isWinner = winner.by === this.get('model.opponent._id') &&
+							   winner.actionid === action._id;
+				}
+
 				var character = this.findCharacterById( action.value );
 				data.opponent = {
 					name: this.get('model.opponent.username'),
 					avatar: App.OPPONENT_AVATAR,
 					type: action.action,
-					character: character
+					character: character,
+					right: isWinner ? "right!" : "wrong."
 				}
 			}
 		}
@@ -585,12 +599,19 @@ App.GameBoardController = Ember.Controller.extend({
 					};
 				}
 			} else if ( action.action === 'guess' ) {
-				// TODO: Add the guessed character and the outcome
+				var isWinner = false;
+				var winner = this.get('model.winner');
+				if ( winner ) {
+					isWinner = winner.by === this.get('model.me._id') && 
+							   winner.actionid === action._id;
+				}
+
 				var character = this.findCharacterById( action.value );
 				data.me	= {
 					character: character,
 					type: action.action,
 					avatar: App.USER_AVATAR,
+					right: isWinner ? "right!" : "wrong."
 				}
 			}
 		}
