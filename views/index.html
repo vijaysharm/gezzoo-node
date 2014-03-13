@@ -308,10 +308,18 @@
 					<div class="l-80p l-inline info guess">
 						<p><span>{{name}}</span> guessed {{character.name}}</p>
 						<img {{bind-attr src=character.img}} alt="person">
+						<p>And they were <span>{{right}}</span></p>
 					</div>
 				</div>
 			</div>
 			{{/with}}
+			{{#if lost}}
+			<div class="comment-wrapper">
+				<div class="comment">
+					press play to play with me again
+				</div>
+			</div>
+			{{/if}}
 		{{/if}}
 	{{else}}
 		<div class="comments">

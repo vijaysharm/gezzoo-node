@@ -492,7 +492,18 @@ App.ReplyItemController = Ember.Controller.extend({
 		var controller = this.get('controllers.gameReply');
 		var mycharacter = this.get('controllers.gameReply.model.me.character');
 		return controller.findCharacterById( mycharacter );
-	}.property('controllers.gameReply.model.me.character')
+	}.property('controllers.gameReply.model.me.character'),
+	lost: function() {
+		var ended = this.get('controllers.gameReply.model.ended');
+		var winner = this.get('controllers.gameReply.model.winner');
+		var userid = this.get('controllers.gameReply.model.opponent._id');
+		if ( ended === true && winner ) {
+			 return winner.by === userid;
+		} else {
+			return false;
+		}
+		return true;
+	}.property('controllers.gameReply.model.ended')
 });
 
 ////////////////
