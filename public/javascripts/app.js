@@ -23,13 +23,14 @@ App.en = {
 		game_over: 'Game over :('
 	},
 	'game.select': {
-		instructions: "Select your character from the choices below! {{opponent}} will have to guess who you chose."
+		instructions: Handlebars.compile("Select your character from the choices below! {{opponent}} will have to guess who you chose.")
 	},
 	'game.board': {
-
+		instructions1: Handlebars.compile("Try to guess who you think {{opponent}} has. You can press any of the faces below and flip them over if you think {{opponent}} hasnt chosen them. Or hit the 'Questions' tab, and ask them a question!"),
+		instructions2: Handlebars.compile("Its not your turn right now, maybe taking a look at the past questions might help you figure out who {{opponent}} might have!")
 	},
 	'game.reply': {
-		instructions: "Below is a list of questions that {{opponent}} has asked you. You have to reply to their question before you have a chance to guess theirs."
+		instructions: Handlebars.compile("Below is a list of questions that {{opponent}} has asked you. You have to reply to their question before you have a chance to guess theirs.")
 	},
 	'new.game.modal': {
 		title: 'Creating...',
@@ -67,8 +68,14 @@ App.en = {
 		fail_button: "Sure..."
 	},
 };
-App.lang = function( category, key ) {
-	return App.en[category][key];
+App.lang = function( category, key, value ) {
+	var l = App.en[category][key];
+	if ( _.isFunction(l) ) {
+		return l(value);
+	} else if ( _.isString(l) ) {
+		return l;
+	}
+	return "null";
 };
 
 App.Router.map(function() {
@@ -154,7 +161,6 @@ App.ApplicationRoute = Ember.Route.extend({
  //    }
 });
 
-// TODO: Handle replies.
 App.ApplicationController = Ember.Controller.extend({
 	usertokens: [
 		{ name:'gezzo_1', id:'52728fbf63a64c904c657ed5' },
@@ -206,8 +212,6 @@ App.ApplicationController = Ember.Controller.extend({
 				if (success) success(response);
 			});
 		}, function(err) {
-			// TODO: Maybe on failures, you want the user to acknowledge that
-			//		 they've seen the error by showing a confirm button?
 			self.send('updateDialog', 'modal', {
 				title: App.lang(category, 'title'),
 				text: App.lang(category, 'fail'),
@@ -519,6 +523,16 @@ App.GameBoardController = Ember.Controller.extend({
 		}
 	},
 	current_selection: '',
+	instructions: function() {
+		var opponent = {
+			opponent: this.get('model.opponent.username')
+		};
+		if ( this.get('model.state') === 'user-action' ) {
+			return App.lang('game.board','instructions1', opponent);
+		} else {
+			return App.lang('game.board','instructions2', opponent);
+		}
+	}.property('model.opponent.username'),
 	selection: function(key, value) {
 	    if (value === undefined) {
 	      return this.get('current_selection');
@@ -715,7 +729,11 @@ App.GameSelectView = Ember.View.extend({
 App.GameSelectController = Ember.Controller.extend({
 	needs: ['application'],
 	current_selection: '',
-	instructions: App.lang('game.select', 'instructions'),
+	instructions: function() {
+		return App.lang('game.select', 'instructions', {
+			opponent: this.get('model.opponent.username')
+		});
+	}.property('model.opponent.username'),
 	opponent: function() {
 		return this.get('model.opponent.username');
 	}.property('model.opponent.username'),
