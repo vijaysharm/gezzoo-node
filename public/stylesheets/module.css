@@ -284,3 +284,23 @@
 .confirm:active {
 	background-color: rgba(256, 256, 256, 0.5);
 }
+
+.replay {
+	padding: 16px;
+	background-color: rgba(256, 256, 256, 1.0);
+	color: black;
+
+	transition: all 0.3s;
+	-moz-transition: all 0.3s;
+	-webkit-transition: all 0.3s;
+}
+
+.replay:hover {
+	background-color: rgba(256, 256, 200, 1.0);
+	color: black;
+}
+
+.replay:active {
+	background-color: rgba(0, 0, 0, 1.0);
+	color: white;
+}

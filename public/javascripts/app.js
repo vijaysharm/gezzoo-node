@@ -225,9 +225,10 @@ App.ApplicationController = Ember.Controller.extend({
 			});
 		});
 	},
-	newgame: function() {
+	newgame: function(opponentid) {
 		var self = this;
 		var data = { token: this.get('token') };
+		if ( opponentid ) data.opponent = opponentid;
 		this.doDialog( '/api/games', data, 'new.game.modal', function( response ) {
 			var token = self.get('token');
 			var gameid = response[0]._id;
@@ -336,9 +337,18 @@ App.GameItemController = Ember.Controller.extend({
 			var token = this.get('controllers.application.token');
 			var gameid = this.get('model._id');
 			var state = this.get('model.state');
+			var ended = this.get('model.ended');
 			var transition = {main: 'slideLeft'};
 
-			if ( 'user-action' === state ) {
+			if ( ended === true ) {
+				var id = this.get('model.me._id');
+				var winner = this.get('model.winner.by');
+				if ( id === winner ) {
+					this.transitionToRouteAnimated('game.board', transition, token, gameid);
+				} else {
+					this.transitionToRouteAnimated('game.reply', transition, token, gameid);
+				}
+			} else if ( 'user-action' === state ) {
 				this.transitionToRouteAnimated('game.board', transition, token, gameid);
 			} else if ( 'user-reply' === state ) {
 				this.transitionToRouteAnimated('game.reply', transition, token, gameid);
@@ -467,6 +477,11 @@ App.ReplyItemController = Ember.Controller.extend({
 			if ( value && value.length !== 0 ) {
 				this.postReply( value );
 			}			
+		},
+		replay: function() {
+			var opponentid = this.get('controllers.gameReply.model.opponent._id');
+			var controller = this.get('controllers.application');
+			controller.newgame(opponentid);
 		}
 	},
 	postReply: function( reply ) {
