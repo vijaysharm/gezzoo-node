@@ -209,7 +209,7 @@ App.ApplicationController = Ember.Controller.extend({
 
 			$.when( wait( 500 ) ).then(function() {
 				self.send('hideModalDialog');
-				if (success) success(response);
+				if (success) success(response[0]);
 			});
 		}, function(err) {
 			self.send('updateDialog', 'modal', {
@@ -231,18 +231,24 @@ App.ApplicationController = Ember.Controller.extend({
 		if ( opponentid ) data.opponent = opponentid;
 		this.doDialog( '/api/games', data, 'new.game.modal', function( response ) {
 			var token = self.get('token');
-			var gameid = response[0]._id;
+			var gameid = response._id;
 			self.transitionToRouteAnimated('game.select', {main: 'slideLeft'}, token, gameid);
 		});
 	},
-	select: function( gameid, characterid ) {
+	select: function( gameid, characterid, me ) {
 		var data = { 
 			token: this.get('token'),
 			character: characterid
 		};
 		var self = this;
-		this.doDialog( '/api/games/' + gameid + '/character', data, 'select.modal', function() {
-			self.transitionToRouteAnimated('index', {main: 'slideRight'});
+		this.doDialog( '/api/games/' + gameid + '/character', data, 'select.modal', function( response ) {
+			console.log('me: ' + me);
+			console.log('turn: ' + response.turn);
+			if ( me === response.turn ) {
+				self.transitionToRouteAnimated('game.board', {main: 'slideLeft'}, self.get('token'), gameid);
+			} else {
+				self.transitionToRouteAnimated('index', {main: 'slideRight'});
+			}
 		});
 	},
 	ask: function( gameid, question, board ) {
@@ -777,8 +783,9 @@ App.GameSelectController = Ember.Controller.extend({
 	selectCharacter: function(characterid) {
 		var application = this.get('controllers.application');
 		var gameid = this.get('model._id');
+		var me = this.get('model.me._id');
 		this.set('current_selection', '');
-		application.select( gameid, characterid );
+		application.select( gameid, characterid, me );
 	}
 });
 

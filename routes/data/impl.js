@@ -426,37 +426,41 @@ exports.startNewGame = function( req, res ) {
 	}
 };
 
-/**
- * TODO: If its the opponent that's setting the
- * 		 character, you don't want to change the
- * 		 turn since they have to also ask a question
- */
 exports.setCharacter = function( req, res ) {
 	var user = req.user;
 	var game = req.game;
 	var character = req.character;
 	var db = req.db;
+	var opponent = gameutil.extractOpponent(user, game);
 
-	var nextturn = gameutil.extractOpponent(user, game);
 	var gamesdb = db.games();
 	var query = {
 		_id: game._id,
 		'players.id': user._id
 	};
 
+	var fields = { 
+		'players.$.character': character._id,
+		modified: new Date()
+	};
+
+	// We only change turns if the opponent hasn't set
+	// their character
+	if ( ! opponent.character ) {
+		fields.turn = opponent.id;
+	}
+
 	var update = {
-		$set: { 
-			'players.$.character': character._id,
-			turn: nextturn.id,
-			modified: new Date()
-		}
+		$set: fields
 	};
 
 	var options = { upsert:false, 'new':true };
 	var sort = [['_id','1']];
 	gamesdb.findAndModify(query, sort, update, options, function(err, insertedgame) {
 		if ( err ) throw err;
-		res.json(200);
+		res.json(200, {
+			turn: insertedgame.turn
+		});
 	});
 };
 
