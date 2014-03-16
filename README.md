@@ -41,8 +41,6 @@ Note that this project uses nodemon, and will restart automatically when a file 
 ###Impl
 
 + Better error handling
-+ Don't return all games for a user. Only return ongoing games and games that have just ended (allowing users to restart the game with the same user)
-+ Have a state that shows when a game is done but requires the opponent to acknowlege it.
 + Store that a user guessed a character in the board.
 + Make sure that you can't skip your turn to reply by sending a guess/question action without replying first
 + Support not having a game with user X. Make sure that user never becomes an option for someone to play with again.
@@ -58,7 +56,9 @@ Note that this project uses nodemon, and will restart automatically when a file 
 + Disable Submit button on action/reply screens
 + Have the API return you an object with localized strings.
   + You can also have different messages in the text box to make the experience a little more fun.
+  + Have different strings displayed when the loser creates a new game with the opponent.
 + Take out all the hardcoded placeit images for avatars and replace them with something from the server
++ Download all the images from imdb and save them on your server. Be a good internet citizen.
 + Make dialog boxes look better
 + Validate the state of the game. If the state says 'reply', and the user enters the URL for 'board'. forward them to the right page.
 + Unset the controller selection for character select and board

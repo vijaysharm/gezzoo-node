@@ -165,15 +165,6 @@ function formatGamesResponse( user, games, boards, users, actions ) {
 }
 
 /**
- * TODO: Currently, this returns all the games by this user.
- * 		 It should constrain itself to ongoing games, its just
- * 		 that we want the user to know when the opponent guessed
- * 		 right (at which point the game is over). Maybe we need
- * 		 a new state.
- *
- * TODO: We shouldn't return all the games that a user has ongoing
- *		 with the same opponent. Only the latest game.
- *
  * TODO: Need to return the characters from the board. Currently doing
  *		 empty query, and not adding to response.
  */
@@ -226,8 +217,6 @@ function getMostRecentAction( actions ) {
 //       and if there's something that doesn't make
 // 		 sense, we can set something to have the turn
 //	     updated to the opponent
-// TODO: Must also support forwarding the user to the 
-//       to show them that the game is over.
 function getState( user, opponent ) {
 	var opponent_action = getMostRecentAction(opponent.actions);
 
@@ -298,6 +287,9 @@ exports.getGameById = function( req, res ) {
  * 		 Are newer and the more active users. This way
  * 		 this user has a better chance to have people
  * 		 to play with
+ *
+ * TODO: Add a BAN list, so that games that are not replayed with
+ * 		 a certain opponent are not selected again
  */
 function createNewGame( db, user, res ) {
 	// 1) we find all the games that the current user is playing
@@ -355,51 +347,70 @@ function createNewGame( db, user, res ) {
  * @param opponent the user object from the DB with all properties
  */
 function createNewGameWithUser( db, user, opponent, res ) {
-	var boardsdb = db.boards();
-	var gamesdb = db.games();
-	var characters = db.characters();
-	var boards_row_count = 1;
-	var query = {}
-	boardsdb.find(query).limit(boards_row_count).toArray(function(err, boards) {
-		if ( err ) throw err;
+	deleteExistingGames( db, user, opponent, res, function() {
+		var boardsdb = db.boards();
+		var gamesdb = db.games();
+		var characters = db.characters();
+		var boards_row_count = 1;
+		var query = {}
+		boardsdb.find(query).limit(boards_row_count).toArray(function(err, boards) {
+			if ( err ) throw err;
 
-		var board = boards[0];
-		var player_characters = transform(board.characters, {up: true});
-		
-		var game = new Game()
-			.board(board._id)
-			.turn(user._id)
-			.ended(false)
-			.addPlayer({
-				id: user._id,
-				board: player_characters
-			})
-			.addPlayer({
-				id: opponent._id,
-				board: player_characters
-			})
-			.toDbObject();
+			var board = boards[0];
+			var player_characters = transform(board.characters, {up: true});
+			
+			var game = new Game()
+				.board(board._id)
+				.turn(user._id)
+				.ended(false)
+				.addPlayer({
+					id: user._id,
+					board: player_characters
+				})
+				.addPlayer({
+					id: opponent._id,
+					board: player_characters
+				})
+				.toDbObject();
 
-		gamesdb.insert(game, function(err, results) {
-			var insertedgame = results[0];
-			var query = {_id:{ $in: board.characters }};
-			var options = {name:1, img:1};
-			characters.find(query, options).toArray(function(err, fullcharacters) {
-				board.characters = fullcharacters;
+			gamesdb.insert(game, function(err, results) {
+				var insertedgame = results[0];
+				var query = {_id:{ $in: board.characters }};
+				var options = {name:1, img:1};
+				characters.find(query, options).toArray(function(err, fullcharacters) {
+					board.characters = fullcharacters;
 
-				// We only need to return back certain fields
-				res.json({
-					players: insertedgame.players,
-					opponent: opponent,
-					turn: insertedgame.turn,
-					_id: insertedgame._id,
-					board: board,
-					ended: insertedgame.ended,
-					modified: insertedgame.modified,
-					state: 'user-select-character'
+					// We only need to return back certain fields
+					res.json({
+						players: insertedgame.players,
+						opponent: opponent,
+						turn: insertedgame.turn,
+						_id: insertedgame._id,
+						board: board,
+						ended: insertedgame.ended,
+						modified: insertedgame.modified,
+						state: 'user-select-character'
+					});
 				});
 			});
 		});
+	});
+};
+
+function deleteExistingGames( db, user, opponent, res, callback ) {
+	var query = {
+		'players.id': {$all:[user._id, opponent._id]},
+		ended: true
+	};
+
+	db.games().find(query).toArray(function(err, games) {
+		var ids = _.pluck(games, '_id');
+		if ( ids.length > 0 ) {
+			db.games().remove({_id: {$in:ids}});
+			db.actions().remove({gameid: {$in:ids}});
+		}
+
+		callback();
 	});
 };
 
