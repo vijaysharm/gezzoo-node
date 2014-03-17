@@ -11,8 +11,8 @@
 	<title>Gezzo?</title>
 </head>
 <body>
-	<!-- TODO: Remove Ember.Select once all the pages are complete, and the page are bound to each other -->
-	<script type="text/x-handlebars" data-template-name="application">
+	<!-- 
+		TODO: Remove Ember.Select once all the pages are complete, and the page are bound to each other 
 		{{view Ember.Select 
 			id="test-users-select"
 			content=usertokens
@@ -20,6 +20,8 @@
 			optionLabelPath="content.name"
 			value=token
 			class="l-fill-width"}}
+	-->
+	<script type="text/x-handlebars" data-template-name="application">
 		{{#link-to 'index' classNames="title"}}Gezzoo?{{/link-to}}
 		{{animated-outlet name="main"}}
 		{{outlet modal}}

@@ -5,14 +5,6 @@ var DbBuilder = require('./dbutil').DbBuilder;
 
 var _ = require('underscore');
 
-function getUsers() {
-	return [
-		{ username:'gezzoo_0', _id:util.toObjectId('52728ca9954deb0b31000004') },
-		{ username:'gezzoo_1', _id:util.toObjectId('52728fbf63a64c904c657ed5') },
-		{ username:'gezzoo_2', _id:util.toObjectId('52728fbf63a64c904c657ed6') }
-	];
-};
-
 function getCharcters() {
 	return [
 		{name:'Shah Rukh Khan', category:['bollywood'], img:'http://ia.media-imdb.com/images/M/MV5BMTQxMjg4Mzk1Nl5BMl5BanBnXkFtZTcwMzQyMTUxNw@@._V1_SY317_CR1,0,214,317_.jpg'},
