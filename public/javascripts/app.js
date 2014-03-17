@@ -51,7 +51,13 @@ App.en = {
 		loading: 'Verifying if your guess is the right one... Just gimme a sec',
 		success: 'Done!',
 		fail: "Hmmm, looks like something isn't right. I can't save your guess. Mind trying again later?",
-		fail_button: "OK?"
+		fail_button: "OK?",
+		guess_right_title: "NICE!",
+		guess_right_text: Handlebars.compile("You're right! {{opponent}} had {{character}}! I'll let {{opponent}} know."),
+		guess_right_button: "Yay!",
+		guess_wrong_title: "Nope",
+		guess_wrong_text: Handlebars.compile("{{opponent}} didn't have {{character}}. Good guess though. You'll have to let {{opponent}} go next before you can go again."),
+		guess_wrong_button: "Ugh...:(",
 	},
 	'ask.modal': {
 		title: 'Asking...',
@@ -192,7 +198,7 @@ App.ApplicationController = Ember.Controller.extend({
 			console.log(JSON.stringify(err));
 		});
 	},
-	doDialog: function(url, data, category, success, fail) {
+	doDialog: function(url, data, category, success, responseHandler) {
 		var self = this;
 		self.send('showModalDialog', 'modal', {
 			title: App.lang(category, 'title'),
@@ -202,15 +208,32 @@ App.ApplicationController = Ember.Controller.extend({
 		var post = Ember.$.post(url, data);
 
 		$.when( post, wait( 2000 ) ).then(function(response) {
-			self.send('updateDialog', 'modal', {
-				title: App.lang(category, 'title'),
-				text: App.lang(category, 'success'),
-			});
+			var content = responseHandler ? responseHandler( response[0] ) : null;
 
-			$.when( wait( 500 ) ).then(function() {
-				self.send('hideModalDialog');
-				if (success) success(response[0]);
-			});
+			if ( content ) {
+				self.send('updateDialog', 'modal', {
+					title: content.title, //App.lang(category, 'title'),
+					text: content.text, //App.lang(category, 'fail'),
+					confirm: {
+						text: content.button_text, //App.lang(category, 'success_button')
+						callback: function() {
+							self.send('hideModalDialog');
+							if (success) success(response[0]);
+						}
+					}
+				});
+			} else {
+				self.send('updateDialog', 'modal', {
+					title: App.lang(category, 'title'),
+					text: App.lang(category, 'success'),
+				});
+				$.when( wait( 500 ) ).then(function() {
+					self.send('hideModalDialog');
+					if (success) success(response[0]);
+				});
+			}
+				
+
 		}, function(err) {
 			self.send('updateDialog', 'modal', {
 				title: App.lang(category, 'title'),
@@ -219,7 +242,6 @@ App.ApplicationController = Ember.Controller.extend({
 					text: App.lang(category, 'fail_button'),
 					callback: function() {
 						self.send('hideModalDialog');
-						if (fail) fail();
 					}
 				}
 			});
@@ -262,15 +284,28 @@ App.ApplicationController = Ember.Controller.extend({
 			self.transitionToRouteAnimated('index', {main: 'slideRight'});
 		});
 	},
-	guess: function( gameid, characterid, board ) {
+	guess: function( gameid, character, board, opponent ) {
+		console.log(character);
 		var data = {
 			token: this.get('token'),
-			character: characterid,
+			character: character._id,
 			player_board: board
 		};
 		var self = this;
 		this.doDialog('/api/games/' + gameid + '/guess', data, 'guess.modal', function() {
 			self.transitionToRouteAnimated('index', {main: 'slideRight'});
+		}, function( response ) {
+			var text = {
+				opponent: opponent,
+				character: character.name
+			};
+			var result = response.guess ? 'right' : 'wrong';
+			
+			return {
+				title: App.lang('guess.modal', 'guess_' + result + '_title'),
+				text: App.lang('guess.modal', 'guess_' + result + '_text', text),
+				button_text: App.lang('guess.modal', 'guess_' + result + '_button')
+			};
 		});
 	},
 	reply: function( gameid, questionid, reply ) {
@@ -691,11 +726,12 @@ App.GameBoardController = Ember.Controller.extend({
 
 		return board;
 	},
-	guess: function( characterid ) {
+	guess: function( character ) {
 		var gameid = this.get('model._id');
 		var board = this.getUserBoard();
 		var application = this.get('controllers.application');
-		application.guess( gameid, characterid, board );
+		var opponent = this.get('model.opponent.username');
+		application.guess( gameid, character, board, opponent );
 	},
 	postQuestion: function( question ) {
 		var gameid = this.get('model._id');
@@ -713,7 +749,7 @@ App.GameBoardCharacterItemController = App.AbstractCharacterItemController.exten
 		guess: function() {
 			this.get('controllers.gameBoard').set('selection', '');
 			var controller = this.get('controllers.gameBoard');
-			controller.guess(this.get('model._id'));
+			controller.guess(this.get('model'));
 		},
 		flip: function() {
 			var up = this.get('model.up');

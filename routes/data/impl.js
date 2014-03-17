@@ -175,7 +175,6 @@ exports.getGames = function( req, res ) {
 	var gamesdb = db.games();
 	var query = {
 		'players.id': {$in:[user._id]},
-		// 'ended': false
 	};
 	
 	// TODO: Here begins the crazy data processing.
