@@ -131,7 +131,12 @@ App.AbstractCharacterItemController = Ember.Controller.extend({
 	}.property('controllers.game.model.state'),
 	up: function(key, value) {
 	    if (value === undefined) {
-	      return this.get('model.up');
+	    	var e = this.get('model.up');
+	    	if (( typeof e ) === "boolean" ) {
+	    		return e;
+	    	} else {
+				return e === "true" ? true:false;
+	    	}
 	    } else {
 	      this.set('model.up', value);
 	      return value;
@@ -747,6 +752,8 @@ App.GameBoardCharacterItemController = App.AbstractCharacterItemController.exten
 	needs: ['gameBoard', 'game'],
 	actions: {
 		guess: function() {
+			var up = this.get('model.up');
+			this.set('model.up', !up);
 			this.get('controllers.gameBoard').set('selection', '');
 			var controller = this.get('controllers.gameBoard');
 			controller.guess(this.get('model'));
