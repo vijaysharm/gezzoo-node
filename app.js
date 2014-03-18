@@ -19,7 +19,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // development only
 if ('development' == app.get('env')) {
 	app.use(express.errorHandler());
-	migrate = require('./routes/migrate.fake');
+	// migrate = require('./routes/migrate.fake');
 }
 
 migrate.execute(function() {

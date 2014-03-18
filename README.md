@@ -30,6 +30,10 @@ This is a two player game, where each player takes turn trying to guess the oppo
 `npm install`  
 `npm start`
 
+##Tooling
++ git push heroku master
++ Going throught the heroku db `heroku addons:open mongolab`
+
 Note that this project uses nodemon, and will restart automatically when a file is modified. This includes blowing away the contents of the db.
 
 ## TODOs
