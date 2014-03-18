@@ -76,7 +76,8 @@ var login = function( req, res ) {
 		countersdb.findAndModify(query, sort, update, options, function( err, usercount ) {
 			if ( err ) throw err;
 			var newuser = {
-				username: 'gezzoo_' + usercount.seq
+				username: 'gezzoo_' + usercount.seq,
+				role: ['user']
 			};
 
 			usersdb.insert( newuser, function( err, inserteduser ) {

@@ -21,6 +21,9 @@ var wrapdb = function( db ) {
 		actions: function() {
 			return db.collection('actions');
 		},
+		version: function() {
+			return db.collection('properties');
+		},
 		close: function() {
 			db.close();
 		}

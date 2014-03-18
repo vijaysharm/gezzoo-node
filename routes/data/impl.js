@@ -316,7 +316,7 @@ function createNewGame( db, user, res ) {
 		//	  games in progress with.
 		var usersdb = db.users();
 		var user_row_limit = 20;
-		var query = {_id:{$nin:users}};
+		var query = {_id:{$nin:users}, role:{$nin:['admin']}};
 		usersdb.find(query).limit(user_row_limit).toArray(function( err, opponents ) {
 			if ( err ) throw err;
 			if ( opponents.length > 0 ) {

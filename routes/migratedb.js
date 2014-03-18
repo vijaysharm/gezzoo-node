@@ -5,6 +5,12 @@ var DbBuilder = require('./dbutil').DbBuilder;
 
 var _ = require('underscore');
 
+function getUsers() {
+	return [
+		{ username:'gezzoo_0', _id:util.toObjectId('52728ca9954deb0b31000004'), role: ['admin'] },
+	];
+};
+
 function getCharcters() {
 	return [
 		{name:'Shah Rukh Khan', category:['bollywood'], img:'http://ia.media-imdb.com/images/M/MV5BMTQxMjg4Mzk1Nl5BMl5BanBnXkFtZTcwMzQyMTUxNw@@._V1_SY317_CR1,0,214,317_.jpg'},
@@ -34,7 +40,7 @@ function getCharcters() {
 	];
 };
 
-exports.execute = function( callback ) {
+function initV1( callback ) {
 	new DbBuilder()
 			.addUsers(getUsers())
 			.addCharacters(getCharcters())
@@ -43,4 +49,27 @@ exports.execute = function( callback ) {
 				console.log('Database Initilization Complete');
 				callback();
 			});
+}
+
+exports.execute = function( callback ) {
+	connection.getInstance(function(db) {
+		var versiondb = db.version();
+		versiondb.findOne(function(err, version) {
+			if (err) throw err;
+			if ( version === null ) {
+				initV1(function() {
+					versiondb.insert({'version':1.0}, function(err,version) {
+						console.log('migration finished');
+						db.close();
+						callback();
+					});
+				});
+			} else {
+				callback();
+			}
+
+			// } else if ( version.version == 1.0 ) {
+		});
+	});
+
 };

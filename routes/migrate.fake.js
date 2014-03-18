@@ -32,10 +32,10 @@ var random_questions = [
 
 function getUsers() {
 	return [
-		{ username:'gezzoo_0', _id:toObjectId(token1) },
-		{ username:'gezzoo_1', _id:toObjectId(token2) },
-		{ username:'gezzoo_2', _id:toObjectId(token3) },
-		{ username:'gezzoo_3', _id:toObjectId(token4) }
+		{ username:'gezzoo_0', _id:toObjectId(token1), role: ['user'] },
+		{ username:'gezzoo_1', _id:toObjectId(token2), role: ['user'] },
+		{ username:'gezzoo_2', _id:toObjectId(token3), role: ['user'] },
+		{ username:'gezzoo_3', _id:toObjectId(token4), role: ['user'] }
 	];
 };
 
