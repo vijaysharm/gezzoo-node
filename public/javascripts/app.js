@@ -11,11 +11,16 @@ function wait( delay ) {
 App = Ember.Application.create({
 	LOG_TRANSITIONS: true,
 });
-
+App.FOR_NAVIKA = true;
 // 'http://placehold.it/214x317';
 App.USER_AVATAR = 'http://placehold.it/64x64';
 App.OPPONENT_AVATAR = 'http://placehold.it/64x64';
 App.en = {
+	'index': {
+		title: "Guess Who? for you ... Navika Dutta <3",
+		instructions: "Happy Birthday my love! So all these weeks, and you've been wondering what I've been working on. Well here it is! It's Guess Who? Except I'm not sure if I'm allowed to call it Guess Who, so I called it Gezzoo.. get it?? lol! Anyways, I wrote this game for you as a birthday present. It's a little rough, but I hope you like :) If nothing else, it'll just be a fun game for us to play when we're bored. I just want to tell you what you mean to me, without you, my world would be incomplete. I love you very much, you are my inspiration, my heart and my everything. I wish you the happiest of birthdays!",
+		button: "So Whenever you're ready to play, press here!",
+	},
 	'user.view': {
 		instructions: "Start a new game by pressing the + button, or press any of the games in progress.",
 		your_turn: "It's your turn",
@@ -337,10 +342,27 @@ App.AuthenticatedRoute = Ember.Route.extend({
 
 App.IndexRoute = App.AuthenticatedRoute.extend({
 	afterModel: function() {
-		var app = this.controllerFor('application');
-		var token = app.get('token');
-		this.transitionTo('user.view', token);
+		if ( ! App.FOR_NAVIKA ) {
+			var app = this.controllerFor('application');
+			var token = app.get('token');
+			this.transitionTo('user.view', token);
+		}
 	}
+});
+
+App.IndexController = Ember.Controller.extend({
+	needs: ['application'],
+	actions: {
+		go: function() {
+			var app = this.get('controllers.application');
+			var token = app.get('token');
+			this.transitionToRouteAnimated('user.view', {main: 'slideLeft'}, token);
+		}
+	},
+	forNavika: App.FOR_NAVIKA,
+	title: App.lang('index', 'title'),
+	instructions: App.lang('index', 'instructions'),
+	button: App.lang('index', 'button')
 });
 
 /////////////

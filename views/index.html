@@ -27,6 +27,20 @@
 		{{outlet modal}}
 	</script>
 
+	<script type="text/x-handlebars" data-template-name="index">
+		{{#if forNavika}}
+			<div class="navika">
+				<h1>{{title}}</h1>
+				<p>
+					{{instructions}}
+				</p>
+				<div class="go" {{action "go"}}>
+					{{button}}
+				</div>
+			</div>
+		{{/if}}
+	</script>
+
 	<script type="text/x-handlebars" data-template-name="user/view">
 		<div class="comments">
 			<div class="comment-wrapper">
