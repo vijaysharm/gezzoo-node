@@ -56,7 +56,7 @@ exports.execute = function( callback ) {
 		var versiondb = db.version();
 		versiondb.findOne(function(err, version) {
 			if (err) throw err;
-			// if ( version === null ) {
+			if ( version === null ) {
 				initV1(function() {
 					versiondb.insert({'version':1.0}, function(err,version) {
 						console.log('migration finished');
@@ -64,9 +64,9 @@ exports.execute = function( callback ) {
 						callback();
 					});
 				});
-			// } else {
-			// 	callback();
-			// }
+			} else {
+				callback();
+			}
 
 			// } else if ( version.version == 1.0 ) {
 		});
