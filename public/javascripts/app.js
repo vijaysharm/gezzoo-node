@@ -11,7 +11,7 @@ function wait( delay ) {
 App = Ember.Application.create({
 	LOG_TRANSITIONS: true,
 });
-App.FOR_NAVIKA = true;
+App.FOR_NAVIKA = false;
 // 'http://placehold.it/214x317';
 App.USER_AVATAR = 'http://placehold.it/64x64';
 App.OPPONENT_AVATAR = 'http://placehold.it/64x64';
